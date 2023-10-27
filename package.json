@@ -1,53 +1,27 @@
 {
-  "name": "new-hyoungmin",
-  "version": "0.0.0",
+  "name": "hyoungmin",
+  "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@10.21.0",
   "scripts": {
-    "dev": "pnpm turbo run dev",
-    "lint": "pnpm turbo run lint --parallel",
-    "typecheck": "pnpm turbo run typecheck --parallel",
-    "test": "pnpm turbo run test --parallel",
-    "test:ci": "pnpm turbo run test:ci --parallel",
-    "build": "pnpm turbo run build --parallel",
-    "prepare": "husky install"
-  },
-  "lint-staged": {
-    "apps/blog/**/*.{ts,tsx,mdx}": [
-      "cd apps/blog && eslint --fix",
-      "prettier --write"
-    ],
-    "packages/**/*.{ts,tsx,mdx}": [
-      "prettier --write"
-    ],
-    "*.{ts,tsx,mdx}": [
-      "prettier --write"
-    ]
-  },
-  "devDependencies": {
-    "@changesets/cli": "^2.29.7",
-    "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.39.1",
-    "@types/node": "^24.10.1",
-    "@typescript-eslint/eslint-plugin": "^8.46.4",
-    "@typescript-eslint/parser": "^8.46.4",
-    "@vitest/coverage-v8": "^4.0.8",
-    "eslint": "^9.39.1",
-    "eslint-mdx": "^3.6.2",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.6",
-    "next": "^16.0.2",
-    "prettier": "^3.6.2",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "turbo": "^2.6.1",
-    "typescript": "^5.9.3",
-    "unused-imports": "0.0.1-security",
-    "vitest": "^4.0.8"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "zod": "^4.1.12"
+    "react": "^18",
+    "react-dom": "^18",
+    "next": "14.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10",
+    "postcss": "^8",
+    "tailwindcss": "^3",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.0"
   }
 }
