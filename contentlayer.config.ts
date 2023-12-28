@@ -3,6 +3,7 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypePrettyCode from 'rehype-pretty-code';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
+import rehypeExternalLinks from 'rehype-external-links';
 
 export const Article = defineDocumentType(() => ({
   name: 'Article',
@@ -27,10 +28,11 @@ export const Article = defineDocumentType(() => ({
     tags: {
       type: 'list',
       of: { type: 'string' },
-    },
-    image: {
-      type: 'string',
       required: true,
+    },
+    thumbnail: {
+      type: 'string',
+      required: false,
     },
   },
   computedFields: {
@@ -57,17 +59,13 @@ export default makeSource({
         {
           theme: 'one-dark-pro',
           defaultLang: 'typescript',
-          // onVisitLine(node) {
-          //   if (node.children.length === 0) {
-          //     node.children = [{ type: 'text', value: ' ' }];
-          //   }
-          // },
-          // onVisitHighlightedLine(node) {
-          //   node.properties.className.push('line--highlighted');
-          // },
-          // onVisitHighlightedWord(node) {
-          //   node.properties.className = ['word--highlighted'];
-          // },
+        },
+      ],
+      [
+        rehypeExternalLinks,
+        {
+          target: ['_blank'],
+          rel: ['noreferrer noopener'],
         },
       ],
       [
