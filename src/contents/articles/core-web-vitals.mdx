@@ -1,0 +1,174 @@
+---
+title: Core Web Vitals
+description: Core Web Vitals에 대해 알아보기
+createdAt: 2023-10-03
+category: Next.js
+tags:
+  - Core Web Vitals
+  - Google Search Console
+  - Lighthouse
+  - Performances
+  - LCP
+  - FID
+  - CLS
+---
+
+# Core Web Vitals
+
+<aside>
+<img src="https://www.notion.so/icons/drafts_gray.svg" alt="https://www.notion.so/icons/drafts_gray.svg" width="40px" /> ***CONTENTS***
+
+</aside>
+
+# Intro
+
+1991년 8월 6일에 공개된 [World Wide Web 프로젝트에 관한 웹 사이트](http://info.cern.ch/hypertext/WWW/TheProject.html)를 시작으로, 2023년 1월 기준으로, [전 세계엔 약 11억 3천만 개 이상의 웹 사이트가 존재한다](https://siteefy.com/how-many-websites-are-there/)고 한다. 하지만, 그 중 비활성화된 비율은 약 82%로, 실제로 활성화된 웹 사이트는 약 2억 개에 불과하다. 게다가 지속적으로 업데이트가 되지 않는 웹 사이트를 제외하면 더 적은 수의 웹 사이트만 활성화되어 있을 것이라고 추측할 수 있다.
+
+이렇게 수많은 웹 사이트 속에서 지속적으로 사용자들이 웹 사이트를 접속하고, 활용하게 하기 위해서는 사용자 경험을 향상시키는 방향으로 웹 사이트를 개선해야 한다. 많은 사용자들이 특정 웹 사이트에 접속하고 나서, 페이지나 이미지 등 컨텐츠의 느린 로딩 속도나 제대로 동작하지 않는 기능, 혹은 모바일 친화적이지 못한 점 등으로 인해 해당 웹 사이트를 이탈하는 경험을 많이 가지고 있다.
+
+<aside>
+❓ ***웹 사이트 이탈의 주요 요인***
+
+- 사용자가 웹 사이트를 잘못 접속한 경우
+- 웹 사이트의 컨텐츠에 무관심한 경우
+- 웹 사이트 컨텐츠의 품질이 떨어지거나 신뢰도가 낮은 경우
+- 웹 사이트 첫 진입 시 페이지 로딩이 느리거나 페이지 전환 시 로딩이 느린 경우
+- 웹 사이트가 최적화되지 않은 경우
+- 웹 사이트가 나쁘거나 불편한 UI/UX를 가진 경우
+- 웹 사이트가 모바일 친화적이지 않은 경우
+- 웹 사이트의 메타 데이터가 명확하고 정확하지 않은 경우
+- 웹 사이트의 기술적인 오류가 있는 경우
+- 웹 사이트가 너무 많은 정보나 너무 많은 단계를 요구하는 경우
+
+</aside>
+
+웹 사이트 이탈의 주요 요인 중 대부분은 웹 사이트를 직접 개선하고 최적화하여 해결할 수 있다. 따라서 웹 개발자는 향상된 사용자 경험을 제공할 수 있는 웹 사이트를 개발해야 하며, 웹 프로젝트를 뚝딱하고 만들고 배포한 뒤 마무리하는 것이 아니라, Google Analytics, Hotjar 등 다양한 사용자 추적 도구를 활용해서 해당 웹 사이트를 지속적으로 최적화하여 개선해야만 한다.
+
+다음과 같은 방법을 활용해서 웹 사이트를 최적화하고 개선할 수 있다.
+
+1. Google의 Core Web Vitals 지표 개선하기
+2. Search Engine Optimization 개선하기
+3. 모바일 친화적인 웹 사이트 만들기
+
+# Core Web Vitals
+
+Google에서 웹 사이트의 사용자 경험을 측정하는 지표로, 웹 사이트 이탈 주요 요인 중 로딩 속도에 대한 이슈나 웹 사이트의 시각적 안정성에 대한 이슈를 확인할 수 있다.
+
+## Core Web Vitals 이해하기
+
+### Web Vitals
+
+Core Web Vitals에 대해 이야기하기 전에 그렇다면, Web Vitals는 무엇일까?
+
+<aside>
+👉🏻 Web Vitals는 웹에서 우수한 사용자 경험을 제공하는 데 필수적인 품질 신호에 대한 통합 지침을 제공하기 위한 Google의 이니셔티브입니다.
+
+- [Web Vitals](https://web.dev/i18n/ko/vitals/#evolving-web-vitals)
+
+</aside>
+
+즉, Web Vitals는 사용자 경험을 실제로 측정하기 위한 지표로서 주로 로딩 시간, 상호작용, 시각적 안정성 등에 관련되어 있다. 다양한 지표들이 존재하지만, 수많은 지표를 모두 측정하여 개선할 수 없기 때문에, 그 중 특히 핵심적인 지표를 선정하여 이를 Core Web Vitals라고 부르는 것이다.
+
+### Core Web Vitals
+
+![LCP](/images/articles/Core-Web-Vitals/LCP.png)
+
+![FID](/images/articles/Core-Web-Vitals/FID.png)
+
+![CLS](/images/articles/Core-Web-Vitals/CLS.png)
+
+각각 로딩 시간, 상호작용, 시각적 안정성을 위한 측정 지표이다.
+
+### LCP, Largest Contentful Paint
+
+일반적으로 onLoad 이벤트나 DOMContentLoaded 이벤트와 같은 과거의 측정 지표들은 사용자의 실제 경험과 일치하지 않는 경우가 존재하여 사용자 경험을 측정하는 데에 부적절한 데이터이다. 또한, 이전에 활용되었던 FCP(First Contentful Paint)는 페이지에 로딩 표시기와 같은 대체 화면이 표시되는 것을 측정하기 때문에 사용자 경험을 확인하기에는 적합하지 않다.
+
+따라서, LCP는 페이지가 처음으로 로드를 시작한 시점을 기준으로, 뷰포트 내에 있는 첫 크기가 가장 큰 이미지 또는 텍스트가 렌더링된 시간을 의미하며, 이는 사용자 경험을 측정하기에 적합한 데이터이다.
+
+LCP의 경우, 페이지가 처음 로드를 시작한 시점으로부터 2.5초 이내로 측정되면, 우수한 사용자 경험을 제공하는 페이지라고 판단한다.
+
+LCP의 경우, 주로 다음 4가지 요인에 의해 영향을 받는다.
+
+- 느린 서버 응답 시간
+- 렌더링 차단 JavaScript 및 CSS
+- 리소스 로드 시간
+- 클라이언트 단 렌더링
+
+## Core Web Vitals 측정하기
+
+[Core Web Vitals workflows with Google tools](https://web.dev/vitals-tools/?hl=ko)
+
+현재 웹 사이트의 상태를 파악하기 위해서는 Core Web Vitals를 측정해야 한다. 다양한 측정 도구를 활용해 지표를 측정하여 확인할 수 있으며, 측정된 지표를 기반으로 웹 사이트를 개선할 방향성을 정립할 수 있다.
+
+위 문서에서는 다음과 같은 사용자 경험 최적화 진행 단계를 추천하고 있다.
+
+1. Google Search Console을 활용해 필드 데이터 기반으로 문제가 있는 페이지를 식별한다.
+2. 식별한 페이지에 대해 PageSpeed Insights를 활용해 실험실 데이터 및 필드 데이터 기반으로 문제를 진단한다.
+3. Lighthouse와 Chrome 개발자 도구의 Performance 탭을 활용해 수정해야할 구체적인 사항을 확인한다.
+4. 실제로 수정한다.
+
+### Google Lighthouse
+
+Chrome 확장 프로그램이나 개발자 도구에서 확인할 수 있는 Lighthouse는 가장 쉽게 웹 사이트의 Core Web Vitals를 측정할 수 있는 도구이다.
+
+![Chrome 개발자 도구의 Lighthouse](/images/articles/Core-Web-Vitals/Lighthouse-in-Chrome-Developer-Tool.png)
+
+보통 Lighthouse를 활용해서 Core Web Vitals를 측정할 때, 배포한 웹 사이트의 경우 Webpack의 번들링 시 압축 과정 등으로 인해 최적화가 조금 더 되어 있기 때문에 개발 서버에서 진행하지 않고, 배포한 이후에 측정을 진행하게 된다. 추가적으로 설치된 확장 프로그램이 Lighthouse 측정에 영향을 미칠 수 있기 때문에, [시크릿 탭에서 측정](https://nextjs.org/learn/seo/improve/lighthouse)을 진행한다. 이는 다음 Google 개발자 문서에서도 언급하는 편차 처리 전략 중 하나이다.
+
+아니면, 여러 번 Lighthouse를 실행하여 통계값을 확인하는 것도 편차 처리 전략 중 하나로 소개되고 있다.
+
+[Lighthouse Variability | Tools for Web Developers | Google for Developers](https://developers.google.com/web/tools/lighthouse/variability?hl=en#strategies_for_dealing_with_variance)
+
+웹 사이트의 성능 지표를 확인하기 위한 환경이 설정된 이후에는 실제로 페이지 로드 분석을 진행하여 웹 사이트의 능 지표에 대한 점수를 측정할 수 있다.
+
+![Lighthouse 총 점수](/images/articles/Core-Web-Vitals/Lighthouse-Scores.png)
+
+다만 Lighthouse의 경우 제한된 환경(캐시 제거, 느린 네트워크, 느린 CPU 등)에서 측정하는 Synthetic Monotoring 방식으로 웹 사이트의 성능 지표를 측정한다. 게다가 로컬에서 측정을 진행하므로 현재 측정을 진행하는 기기의 성능과 상황, 네트워크 라우팅, 게시된 광고 등의 변경에 따라 다른 측정 값을 가져올 수도 있다. 다음 Google 개발자 문서에서도 확인할 수 있듯이 로컬 네트워크, 클라이언트 하드웨어나 리소스 등이 영향을 높게 미친다고 말하고 있다.
+
+[Lighthouse Variability | Tools for Web Developers | Google for Developers](https://developers.google.com/web/tools/lighthouse/variability?hl=en)
+
+따라서, Lighthouse의 측정 점수를 온전히 받아들이지 않고, 측정 점수를 기반으로 웹 사이트 개선 및 최적화의 방향성을 정립해야 한다.
+
+실제로 우리가 궁금한 성능 지표에 대한 측정 항목을 살펴보면, Lighthouse 버전에 따라 측정 항목이 다르지만, 현재 10버전에서는 총 5가지의 측정 지표를 기반으로한 점수의 가중 평균으로 웹 사이트의 성능 점수를 계산하고 있다. Core Web Vitals에 포함되는 LCP(Largest Contentful Paint), CLS(Cumulative Layout Shift)에 대해 측정된 결과도 존재하고, 추가적으로 FCP(First Contentful Paint), TBT(Total Blocking Time), SI(Speed Index)에 대한 측정 결과도 확인할 수 있다. 이전 버전에서는 TTI(Time To Interactive), FMP(First Meaningful Paint) 등의 측정 지표도 존재했으나, 현재 버전에서는 측정 지표로 활용되지 않는다.
+
+![Lighthouse 성능 측정 결과](/images/articles/Core-Web-Vitals/Lighthouse-Performance-Metrics.png)
+
+[Lighthouse Scoring calculator](https://googlechrome.github.io/lighthouse/scorecalc/#FCP=258&LCP=1280&TBT=0&CLS=0&SI=399&TTI=258&FMP=258&device=desktop&version=10.3.0)
+
+Lighthouse의 성능 측정 지표는 다음 글에서 정리한다.
+
+[Performance Audits - Chrome Developers](https://developer.chrome.com/docs/lighthouse/performance/)
+
+보다 자세한 결과를 확인하기 위해서는 진단 및 통과한 감사에 어떤 리소스가 어떤 문제를 가지고 있는지 상세하게 확인할 수 있으며, 이를 기반으로 웹 사이트를 개선할 수 있다.
+
+![진단 및 통과한 감사, Lighthouse 성능 측정 결과](/images/articles/Core-Web-Vitals/Lighthouse-Performance-Diagnostics.png)
+
+2021년 이후로 추가된 트리맵 결과를 통해 전체 리소스의 크기와 사용하지 않는 리소스의 크기를 확인할 수 있어서 어떤 부분을 최적화해야 할 지를 알 수 있다.
+
+![트리맵 보기, Lighthouse 성능 측정 결과](/images/articles/Core-Web-Vitals/Lighthouse-Treemap.png)
+
+![사용하지 않은 바이트, 트리맵 보기, Lighthouse 성능 측정 결과](/images/articles/Core-Web-Vitals/Lighthouse-Treemap-Unused-Bytes.png)
+
+출처 흔적은 Performance 탭에 기록되며, DOMContentLoaded, Onload 이벤트나 FP(First Paint), FCP, LCP, LS(Layout Shift)가 언제 발생했는지에 대해서 확인할 수 있다.
+
+![출처 흔적 보기, Lighthouse 성능 측정 결과](/images/articles/Core-Web-Vitals/Performance-Tab-in-Chrome-Developer-Tool.png)
+
+### Google PageSpeed Insights
+
+PageSpeed Insights는 모바일과 데스크탑 기기 모두에서 Chrome 사용자 환경 보고서(CrUX)를 기반으로 실제 사용자의 경험과 성능 문제를 확인할 수 있다. 다만, 성능 문제의 경우 Lighthouse 기반으로 측정되기 때문에, 위 Lighthouse 섹션과 동일한 사용자 경험 개선을 위한 권장 사항을 보여준다.
+
+PageSpeed Insights의 Core Web Vitals 평가는 RUM(Real User Monitoring, 실제 사용자 모니터링) 측정 방식으로 실제 사용자 경험 데이터의 공개 데이터 세트인 CrUX를 기반으로 한다. 즉, 지난 28일동안의 실제 사용자의 FCP, FID, LCP, CLS, INP(Interation to Next Paint), TTFB(Time To First Byte)를 75번째 백분위 수로 측정된 결과를 보여준다.
+
+다만, RUM이 불가능한 경우 실험실 데이터, 즉, 잠재적인 사용자가 웹 사이트를 어떻게 경험할 것인지에 대한 통찰력을 제공하고 디버깅을 위한 **재현 가능한 결과**를 활용해 Core Web Vitals 평가를 진행하게 된다.
+
+![[LCP, Core Web Vitals, Google PageSpeed Insights](https://web.dev/vitals-tools/)](/images/articles/Core-Web-Vitals/LCP-in-Google-PageSpeed-Insight.png)
+
+[LCP, Core Web Vitals, Google PageSpeed Insights](https://web.dev/vitals-tools/)
+
+### Google Search Console
+
+Google Search Console에서는 CrUX의 실제 데이터를 기반으로 측정된 Core Web Vitals를 확인할 수 있다. 다만, 개선 사항이나 권장 사항 등을 보여주지는 않는다는 점에서 Lighthouse나 PageSpeed Insights를 함께 활용해야 한다.
+
+![[Core Web Vitals, Google Search Console](https://web.dev/vitals-tools/)](/images/articles/Core-Web-Vitals/Core-Web-Vitals-in-Google-Search-Console.png)
+
+[Core Web Vitals, Google Search Console](https://web.dev/vitals-tools/)
