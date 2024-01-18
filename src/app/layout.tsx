@@ -1,11 +1,14 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-
-import { ILayoutProps } from '@/interfaces';
-
+import localFont from 'next/font/local';
+import { ILayoutProps } from '@/src/interfaces';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+export const Pretendard = localFont({
+  src: '../fonts/woff2/PretendardVariable.woff2',
+  display: 'swap',
+  variable: '--font-pretendard',
+  preload: true,
+});
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -15,7 +18,7 @@ export const metadata: Metadata = {
 const RootLayout = ({ children }: ILayoutProps) => {
   return (
     <html lang='ko'>
-      <body className={inter.className}>{children}</body>
+      <body className={Pretendard.className}>{children}</body>
     </html>
   );
 };
