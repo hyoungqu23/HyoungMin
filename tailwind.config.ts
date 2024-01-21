@@ -12,6 +12,12 @@ const config: Config = {
         '12': '12px',
         '16': '16px',
       },
+      width: {
+        '100': '25rem',
+        '120': '30rem',
+        '160': '40rem',
+        '200': '50rem',
+      },
     },
   },
   plugins: [require('@tailwindcss/typography')],
