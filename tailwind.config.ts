@@ -8,6 +8,22 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontSize: {
+        display1: ['6.5rem', { lineHeight: '7rem', letterSpacing: '-2%' }],
+        display2: ['5.5rem', { lineHeight: '6rem', letterSpacing: '-2%' }],
+        display3: ['4.75rem', { lineHeight: '5.5rem', letterSpacing: '-2%' }],
+        heading1: ['4rem', { lineHeight: '4.5rem', letterSpacing: '-1%' }],
+        heading2: ['3.25rem', { lineHeight: '4rem', letterSpacing: '-1%' }],
+        heading3: ['2.75rem', { lineHeight: '3.5rem', letterSpacing: '-1%' }],
+        heading4: ['2rem', { lineHeight: '2.5rem', letterSpacing: '-1%' }],
+        heading5: ['1.625rem', { lineHeight: '2.5rem', letterSpacing: '-1%' }],
+        heading6: ['1.25rem', { lineHeight: '2rem', letterSpacing: '-1%' }],
+        body1: ['1.125rem', { lineHeight: '1.75rem' }],
+        body2: ['1rem', { lineHeight: '1.5rem' }],
+        body3: ['0.875rem', { lineHeight: '1.5rem' }],
+        caption1: ['0.75rem', { lineHeight: '1rem' }],
+        caption2: ['0.625rem', { lineHeight: '1rem' }],
+      },
       borderWidth: {
         '12': '12px',
         '16': '16px',
@@ -22,4 +38,5 @@ const config: Config = {
   },
   plugins: [require('@tailwindcss/typography')],
 };
+
 export default config;
