@@ -3,7 +3,7 @@ import localFont from 'next/font/local';
 
 import { ILayoutProps } from '@/src/interfaces';
 
-import './globals.css';
+import '../styles/globals.css';
 
 export const Pretendard = localFont({
   src: [
@@ -55,6 +55,7 @@ export const Pretendard = localFont({
   ],
   display: 'swap',
   preload: true,
+  variable: '--pretendard',
 });
 
 export const metadata: Metadata = {
