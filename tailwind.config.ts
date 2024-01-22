@@ -40,6 +40,16 @@ const config: Config = {
         '160': '40rem',
         '200': '50rem',
       },
+      keyframes: {
+        'automatic-infinite-carousel': {
+          from: { transform: 'translateX(0%)' },
+          to: { transform: 'translateX(-100%)' },
+        },
+      },
+      animation: {
+        'automatic-infinite-carousel':
+          'automatic-infinite-carousel 40s linear infinite',
+      },
     },
   },
   plugins: [require('@tailwindcss/typography')],
