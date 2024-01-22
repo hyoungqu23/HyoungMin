@@ -34,13 +34,14 @@ const Card = ({
         {thumbnail.src ? (
           <Image
             src={thumbnail.src}
-            alt={thumbnail?.alt ?? '아티클 프리뷰 이미지'}
+            alt={thumbnail?.alt ?? title}
             fill
             className='object-cover rounded-xl'
+            sizes='100vw, (min-width: 768px) 50vw, (min-width: 1280px) 30vw, (min-width: 1280px) 25vw'
           />
         ) : (
-          <div className='bg-white w-full h-full rounded-br-xl flex items-center justify-center px-4'>
-            <h2 className='font-bold text-heading4 text-blue-500 line-clamp-1'>
+          <div className='flex items-center justify-center w-full h-full px-4 bg-white rounded-br-xl'>
+            <h2 className='font-bold text-blue-500 text-heading4 line-clamp-1'>
               {title}
             </h2>
           </div>
