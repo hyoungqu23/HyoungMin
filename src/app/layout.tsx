@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 
 import { ILayoutProps } from '@/src/interfaces';
+import { cls } from '@/src/libs/utils';
 
 import '../styles/globals.css';
 
@@ -66,7 +67,9 @@ export const metadata: Metadata = {
 const RootLayout = ({ children }: ILayoutProps) => {
   return (
     <html lang='ko'>
-      <body className={Pretendard.className}>{children}</body>
+      <body className={cls(Pretendard.className, 'bg-pink-100')}>
+        {children}
+      </body>
     </html>
   );
 };
