@@ -7,6 +7,12 @@ const config: Config = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    screens: {
+      mobile: '640px',
+      tablet: '768px',
+      laptop: '1280px',
+      desktop: '1920px',
+    },
     extend: {
       fontSize: {
         display1: ['6.5rem', { lineHeight: '7rem', letterSpacing: '-2%' }],
