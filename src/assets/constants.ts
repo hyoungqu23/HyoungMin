@@ -1,0 +1,28 @@
+export const INFORMATION = ['HyoungMin', 'Frontend Engineer'];
+
+export const SKILLS = [
+  'React',
+  'TypeScript',
+  'Next.js',
+  'Tailwind CSS',
+  'Node.js',
+  'Flutter',
+  'JavaScript',
+  'Git',
+  'GitHub',
+];
+
+export const LINKS = [
+  { id: 'github', href: 'https://github.com/hyoungqu23' },
+  { id: 'instagram', href: 'https://www.instagram.com/hyoungqu23/' },
+  {
+    id: 'linkedin',
+    href: 'https://www.linkedin.com/in/hyoungmin-lee-9b5489196/',
+  },
+  { id: 'gmail', href: 'hyoungqu23@gmail.com' },
+  {
+    id: 'careerly',
+    href: 'https://careerly.co.kr/profiles/147137?utm_campaign=self-share',
+  },
+  { id: 'portfolio', href: 'https://hyoungmin.vercel.app/' },
+];
