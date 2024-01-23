@@ -42,13 +42,13 @@ const config: Config = {
       },
       keyframes: {
         'automatic-infinite-carousel': {
-          from: { transform: 'translateX(0%)' },
-          to: { transform: 'translateX(-100%)' },
+          from: { left: '0' },
+          to: { left: '-100%' },
         },
       },
       animation: {
         'automatic-infinite-carousel':
-          'automatic-infinite-carousel 40s linear infinite',
+          'automatic-infinite-carousel 60s linear infinite',
       },
     },
   },
