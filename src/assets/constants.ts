@@ -26,3 +26,5 @@ export const LINKS = [
   },
   { id: 'portfolio', href: 'https://hyoungmin.vercel.app/' },
 ];
+
+export const COPYRIGHT = `© Copyright ${new Date().getFullYear()} HyoungMin. All rights reserved.`;
