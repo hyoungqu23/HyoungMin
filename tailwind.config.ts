@@ -14,6 +14,32 @@ const config: Config = {
       desktop: '1920px',
     },
     extend: {
+      colors: {
+        primary: {
+          50: '#F2F4FF',
+          100: '#E6E9FF',
+          200: '#C9D1FF',
+          300: '#ACB9FF',
+          400: '#8EA1FF',
+          500: '#7F9FFF',
+          600: '#708EFF',
+          700: '#5F7AFF',
+          800: '#4E66FF',
+          900: '#3D52FF',
+        },
+        secondary: {
+          50: '#F2F2F2',
+          100: '#E6E6E6',
+          200: '#CCCCCC',
+          300: '#B3B3B3',
+          400: '#999999',
+          500: '#171717',
+          600: '#0F0F0F',
+          700: '#080808',
+          800: '#050505',
+          900: '#030303',
+        },
+      },
       fontSize: {
         display1: ['6.5rem', { lineHeight: '7rem', letterSpacing: '-2%' }],
         display2: ['5.5rem', { lineHeight: '6rem', letterSpacing: '-2%' }],
