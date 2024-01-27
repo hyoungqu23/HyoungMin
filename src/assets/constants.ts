@@ -1,3 +1,8 @@
+export const NAVIGATION_ITEMS = [
+  { id: 'home', route: '/' },
+  { id: 'articles', route: '/articles' },
+];
+
 export const INFORMATION = ['HyoungMin', 'Frontend Engineer'];
 
 export const SKILLS = [
@@ -22,7 +27,7 @@ export const LINKS = [
   { id: 'gmail', href: 'hyoungqu23@gmail.com' },
   {
     id: 'careerly',
-    href: 'https://careerly.co.kr/profiles/147137?utm_campaign=self-share',
+    href: 'https://careerly.co.kr/profiles/147137',
   },
   { id: 'portfolio', href: 'https://hyoungmin.vercel.app/' },
 ];
