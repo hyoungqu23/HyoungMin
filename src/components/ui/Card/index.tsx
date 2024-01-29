@@ -47,11 +47,11 @@ const Card = ({
           </div>
         )}
       </div>
-      {/* <div className='absolute right-0 col-start-2 col-end-3 row-start-1 row-end-2 bg-secondary-500 h-1/5 w-2/3 rounded-bl-xl group-hover:opacity-0 transition-opacity duration-500 before:absolute before:w-6 before:h-6 before:rounded-full before:top-0 before:-left-6 before:shadow-[12px_-12px_0px_rgb(23,23,23)] after:absolute after:w-6 after:h-6 after:rounded-full after:top-full after:right-0 after:shadow-[12px_-12px_0px_rgb(23,23,23)]'>
+      <div className='absolute right-0 col-start-2 col-end-3 row-start-1 row-end-2 bg-secondary-500 h-1/5 w-2/3 rounded-bl-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 before:absolute before:w-6 before:h-6 before:rounded-full before:top-0 before:-left-6 before:shadow-[12px_-12px_0px_rgb(23,23,23)] after:absolute after:w-6 after:h-6 after:rounded-full after:top-full after:right-0 after:shadow-[12px_-12px_0px_rgb(23,23,23)]'>
         <div className='flex items-center justify-center w-full h-full'>
           <p className='font-medium text-primary-600 text-body2'>{createdAt}</p>
         </div>
-      </div> */}
+      </div>
       <div className='absolute w-full h-full col-start-1 col-end-2 row-start-2 row-end-3 bg-secondary-500 border-secondary-500 rounded-tr-3xl border-t-12 border-r-12 before:absolute before:w-6 before:h-6 before:-translate-y-9 before:rounded-full before:shadow-[-12px_12px_0px_rgb(23,23,23)]'>
         <div className='w-full h-[calc(100%+12px)] bg-primary-900 rounded-t-xl flex items-center justify-center p-2 pb-5'>
           <p className='z-20 flex items-center justify-center w-full h-full font-semibold rounded text-primary-600 text-body1 bg-primary-50'>
