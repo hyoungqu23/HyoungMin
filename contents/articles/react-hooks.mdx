@@ -1,0 +1,280 @@
+---
+title: React Hooks 기초
+description: React의 Hooks은 무엇이고, 대표적인 Hooks를 알아보자
+createdAt: 2022-06-10
+category: React
+tags:
+  - React
+  - TypeScript
+---
+
+## 🌊 React.js Hooks
+
+**Hooks**는 Component에서 데이터를 관리하거나 데이터가 변경될 때 상호작용하기 위해 사용되는 것이다. 기존의 React.js에서는 Component 내부의 State와 생명주기를 관리하려면 Class Component를 사용해야 했으나, Function Component에서 이러한 기능을 구현하기 위해 16.8 버전 이후로 추가된 새로운 기능이다.
+
+즉, Function Component에서 React state와 생명주기 기능(lifecycle features)을 **연동(hook into)** 할 수 있게 해주는 것이 바로 Hook이다.
+
+### Hooks를 활용하는 이유
+
+**기존 React.js 문제점**
+
+- Component 사이에서 State와 관련된 로직을 재사용하기 어렵다.
+- 복잡한 Component들을 이해하기 어렵다.
+- Class Component의 `this`의 문제점
+
+**Hooks의 장점**
+
+- Component의 함수가 많아질 때부터 Class Component로 리팩토링할 필요가 없다.
+- UI와 로직을 수비게 분리해 두 가지 모두 재사용할 수 있다.
+- 기존 코드를 다시 작성할 필요 없이 일부 Component 내부에서 Hook을 사용할 수 있다.
+- Hook을 사용하면 Component로부터 상태 관련 로직을 추상화할 수 있다. 즉, Component별로 독립적인 테스트와 재사용이 가능하고, Component 간 계층 변화 없이 상태 관련 로직을 재사용할 수 있다.
+
+### Hooks 사용 규칙
+
+- Hooks는 반드시 React.js 함수(Component, Hook) 내에서만 사용할 수 있다.
+- Hooks의 이름은 `use`로 반드시 시작한다.
+- 최상위 레벨에서만 Hooks를 호출할 수 있다.(ex. `if`, `for`, 콜백 함수, 중첩된 함수 내에서는 불가능)
+  즉, Component 내부의 첫 번째 중괄호(`{}`) 내에 작성해야 한다.
+
+### State Hook
+
+간단한 상태 관리조차도 Class Component로 작성해야 했는데, 이는 Function Component보다 복잡하고 에러가 발생하기 쉬우며 유지 보수가 힘들다. 따라서 State Hook을 활용해 Function Component에서 간단히 사용할 수 있다.
+
+```jsx
+const App = () => {
+  const [state, setState] = useState('초기값');
+};
+```
+
+Function Component 내부의 동적인 데이터를 관리할 수 있게 해주는 Hook.
+
+- 상태를 관리하기 위한 코드 역시 매우 간단해지는 장점이 있다.
+- 이렇게 State Hook으로 설정된 `state` 값은 읽기 전용이므로 수정하면 안된다.
+- `state` 값을 변경하기 위해서는 `setState` 함수를 사용해야 한다.
+- `state` 값이 변경되는 경우 자동으로 Component가 다시 렌더링 된다.
+- `setState` 함수 활용법
+  - 직접 변경할 `state` 값을 인자로 입력하는 방식.
+    ```jsx
+    setState('변경할 값');
+    ```
+  - 현재 `state` 값을 매개변수로 받는 함수를 전달하는 방식. 👍
+    ```jsx
+    setState((current) => {
+      return current + 1;
+    });
+    ```
+
+### Effect Hook
+
+- ~~Component Life Cycle~~
+  ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/05d86aa0-ca32-498d-9fa3-0caeb7fe3e48/Untitled.png)
+
+React Component 안에서 데이터를 가져오거나 구독하고, DOM을 직접 조작하는 등의 다양한 작업들을 Side Effects 또는 Effects 라고 한다.
+
+Side Effects에는 Clean-up이 필요하지 않은 것이 있는데, 즉, DOM을 업데이트 한 뒤 추가로 코드를 실행해야 하는 경우에는 Clean-up이 필요하지 않다. 해당 Component는 렌더링 이후 계속 사용되기 때문이다.
+
+이와 달리 Clean-up이 필요한 Side Effects도 있다. 예를 들어 메모리를 많이 사용하는 Component의 경우에는 메모리 누수를 막기 위해 사용하지 않는 경우 메모리를 해제해주어야 한다. 즉, DOM 렌더링 이후 추가로 필요하지 않은 코드이거나, 메모리를 많이 사용하는 등의 경우에는 Clean-up을 해주어야 한다.
+
+이러한 부분을 해결하기 위해 Class Component에서는 `componentWillUnmount()`등의 생명주기 메서드를 활용하지만, Function Component에서는 Effect Hook을 사용한다.
+
+즉, Function Component 외부에서 로컬의 상태 값을 변경하는 것을 의미한다. 다만, 이러한 과정은 다른 Component에 영향을 줄 수도 있어 렌더링 과정에서는 구현할 수가 없다.
+
+따라서 Effect Hook을 활용해 Function Component 내에서 side effects를 수행할 수 있게 해준다.
+
+필수적인 API를 불러오거나 데이터를 가져올 때 **`useEffect()`**를 사용하면 모든 렌더링하는 요소마다 원하는 작업을 수행할 수 있어 코드를 중복할 필요가 없다.
+
+```jsx
+const App = () => {
+	useEffect(effectCallback, Deps?);
+	// effectCallback: 지정된 대상 변수가 변경되는 경우 실행할 함수
+	// Deps: 변경을 감지할 대상 변수들의 배열
+}
+```
+
+Function Component 내부에서 Side Effect를 수행하는 Hook.
+
+- Component가 최초로 렌더링될 때, 지정한 State나 Props가 변경될 때 등 다양한 경우에 `effectCallback` 함수가 호출된다.
+- Deps가 빈 배열`[]`이라면, Component 최초 생성 시 한번만 실행하는 효과를 지정하는 것이다.
+- useEffect Hook 내에서 다른 함수를 반환하는 것은 `state` 값이 변경되어 Component가 다시 렌더링되기 전과 Component가 없어질 때 호출할 함수를 반환하는 것이다.
+  ```jsx
+  const App = () => {
+  	useEffect(() => {
+  			// ... State가 변경될 때, Component를 렌더링할 때
+  		}
+
+  		return () => {
+  			// ... Component를 다시 렌더링할 때, Component가 없어질 때
+  		}
+  	);
+  }
+  ```
+
+### Memo Hook
+
+```jsx
+const App = () => {
+  const [firstName, setFirstName] = useState('철수');
+  const [lastName, setLastName] = useState('김');
+
+  const fullName = useMemo(() => {
+    return `${lastName}${firstName}`;
+  }, [firstName, lastName]);
+};
+```
+
+지정한 State나 Props가 변경될 경우 해당 값을 활용해 계산된 값을 메모이제이션하여 다시 렌더링할 때 불필요한 연산을 줄여줄 때 활용한다.
+
+- Memo Hook 연산은 렌더링 단계에서 이루어진다. 따라서 오래 걸리는 로직은 작성하지 않도록 권장된다. 성능 하락 이슈가 발생할 수 있다.
+
+```jsx
+import React, { useState, useMemo } from 'react';
+
+function App() {
+  const [foo, setFoo] = useState(0);
+  const [bar, setBar] = useState(0);
+
+  let multi = useMemo(() => {
+    return foo * bar;
+  }, [foo, bar]);
+
+  return (
+    <div className='App'>
+      <input
+        type='number'
+        value={foo}
+        onChange={(e) => setFoo(+e.target.value)}
+      />
+      <input
+        type='number'
+        value={bar}
+        onChange={(e) => setBar(+e.target.value)}
+      />
+      <div>{multi}</div>
+    </div>
+  );
+}
+
+export default App;
+```
+
+### Callback Hook
+
+```jsx
+const App = () => {
+  const [firstName, setFirstName] = useState('철수');
+  const [lastName, setLastName] = useState('김');
+
+  const getFullName = useCallback(() => {
+    return `${lastName}${firstName}`;
+  }, [firstName, lastName]);
+
+  return <>{getFullName()}</>;
+};
+```
+
+Callback Hook은 함수를 메모이제이션하기 위해 사용하는 Hook.
+
+- Component가 다시 렌더링될 때 불필요하게 함수가 재생성되는 것을 방지할 수 있다.
+- Memo Hook이 변수를 메모이제이션한다면, Callback Hook은 함수를 메모이제이션 한다.
+  `useMemo(() ⇒ fn, deps)`와 `useCallback(fn, deps)`는 동일하다.
+
+```jsx
+import React, { useState, useCallback } from 'react';
+
+function App() {
+  const [foo, setFoo] = useState(0);
+  const [bar, setBar] = useState(0);
+
+  let calc = useCallback(() => {
+    return foo + bar;
+  }, [foo, bar]);
+
+  return (
+    <div className='App'>
+      <input
+        type='number'
+        value={foo}
+        onChange={(e) => setFoo(+e.target.value)}
+      />
+      <input
+        type='number'
+        value={bar}
+        onChange={(e) => setBar(+e.target.value)}
+      />
+      <div>{calc()}</div>
+    </div>
+  );
+}
+
+export default App;
+```
+
+### Reference Hook
+
+```jsx
+const App = () => {
+  const inputRef = useRef(null);
+  const handleClickBtn = () => {
+    inputRef.current.focus();
+  };
+
+  return (
+    <div>
+      <input ref={inputRef} type='text' />
+      <button onClick={handleClickBtn}>input으로 포커스하기</button>
+    </div>
+  );
+};
+```
+
+Component 생애 주기 내에서 유지할 ref 객체를 반환하는 Hook.
+
+기본적으로 State가 변경되면 다시 렌더링된다. 다만, 값을 변경하더라도 다시 렌더링되지 않게끔 해야 할 상황이 있을 수 있다. 이때 `let`을 활용해 변수를 선언한다면 Component를 다시 렌더링할 때 `let` 선언문이 다시 선언되어 값이 초기화되게 된다.
+
+따라서 이런 상황에서 Reference Hook을 활용한다.
+
+- `ref` 객체는 `current` 속성을 가지며 이를 자유롭게 변경할 수 있다.
+- useRef에 의해 반환된 ref 객체가 변경되더라도 Component가 다시 렌더링되지 않는다.
+- 일반적으로 DOM 요소에 접근할 때 해당 요소에 `ref` 속성을 추가하여 사용한다.
+  즉, 다음과 같이 작성하면 `inputRef.current`에 해당 `input` 요소가 할당된다.
+  ```jsx
+  <input ref={inputRef} type='text' />
+  ```
+
+```jsx
+import React, { useRef } from 'react';
+
+function App() {
+  const inputRef = useRef(null);
+  return (
+    <div className='App'>
+      <input ref={inputRef} />
+      <button
+        onClick={() => {
+          alert(inputRef.current.value);
+        }}
+      >
+        클릭하기
+      </button>
+    </div>
+  );
+}
+
+export default App;
+```
+
+### Custom Hook
+
+자신만의 Hook을 만들어 Component 로직을 재사용할 수 있다. 즉, UI 요소의 재사용성을 높이기 위해 Component를 활용하고, 로직의 재사용성을 높이기 위해 Custom Hook을 활용한다.
+
+```jsx
+fucntion useCustomHook(args) {
+	const [status, setStatus] = useState(null);
+	// ...
+	return status;
+}
+```
+
+- 하나의 로직이 여러 번 활용되는 경우 함수를 분리하는 것처럼 Hook으로 분리하는 것이다.
+- use로 시작해야 한다.
+- 하나의 Hook 내의 `state`는 공유되지 않는다.
