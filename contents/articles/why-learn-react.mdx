@@ -1,0 +1,204 @@
+---
+title: React를 학습해야 하는 이유
+description: React를 학습하고 사용해야 하는 이유에 대해 알아보자
+createdAt: 2022-06-06
+category: React
+tags:
+  - React
+  - TypeScript
+---
+
+## React.js를 사용하는 이유 & 학습하는 이유
+
+**JavaScript**는 모든 단계를 명시하는 **명령형 프로그래밍 방식**을 활용하고 있다. 이러한 방식은 개발자들이 세부적인 모든 사항을 고려하게 해 개발 효율성을 낮추고, 지속적으로 반복되는 작업을 하기 위해 시간을 낭비하는 등의 한계를 보인다.
+
+이와 달리 **React.js**는 다음과 같은 특징을 가져 JavaScript의 단점을 보완할 수 있다.
+
+- 작은 단위로 구성된 **Component**를 구현하여 유지 보수와 관리가 유용하다.
+  특히 이번 프로젝트 진행 시 공통적으로 적용되는 nav bar, footer, side quick menu 등을 구현하면서 Component를 통한 개발 방식의 편리함을 느꼈지만, Vanilla JavaScript로 구현하는 것이 어려웠다. 따라서 **React.js**로 다음 프로젝트를 진행하며 Component의 위대함을 느껴보고 싶다.
+- **SPA**이기 때문에 HTML 파일은 렌더링 내용이 JavaScript에 의해 변경되는 것이지, HTML이 변경되지 않아 페이지를 서버에 요청하지 않는다.
+  이번 프로젝트를 진행하면서, 새로고침되는 페이지 이슈와 아무리 적은 데이터를 요청하고 HTML 페이지를 가지고 온다 해도 화면 깜박임 이슈에 대해 해결책을 찾으며 **React.js**을 공부하게 되었다.
+
+즉, 사용자 정의 HTML **Component**를 활용한다는 점이 큰 차이점이다. 이러한 명확한 task를 가지고 있는 작은 **Component**를 가지기 때문에 유지 보수와 관리가 용이하다. 또한, 복잡한 사용자 인터페이스 작업을 더 쉽게 구축할 수 있고, 선언형 **Component** 중심의 방식으로 코드를 작성한다.
+
+이러한 장점을 기반으로 Airbnb, Netflix, Facebook 등의 여러 기업에서 활용되고 있다.
+
+다만, **React.js**는 **Component** 기반의 UI 라이브러리로, 다른 내장된 기능들은 많지 않다. 즉, 라우팅같은 다른 기능을 활용하기 위해서는 추가적으로 서드 파티 라이브러리를 설치해야만 한다. **React.js**는 **Component**에 중점을 두고 있기 때문이다.
+
+- 같은 Component 기반의 프레임워크인 Angualr는 보다 많은 내장 기능을 가지고 있고, TypeScript를 처음부터 지원했기 때문에 작은 프로젝트에는 과할 수도 있다. 대규모 프로젝트에서는 이러한 부분이 장점으로 적용된다.
+- Vue.js 또한 Component 기반의 프레임워크이지만, Angular보다 내장 기능이 적고, React.js보다는 많다. 다만, 라우팅같은 필수 기능을 지원하고, 너무 용량이 크지 않기 때문에 적당히 작은 프로젝트를 진행할 수 있다.
+
+### 🌊 Component-Driven UI
+
+**React.js**는 UI를 구축하는 **JavaScript** 라이브러리이다. HTML, CSS, JavaScript 또한 UI를 구축할 수 있지만, **React.js**를 활용하는 이유는 더 간단히 UI를 구축할 수 있다. 따라서 반드시 필요한 것은 아니지만, **React.js**를 활용한다면 더 쉽고 간단히 만들 수 있다.
+
+즉, **React.js**를 활용하면 어떤 이벤트가 발생했을 때 페이지를 업데이트하는 작업들에 집중하는 대신에 사소한 부분들에 신경을 덜 쏟고, 에러도 덜 발생하며, 프로그램을 구성하는 핵심 비즈니스 로직에 집중할 수 있게 된다.
+
+### 🌊 What is Component?
+
+**Component**가 중요한 이유는, 결국 모든 UI가 **Component**로 구성되기 때문이다.
+
+**React.js**로 완성된 프로그램을 보면 하나의 아이템이 다른 데이터를 가지고 반복되고 있는 것을 확인할 수 있다. 이러한 아이템이 하나의 **Component**가 되고, 이는 UI를 구축하는 데 재사용할 수 있게 된다.
+
+- Reusability
+  반복을 피하게 해준다.
+- Seperation of Concerns
+  작은 단위로 구성되어 관리와 유지 보수가 용이하게 한다.
+
+즉, 코드를 여러 개의 작은 함수로 나누고, 외부에서 가져온 로직을 함수에 넣어 우려 사항을 분리하고, 같은 코드를 여러번 활용하는데, 이러한 개념을 **React.js**는 **Component**로 구성해 UI를 구축하는 것이다.
+
+결론적으로, **React.js** **Component**는 재사용 가능하며, HTML, CSS, JavaScript로 구성된다. 이러한 **Component**는 선언적인 접근 방식을 활용해 구성된다. 즉, **React.js**로 작업할 때는 실제 웹 페이지에서 어떤 요소가 추가, 삭제, 수정되어야 하는지 등을 해결하기 위해 최종 상태, 즉 목표 상태를 정의하고 그때 어떤 상태가 사용되어야 하는 지 정의하는 것이 중요하다.
+
+### 🌊 React.js의 특징
+
+- **Component**
+  독립적인 기능 단위인 **Component**로 나누어 개발을 진행한다. 따라서 개발 시간을 크게 절약할 수 있다.
+- **State**
+  **Component** 내에서 **State**를 활용해 데이터를 유동적으로 관리한다. 즉, **State**가 변경될 때마다 **Component**가 다시 렌더링 된다.
+- **Virtual DOM**
+  내부적으로 **Virtual DOM**을 통해 렌더링을 진행한 뒤 변경점만 사용자의 화면에 반영한다. 따라서 UX를 향상시키고, 개발자의 작업 속도를 높여 DX도 향상시킨다.
+- **단방향 데이터 흐름**
+  데이터들이 항상 일정한 장소에 있고, 그 장소에서만 변경할 수 있기 때문에 안정적인 코드를 제공한다.
+- **Hooks**
+  **Hooks**를 활용해 **Component**의 상태를 쉽게 관리할 수 있다.
+- **JSX**
+  JavaScript 내에서 UI를 작성하기 위해 제공하는 라이브러리로, HTML과 유사하다.
+- **코드 작성 방식 정의**
+  **React.js**는 앱 작성 방식을 정의하는 라이브러리로 데이터가 앱에 사용되는 방식과 그 데이터가 변화하는 결과에 따른 UI 변경 방법에 대해 명확한 규칙을 설정하여 수행한다.
+
+### 🌊 Why React.js?
+
+- 생산성/재사용성
+  Component와 Hooks를 활용해 독립적인 작은 단위의 요소로 개발해 생산성과 코드의 재사용성이 향상된다.
+  특히 JSX를 활용해 HTML 태그 내에 필요한 데이터를 한 공간에 삽입할 수 있어 다른 사람의 개발 의도를 파악하기 쉽고, 생산성이 높아진다.
+  또한, 이러한 Component 내의 데이터가 변경되면 자동으로 감지하여 UI를 업데이트하게 된다.
+- 풍부한 자료와 라이브러리
+  가장 활발한 커뮤니티를 보유하고 있다.
+- 다양한 사용처
+  단순 웹 애플리케이션뿐만 아니라, React Native를 통한 안드로이드, iOS 애플리케이션 개발이 가능하다.
+
+다만, 대규모 프로젝트에서 데이터를 효율적으로 관리하는데는 유용하나, 실행 속도와 퍼포먼스 측면에서는 불리하다.
+
+### 🌊 Single Page Application
+
+사용자가 어떤 버튼을 클릭해서 다른 화면으로 넘어갈 때, 마치 페이지를 전환한 것처럼 보이지만, 실제로는 새로운 HTML 파일을 서버에 요청한 것이 아니다. 따라서 좀 더 매끄러운 UI와 더 나은 사용자 경험을 제공하게 된다.
+
+즉, 풀어서 말하면, 최초에 접속 요청을 통해 서버로부터 HTML을 전달 받고, 페이지 변경이 필요할 때 다시 서버에 요청해 HTML을 전달받아 처음부터 페이지를 다시 불러오는 전통적인 페이지 방식과 달리, SPA는 최초에 접속 요청을 통해 HTML을 전달 받은 후, 페이지의 변경이 필요할 때 변경이 필요한 부분만을 JSON 형식으로 전달받아 변경된 부분만 다시 렌더링하는 방식을 가진다.
+
+### 🌊 React.js vs. JavaScript
+
+**React.js**
+
+**React.js**는 앱 작성 방식을 정의하는 라이브러리로, 데이터가 앱에 사용되는 방식과 그 데이터가 변화하는 결과에 따른 UI 변경 방법에 대한 명확한 규칙을 설정하여 수행한다.
+
+**React.js**는 HTML처럼 보이지만 **JavaScript** 코드인 JSX로 반환되는 **Component**를 통해 UI를 정의한다. 이렇게 생성된 **Component**는 이후 **ReactDOM** 라이브러리에 의해 렌더링되어 화면에 출력된다.
+
+```jsx
+function GreetingList(props) {
+  return (
+    <div>
+      <h1>파티 참가 목록</h1>
+      <ul>
+        <li>김철수</li>
+        <li>김영희</li>
+        <li>김맹구</li>
+      </ul>
+    </div>
+  );
+}
+```
+
+**React.js**의 경우 **Component**로 앱의 기능이나 UI 요소를 구분하기 때문에 하나의 파일로 유지할 수 있다.
+
+```jsx
+function GreetingList(props) {
+  function addList() {
+    // 동작 내용...
+  }
+  return (
+    <div>
+      <h1>파티 참가 목록</h1>
+      <ul>
+        <li>김철수</li>
+        <li>김영희</li>
+        <li>김맹구</li>
+      </ul>
+    </div>
+  );
+}
+```
+
+이렇게 **Component** 방식을 활용하면 앱이 복잡해 지더라도 쉽게 이해할 수 있고, 재사용이 가능해진다.
+
+**React.js**는 사용자의 입력을 기반으로 자신의 상태를 관리하고 업데이트하는 제어 **Component**를 이용해 사용자가 입력할 때 **JavaScript** 객체의 값을 설정한다.
+
+```jsx
+const [list, setList] = useState("");
+
+<input type="text" value={list} onChange={e => setList(e.target.value)}
+console.log(list);
+```
+
+즉, 현재 앱의 상태를 저장하기 위해 DOM에 의존하지 않으므로 사용자의 데이터를 관리하는 이점이 존재한다.
+
+이벤트 발생 시 앱이 사용자에 반응하는 방식과 새로운 변경 사항을 반영할 때 **React.js**는 **JavaScript** 변수의 전체 상태를 유지하고, 변수의 각 항목을 매핑한 후 그에 대한 목록 요소를 반환한다. 이후 버튼을 누르거나 하는 등의 이벤트 기능을 정의할 수 있다.
+
+```jsx
+const [lists, setList] = useState("");
+
+<ul>
+    {lists.map(list => (
+        <li key={list}>{list}</li>
+    ))}
+</ul>
+<button onClick={addList}>목록 추가</button>
+
+function addList() { setList([...lists, "새로운 회원"]); }
+```
+
+**JavaScript**
+
+반면 **JavaScript**는 규칙을 설정하지 않는 스크립트 언어로 더 자유로운 코드 작성이 가능하나 정해진 것이 없어 코드를 작성하기 어렵다.
+
+**JavaScript**의 경우 UI를 HTML로 구현한다.
+
+```jsx
+<div>
+  <h1>파티 참가 목록</h1>
+  <ul>
+    <li>김철수</li>
+    <li>김영희</li>
+    <li>김맹구</li>
+  </ul>
+</div>
+```
+
+또한, 앱의 기능 또는 UI 요소를 분할하는 특별한 요구사항이 존재하지 않는다. 다만, 관심사 분리 원칙에 따라 화면에 출력하는 HTML과 기능을 구현하는 **JavaScript**가 분리되도록 설계하므로, 앱이 복잡해질수록 HTML과 **JavaScript**를 연결짓기 어렵게 된다.
+
+**JavaScript**의 사용자 데이터는 일반적으로 브라우저 자체에서 만들고 유지 관리를 하는 전체 HTML인 DOM에 저장된다. 따라서 개발자는 DOM에서 input 태그의 값을 검색하고, 추출하여 사용할 수 있다.
+
+```jsx
+<input type='text' id='input-member' />;
+
+const input = document.getElementById('input-member');
+```
+
+또한, **JavaScript**의 경우 이벤트 발생 시 앱이 사용자에 반응하는 방식과 새로운 변경 사항을 반영하는 UI를 업데이트할 때 복잡한 과정을 거치게 된다.
+
+```jsx
+<input type="text" id="member" /> <button id="add-button">회원 추가</button>
+
+const addButton = document.getElementById("add-button");
+
+addButton.addEventListener("click", function() {
+
+  ...
+
+})
+```
+
+---
+
+## 마무리
+
+이처럼, **React.js**가 가지는 장점이 Vanilla JavaScript로 개발을 진행하는 것보다 장점이 많기 때문에 많은 기업에서 활용하고 있다는 느낌을 받았다. 따라서, 취업을 위해서든 더 나은 개발 경험을 위해서든 반드시 **React.js**를 배워야 한다는 생각이 들었다! 한 번 해보자!
