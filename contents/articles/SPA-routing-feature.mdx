@@ -1,0 +1,739 @@
+---
+title: SPA의 Routing 기능 개발 프로젝트
+description: SPA의 라우팅 기능을 라이브러리 없이 구현해보자
+createdAt: 2022-10-06
+category: React
+tags:
+  - React
+  - TypeScript
+  - Team Project
+  - Retrospective
+  - Wanted PreOnBoarding Frontend Course
+---
+
+# SPA와 Routing
+
+→ 원티드 프리온보딩 프론트엔드 챌린지 1차 과제를 진행하며
+
+## 1️⃣ 주제
+
+<aside>
+📢 **React와 History API 사용하여 SPA Router 기능 구현하기**
+
+</aside>
+
+단일 페이지 애플리케이션, 즉 SPA(Single Page Application)은 UX 향상을 핵심 가치로 두고 있다. SPA는 전체 페이지를 다시 렌더링하지 않고 필요한 부분만 JSON으로 데이터를 전달받아 다시 렌더링하여 새로고침이나 화면 깜빡임 현상을 일으키지 않는다. 추가적으로 애플리케이션의 속도도 향상될 수 있다.
+
+> There is no Silver Bullet
+
+다만, 프레드 브룩스의 [논문 제목](https://ko.wikipedia.org/wiki/%EC%9D%80%EB%B9%9B_%EC%B4%9D%EC%95%8C%EC%9D%80_%EC%97%86%EB%8B%A4)(No Silver Bullet - Essence and Accident in Software Engineering)처럼, 프로그래밍에서 은탄환은 없다. 즉, SPA에도 트레이드 오프가 존재한다는 것이다.
+
+SPA는 최초 접근시 모든 정적 리소스를 다운로드하는 방식이기 때문에 초기 구동 속도가 상대적으로 느리고, 서버로부터 데이터를 응답받아 뷰를 동적으로 그리기 때문에 SEO에 약하다는 단점을 가지고 있다.
+
+이러한 SPA의 특징으로 인해 라우팅(Routing) 기능이 SPA에서는 중요하다.
+
+라우팅(Routing) 기능은 사용자가 태스크를 수행하기 위해 어떤 뷰에서 다른 뷰로 전환하는 내비게이션을 관리하기 위한 기능으로, SPA에서의 라우팅 기능은 서버에 요청을 보내지 않고 브라우저에서 여러 뷰를 이동하는 기능이다.
+
+주로 사용자가 브라우저에 `URL을 직접 입력`하거나, 웹 페이지 내부의 `anchor 태그`를 클릭하거나, `뒤로가기`, `앞으로가기` 버튼을 클릭하는 경우에 라우팅 기능이 동작한다.
+
+따라서 SPA에서 라우팅 기능은 다음과 같은 역할을 할 수 있어야 한다.
+
+- URL의 변경을 감지하고 처리해야 한다.
+- 특정 URL에 맞는 UI를 렌더링해야 한다.
+
+## 2️⃣ SPA의 Routing 기능 개발하기
+
+우선 **특정 URL에 맞는 UI를 렌더링하기 위해** 두 가지 페이지 UI를 간단하게 타이틀과 라우팅 내비게이션을 가진 버튼을 구현했다.
+
+### `/`에 렌더링 될 Root UI
+
+```tsx
+// Root.tsx
+
+import React from 'react';
+
+const Root = () => {
+  return (
+    <div>
+      <h1>Root</h1>
+      <button>go to About</button>
+    </div>
+  );
+};
+
+export default Root;
+```
+
+### `/about`에 렌더링 될 About UI
+
+```tsx
+// About.tsx
+
+import React from 'react';
+
+const About = () => {
+  return (
+    <div>
+      <h1>About</h1>
+      <button>go to Root</button>
+    </div>
+  );
+};
+
+export default About;
+```
+
+이렇게 UI를 구현할 때까지만 해도
+
+> 버튼을 클릭하면 URL을 변경하고 변경된 URL에 따라서 설정된 UI를 렌더링하면 되겠네ㅋㅋㅋ
+
+라고 쉽게 생각했다.
+
+### History API를 통해 버튼 클릭시 URL 변경하기
+
+브라우저의 전역 객체인 `window` 객체는 JavaScript에 기본적으로 포함되어 있는 빌트인 객체, 함수 등을 포함하고 있다. 그 중 하나인 `history` 객체는 브라우저의 세션 기록에 접근할 수 있는 방법을 제공한다.
+
+![브라우저의 console에 window.history를 출력.](/images/SPA-Routing/History-API.png)
+
+`back`, `forward`, `go` 등의 메서드로 사용자의 방문 기록, 즉 브라우저의 세션 기록을 기반으로 앞으로가기, 뒤로가기, 혹은 특정 지점으로 이동하기 등의 동작을 할 수 있다. 또한, `length` 속성으로 방문 기록 스택의 크기를 알 수 있으며, `state` 속성으로 방문 기록 스택의 최상단을 확인할 수도 있다.( → [History의 더 많은 속성과 메서드 보러가기](https://developer.mozilla.org/ko/docs/Web/API/History) )
+
+이때, HTML5에서 추가된 `pushState` 메서드는 브라우저의 세션 기록, 즉 방문 기록 스택에 상태를 추가하는데, 이를 활용해서 URL을 변경할 수 있다고 생각했다.
+
+```tsx
+// Root.tsx
+
+import React from 'react';
+
+const Root = () => {
+  const handleClick = () => {
+    window.history.pushState({ data: 'Move to ABOUT' }, '', '/about');
+  };
+
+  return (
+    <div>
+      <h1>Root</h1>
+      <button onClick={handleClick}>Move to About</button>
+    </div>
+  );
+};
+
+export default Root;
+```
+
+버튼을 클릭하면, `history.pushState()` 메서드를 통해 방문 기록 스택의 최상단에 첫 번째 인자인 `state`를 추가하고, 마지막 인자인 `url`로 브라우저의 주소가 변경된다.
+
+다만, 여기서 문제가 발생했다. 브라우저의 주소는 `http://localhost:5713/about`으로 변경되었지만, 위에서 만들어둔 About UI가 렌더링되지 않았다.
+
+이는 당연하다고 생각했다. 그 이유는 URL에 맞는 UI를 렌더링하게 설정하지도 않았고, URL 변경을 감지하고 처리하게끔 설정하지도 않았기 때문이다. `react-router-dom`을 활용하면 `<Router>`가 이러한 역할을 대신해주기 때문에 구현하지 않는 부분이라고 생각된다.
+
+그래도 `<Router>`를 만드는 것 대신 한 번 시도해봤다.
+
+### URL에 따라 다른 컴포넌트 렌더링하기 - `pathname`에 따른 분기
+
+우선 첫 번째 방법으로 `window`의 `location` 객체에 존재하는 `pathname` 속성의 값을 통해 분기처리해 URL에 따라 다른 컴포넌트를 렌더링하고자 했다.
+
+```tsx
+// App.tsx
+
+import React from 'react';
+import Root from './pages/Root/Root';
+import About from './pages/About/About';
+
+const App = () => {
+  const params = window.location.pathname;
+
+  return (
+    <div className='App'>
+      {params === '/' && <Root />}
+      {params === '/about' && <About />}
+    </div>
+  );
+};
+
+export default App;
+```
+
+하지만, 이러한 방법은 새로고침을 하기 전까지는 렌더링이 되지 않고, 새로고침을 해야 다른 컴포넌트가 렌더링되는 문제가 있었다.
+
+- 관련 동영상 보기
+
+[Errors](/images/SPA-Routing/Error.mp4)
+
+### URL에 따라 다른 컴포넌트 렌더링하기 - `pathname`을 State로 처리
+
+추측하건대, `state`로 처리하지 않았기 때문에 React 로직 상 렌더링될 이유가 없어 렌더링되지 않는 것 같았다. 따라서, `pathname`을 `state`로 만들어봤다.
+
+```tsx
+// App.tsx
+
+import React, { useEffect, useState } from 'react';
+import Root from './pages/Root/Root';
+import About from './pages/About/About';
+
+const App = () => {
+  const [params, setParams] = useState('');
+  const { pathname } = window.location;
+
+  useEffect(() => {
+    setParams(pathname);
+  }, [pathname]);
+
+  return (
+    <div className='App'>
+      {params === '/' && <Root />}
+      {params === '/about' && <About />}
+    </div>
+  );
+};
+
+export default App;
+```
+
+다만, useEffect Hook 없이 `setParams` 함수를 호출하면, 무한 렌더링이 되기 때문에 useEffect의 의존성 배열에 `pathname`를 추가했다. 이렇게 해도 렌더링은 되지 않았고, 새로고침을 해야 다른 컴포넌트로 렌더링되었다.
+
+결국, 어쩔 수 없이 `react-router-dom`의 코드를 확인하며, `<Router>` 관련 부분을 찾아보려고 노력했지만, 어디있는지 모르겠다. 그래서 구글링해서 관련된 레퍼런스를 찾아봤다.
+
+`<Router>` 컴포넌트는 마운트되는 순간에 `history` 객체의 속성인 `location` 객체를 `state`로 저장하고, `history.listen` 메서드로 `history` 객체를 구독하여 브라우저의 현재 URL이 변경될 때마다 `state`로 저장된 `location` 객체를 대체한다고 한다.
+
+추가적으로 `<Router>` 컴포넌트는 현재 URL과 관련된 정보 등(`match` 객체, `location` 객체, `history` 객체**)**을 Context로 구성해 해당 Context API의 Provider를 렌더링하여 트리 하위에 존재하는 각종 라우팅 관련 컴포넌트들이 어디서든 브라우저의 현재 URL과 관련된 정보 등을 참조할 수 있도록 해준다고 한다.
+
+### URL에 따라 다른 컴포넌트 렌더링하기 - `<Router>` 컴포넌트 개발
+
+그렇다면 `<Router>` 컴포넌트를 구현하면 Context API가 없더라도 쉽게 구현되지 않을까? 라는 생각을 했다. 즉, `path`와 `element`를 props로 받고, 현재 `pathname`과 props로 받은 `path`가 동일한 경우 `element`를 렌더링해주면 될 것이라고 생각했다.
+
+```tsx
+// Router.tsx
+
+import React from 'react';
+
+interface RouterProps extends React.PropsWithChildren {
+  path: string;
+  element: React.ReactNode;
+}
+
+const Router = ({ path, element }: RouterProps) => {
+  return window.location.pathname === path ? <>{element}</> : null;
+};
+
+export default Router;
+```
+
+```tsx
+// App.tsx
+
+import Root from './pages/Root/Root';
+import About from './pages/About/About';
+import Router from './components/Router/Router';
+
+const App = () => {
+  return (
+    <div className='App'>
+      <Router path='/' element={<Root />}></Router>
+      <Router path='/about' element={<About />}></Router>
+    </div>
+  );
+};
+
+export default App;
+```
+
+하지만, 여전히 렌더링은 되지 않았고, 새로고침을 해야 렌더링되는 것은 동일했다….😭
+
+### URL에 따라 다른 컴포넌트 렌더링하기 - `<Link>` 컴포넌트 개발
+
+생각을 다르게 해봤다. 단순 버튼으로 이루어져 렌더링이 되지 않는 것은 아닐까라고 의심했고, 이를 `react-router-dom`의 `<Link>`처럼 변경하고자 했다. 생각을 했으면 역시 시도해봐야 한다.
+
+```tsx
+// Link.tsx
+
+import React from 'react';
+
+interface LinkProps {
+  href: string;
+  children: React.ReactNode;
+}
+
+const Link = ({ href, children }: LinkProps) => {
+  const handleLinkClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    window.history.pushState({ data: href }, '', href);
+  };
+
+  return (
+    <a href={href} onClick={handleLinkClick}>
+      {children}
+    </a>
+  );
+};
+
+export default Link;
+```
+
+동일하게 `href`를 받아 `history.pushState()`로 처리하는 `<Link>`를 만들고 적용해봤다.
+
+```tsx
+import React from 'react';
+import Link from '../../components/Router/Link';
+
+const Root = () => {
+  return (
+    <div>
+      <h1>Root</h1>
+      <Link href='/about'>Move to About</Link>
+    </div>
+  );
+};
+
+export default Root;
+```
+
+하지만 역시나 동일하게 렌더링은 되지 않았다…😭
+
+레퍼런스를 찾아볼 때, `history.listen` 메서드로 `history` 객체를 구독하여 브라우저의 현재 URL이 변경될 때마다 `state`로 저장된 `location` 객체를 대체한다는 것이 있어서 관련된 메서드를 찾아봤다.
+
+### URL에 따라 다른 컴포넌트 렌더링하기 - `popState` 이벤트 활용하기
+
+`popState` 이벤트는 사용자의 `history`가 변경될 때 트리거되고, `history.pushState()` 메서드를 사용해 사용자의 세션 기록 스택에 추가하는 경우에 해당 `history`를 대체하게 된다. 따라서 `popState` 이벤트로 `history` 객체를 구독할 수 있을 것 같다. 다만, `pushState()` 메서드를 호출하는 것은 popState 이벤트를 트리거시키지 않으므로 직접 트리거 해주어야 한다. 한 번 해보자.
+
+~~(죽어도 Context API로 구현하기 싫은 건 아님)~~
+
+```tsx
+// Link.tsx
+
+import React from 'react';
+
+interface LinkProps {
+  href: string;
+  children: React.ReactNode;
+}
+
+const Link = ({ href, children }: LinkProps) => {
+  const handleLinkClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    window.history.pushState({ data: href }, '', href);
+
+    const popStateEvent = new PopStateEvent('popState');
+    window.dispatchEvent(popStateEvent);
+  };
+
+  return (
+    <a href={href} onClick={handleLinkClick}>
+      {children}
+    </a>
+  );
+};
+
+export default Link;
+```
+
+우선 `popState` 이벤트 인스턴스를 생성하고, 이를 `window` 객체에 `dispatch`해주면, `popState` 이벤트를 트리거시킬 수 있다. 이제 이를 바탕으로 `<Router>` 컴포넌트에서 해당 이벤트를 구독해주면 된다.
+
+```tsx
+// Router.tsx
+
+import React, { useState, useEffect } from 'react';
+
+interface RouterProps extends React.PropsWithChildren {
+  path: string;
+  element: React.ReactNode;
+}
+
+const Router = ({ path, element }: RouterProps) => {
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
+  useEffect(() => {
+    const pathChange = () => {
+      setCurrentPath(window.location.pathname);
+    };
+
+    // Listen popState Event(구독)
+    window.addEventListener('popstate', pathChange);
+
+    // Clean up
+    return () => {
+      window.removeEventListener('popstate', pathChange);
+    };
+  }, []);
+
+  return currentPath === path ? <>{element}</> : null;
+};
+
+export default Router;
+```
+
+이렇게 하면, 결국 History API와 React만으로 `react-router-dom`을 구현할 수 있다! 물론 문제는 존재한다. 아마 하위 컴포넌트에서 `pathname`을 활용하는 경우에는 렌더링이 되지 않을 것으로 파악했다. 그 이유는 전역에서 State를 관리하는 것도 아니고, 단순히 `<Router>` 컴포넌트에서 지역적인 State로 관리하고 있기 때문이라고 생각된다.
+
+### `useRouter` Custom Hook 개발하기
+
+추가적으로 `url`을 전달받아 해당 `url`로 페이지를 이동시켜주는 `useRouter` 훅을 구현해보자. 우선 위에서 사용한 코드를 분리하여 구현해보았다.
+
+```tsx
+// useRouter.ts
+
+import React from 'react';
+
+interface useRouterParams {
+  url: string;
+}
+
+export const useRouter = () => {
+  const push = ({ url }: useRouterParams = { url: '/' }) => {
+    const { pathname } = window.location;
+
+    if (pathname === url) return;
+
+    window.history.pushState({ data: url }, '', url);
+
+    const popStateEvent = new PopStateEvent('popstate');
+    window.dispatchEvent(popStateEvent);
+  };
+
+  return { push };
+};
+```
+
+그냥 `<Link>` 컴포넌트에서 활용한 코드를 재사용하는 것 같아서, `react-router-dom`의 `useNavigate` Hook과 유사한 기능을 하기에 한 번 직접 코드를 확인해봤다.
+
+```tsx
+// package/react-router/lib/hooks.tsx
+
+// ...
+
+export function useNavigate(): NavigateFunction {
+  invariant(
+    useInRouterContext(),
+
+		**// react-router 개발자도 TODO 쓰는 거에 동일성 느껴서 좋았음ㅋㅋ**
+    // TODO: This error is probably because they somehow have 2 versions of the
+    // router loaded. We can help them understand how to avoid that.
+    `useNavigate() may be used only in the context of a <Router> component.`
+  );
+
+	**// Context API를 활용해야 할 것 같음..**
+  let { basename, navigator } = React.useContext(NavigationContext);
+  let { matches } = React.useContext(RouteContext);
+	**// Hook 내부에서 Hook 사용하는 깔끔함.. 배워가기**
+  let { pathname: locationPathname } = useLocation();
+
+  let routePathnamesJson = JSON.stringify(
+    getPathContributingMatches(matches).map((match) => match.pathnameBase)
+  );
+
+  let activeRef = React.useRef(false);
+  React.useEffect(() => {
+    activeRef.current = true;
+  });
+
+	**// 실제 navigate 함수**
+  let navigate: NavigateFunction = React.useCallback(
+    (to: To | number, options: NavigateOptions = {}) => {
+      warning(
+        activeRef.current,
+        `You should call navigate() in a React.useEffect(), not when ` +
+          `your component is first rendered.`
+      );
+
+      if (!activeRef.current) return;
+
+			**// Type 분기 처리**
+      if (typeof to === "number") {
+        navigator.go(to);
+        return;
+      }
+
+      let path = resolveTo(
+        to,
+        JSON.parse(routePathnamesJson),
+        locationPathname,
+        options.relative === "path"
+      );
+
+      // If we're operating within a basename, prepend it to the pathname prior
+      // to handing off to history.  If this is a root navigation, then we
+      // navigate to the raw basename which allows the basename to have full
+      // control over the presence of a trailing slash on root links
+
+			**// 기본 url이 따로 있는 경우를 처리**
+      if (basename !== "/") {
+        path.pathname =
+          path.pathname === "/"
+            ? basename
+            : joinPaths([basename, path.pathname]);
+      }
+
+      (!!options.replace ? navigator.replace : navigator.push)(
+        path,
+        options.state,
+        options
+      );
+    },
+    [basename, navigator, routePathnamesJson, locationPathname]
+  );
+
+  return navigate;
+}
+```
+
+코드를 직접 확인해보면서, Context API를 활용해 결국 `BrowserRouter`를 구현해야 한다는 점을 알게 되었고, `react-router` 개발자들도 TODO 사용하는 걸 보고 잠깐 동일성을 느꼈다.(ㅋㅋ)
+
+### Context API를 활용해 리펙토링하기
+
+결국, Context API를 활용해 리펙토링을 하기로 마음을 먹었다.
+
+Context API는 React 컴포넌트 트리 내부에서 전역적으로 State를 공유할 수 있는 State 관리 방법 중 하나로, 보통 Props Drilling 문제를 해결하기 위해 가장 처음으로 학습하는 방법이다.
+
+주로 전역적으로 관리되는 데이터는 테마, 로그인한 유저의 정보, 선호 언어 등과 같이 앱 내부의 많은 컴포넌트에서 사용되는 데이터를 말한다. 이때 React의 단방향성으로 인해서 Props로 해당 데이터를 전달하기 위해서는 중간에 존재하는 모든 컴포넌트를 거쳐야하는데, 이보다 더 비효율적인 방식이 존재할 리가 없다고 생각한다.
+
+결국 Context API는 쉽게 특정 컴포넌트에게 데이터를 전달할 수 있는 방식을 고안한 것이라고 생각된다. [React 공식 문서](https://ko.reactjs.org/docs/context.html#before-you-use-context)도 제어의 역전으로 인해 전달하는 Props의 수를 줄이고, 최상위 컴포넌트의 제어력을 더 높여 더 깔끔한 코드를 작성할 수 있다고 언급하고 있다.
+
+Context API를 활용하기 위해서는 우선 Context 객체를 만들어야 한다.
+
+```tsx
+const MyContext = React.createContext();
+```
+
+이후 최상위 컴포넌트를 Provider로 감싸 Context를 구독하는 모든 컴포넌트에게 Context의 변화를 인지하게 해야 한다. 즉, Provider 하위에서 Context를 구독하는 모든 하위 컴포넌트는 `value` Props가 변경될 때마다 다시 렌더링된다는 것이다.
+
+```tsx
+<MyContext.Provider value={// ...}>
+	{/* ... */}
+</MyContext.Provider>
+```
+
+이때 Context의 value 변경 여부는 `Object.is` 메서드와 동일한 알고리즘을 활용해 이전 값과 새로운 값을 비교해 측정된다.
+
+이제 다시 `react-router-dom`의 `BrowserRouter` 부분을 확인해보자. 음 그렇다. 여전히 잘 모르겠다.
+
+```tsx
+// package/react-route-dom/index.tsx
+
+**// basename, children, window를 인자로 전달받아, Router 컴포넌트를 반환한다.**
+export function BrowserRouter({
+  basename,
+  children,
+  window,
+}: BrowserRouterProps) {
+  let historyRef = React.useRef<BrowserHistory>();
+  if (historyRef.current == null) {
+    historyRef.current = createBrowserHistory({ window, v5Compat: true });
+  }
+
+  let history = historyRef.current;
+  let [state, setState] = React.useState({
+    action: history.action,
+    location: history.location,
+  });
+
+  React.useLayoutEffect(() => history.listen(setState), [history]);
+
+  return (
+    <Router
+      basename={basename}
+      children={children}
+      location={state.location}
+      navigationType={state.action}
+      navigator={history}
+    />
+  );
+}
+```
+
+### Context API로 `<BrowserRouter>` 개발하기
+
+Context API로 `<BrowserRouter>`를 구현하면, 다음과 같다.
+
+```tsx
+// RouterContext.ts
+
+import React, { createContext, Dispatch, SetStateAction } from 'react';
+
+type defaultValue = {
+  path: string;
+  changePath: Dispatch<SetStateAction<string>>;
+};
+
+const defaultValue: defaultValue = {
+  path: '',
+  changePath: () => {},
+};
+
+const RouterContext = createContext(defaultValue);
+
+export default RouterContext;
+```
+
+```tsx
+// BrowserRouter.tsx
+
+import React, { PropsWithChildren, useEffect, useState } from 'react';
+import RouterContext from './RouterContext';
+
+const BrowserRouter = ({ children }: PropsWithChildren) => {
+  const { pathname } = window.location;
+
+  const [path, setPath] = useState(pathname);
+
+  return (
+    <RouterContext.Provider
+      value={{
+        path,
+        changePath: setPath,
+      }}
+    >
+      {children}
+    </RouterContext.Provider>
+  );
+};
+
+export default BrowserRouter;
+```
+
+다만 이렇게 진행하는 경우, 또 다시 URL 변경을 Context가 인지하지 못하므로, `popState`를 활용해 추가적인 로직을 작성해야 한다. 즉, 기존의 `<Router>` 컴포넌트가 가지고 있던 로직을 가져와야 한다. 잊지말고 `pushState` 로직도 가져와야 한다.
+
+```tsx
+// BrowserRouter.tsx
+
+import React, { PropsWithChildren, useEffect, useState } from 'react';
+import RouterContext from './RouterContext';
+
+const BrowserRouter = ({ children }: PropsWithChildren) => {
+  const { pathname } = window.location;
+
+  const [path, setPath] = useState(pathname);
+
+  useEffect(() => {
+    const pathChange = () => {
+      setPath(pathname);
+    };
+
+    window.history.pushState({ data: path }, '', path);
+
+    window.addEventListener('popstate', pathChange);
+
+    return () => {
+      window.removeEventListener('popstate', pathChange);
+    };
+  }, [path]);
+
+  return (
+    <RouterContext.Provider
+      value={{
+        path,
+        changePath: setPath,
+      }}
+    >
+      {children}
+    </RouterContext.Provider>
+  );
+};
+
+export default BrowserRouter;
+```
+
+### Context API를 활용해 `<Router>`, `<Link>`, `useRouter` 수정하기
+
+Context에 따라 `<Router>` 컴포넌트와 `<Link>` 컴포넌트도 수정되어야 한다. `<Router>` 컴포넌트는 Context의 path를 가져와 인자로 전달받은 값과 일치하면 해당 컴포넌트를 렌더링해주면 된다.
+
+```tsx
+// Router.tsx
+
+import React, { useState, useEffect, useContext } from 'react';
+import RouterContext from './RouterContext';
+
+interface RouterProps extends React.PropsWithChildren {
+  to: string;
+  element: React.ReactNode;
+}
+
+const Router = ({ to, element }: RouterProps) => {
+  const { path } = useContext(RouterContext);
+
+  return path === to ? <>{element}</> : null;
+};
+
+export default Router;
+```
+
+`<Link>` 컴포넌트도 더 간결해진 것을 확인할 수 있다. Context의 `changePath` 메서드를 가져와 쉽게 페이지 이동을 구현할 수 있기 때문이다.
+
+```tsx
+// Link.tsx
+
+import React, { useContext } from 'react';
+import RouterContext from '../Router/RouterContext';
+interface LinkProps {
+  href: string;
+  children: React.ReactNode;
+}
+
+const Link = ({ href, children }: LinkProps) => {
+  const { path, changePath } = useContext(RouterContext);
+
+  const handleLinkClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    if (path !== href) changePath(href);
+  };
+
+  return (
+    <a href={href} onClick={handleLinkClick}>
+      {children}
+    </a>
+  );
+};
+
+export default Link;
+```
+
+또한, `useRouter` Custom Hook도 Context의 `changePath` 메서드로 쉽게 구현할 수 있다.
+
+```tsx
+// useRouter.ts
+
+import React, { useCallback, useContext } from 'react';
+import RouterContext from '../Router/RouterContext';
+
+interface useRouterParams {
+  url: string;
+}
+
+export const useRouter = () => {
+  const { path, changePath } = useContext(RouterContext);
+
+  const push = useCallback(
+    ({ url }: useRouterParams = { url: '/' }) => {
+      if (path !== url) changePath(url);
+    },
+    [path, changePath],
+  );
+
+  return { push };
+};
+```
+
+모두 잘 작동하는 것을 확인할 수 있다.
+
+[SPA_Routing](/images/SPA-Routing/SPA-Routing.mp4)
+
+- 데모 영상을 촬영하는 중 뒤로가기와 앞으로가기가 동작했다가 동작하지 않다가 하는 이슈를 발견했으나 `history.state`는 제대로 쌓이고 있어서 어떤 부분이 문제인지 모르겠음.
+
+## 3️⃣ 회고
+
+사실 이렇게까지 어려울 거라고 예상하지 못했다. 단순히 과제를 진행하면서 SPA의 라우팅 기능의 중요성에 대해 알아보고자 했는데, `react-router-dom`의 코드도 뜯어보게 되었고, 그러면서 v6의 Hooks에 대해서도 조금 더 이해하게 됐다.
+
+물론 History API나 Context API에 대해 학습한 점도 정말 좋았다. 무심코 사용하고 있었던 기능들을 정리하면서 더 깊게 이해할 수 있었던 것 같다.
+
+솔직히 해낼 수 있을 거라고 생각하지 못했는데 결국 하고 나니까 너무 뿌듯해서 추가적으로 다른 Hooks를 구현해보는 것도 나쁘지 않겠다는 생각을 했다.(물론 나중에)
+
+무튼 정말 재밌었다!
+
+## 4️⃣ 참고 자료
+
+- **[Single Page Application & Routing](https://poiemaweb.com/js-spa)**
+- **[React: Navigation Without React-Router](https://ncoughlin.com/posts/react-navigation-without-react-router/#intro)**
+- **[react-router 동작 원리 간단히 알아보기](https://it-eldorado.tistory.com/113)**
+- **[MDN History](https://developer.mozilla.org/ko/docs/Web/API/History)**
+- **[MDN History.pushState()](https://developer.mozilla.org/ko/docs/Web/API/History/pushState)**
+- **[How to get notified about changes of the history via history.pushState?](https://stackoverflow.com/questions/4570093/how-to-get-notified-about-changes-of-the-history-via-history-pushstate)**
+- [**MDN popState**](https://developer.mozilla.org/ko/docs/Web/API/Window/popstate_event)
+- **[리액트 라우터 만들기](https://jeonghwan-kim.github.io/dev/2022/05/06/react-router.html)**
+- [**History API**](https://www.zerocho.com/category/HTML&DOM/post/599d2fb635814200189fe1a7)
