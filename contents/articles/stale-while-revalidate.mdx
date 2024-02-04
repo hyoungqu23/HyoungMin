@@ -1,0 +1,72 @@
+---
+title: HTTP의 전략, stale-while-revalidate와 useSWR
+description: HTTP의 전략, stale-while-revalidate에 대해 알아보자
+createdAt: 2022-12-19
+category: Frontend
+tags:
+  - HTTP
+  - SWR
+  - Stale While Revalidate
+---
+
+## HTTP Cache
+
+네트워크를 통해 리소스를 가져오는 것은 시간도 오래 걸리고 비용도 많이 소요된다. 따라서 브라우저의 HTTP Cache를 활용하는 것은 불필요한 네트워크 요청을 피하여 웹 사이트와 어플리케이션의 성능을 향상시킬 수 있다. 즉, Cache를 활용해 레이턴시와 네트워크 트래픽을 줄여 리소스를 보여주는 데에 필요한 시간을 감소시킬 수 있다. 추가적으로 Cache의 경우 기존 서버에 비해 클라이언트(브라우저)에 더 가깝기에 리소스를 응답하는 데 더 적은 시간이 소요되어 성능이 향상된다.
+
+물론 모든 클라이언트(브라우저)의 요청을 서버가 서비스할 필요가 없어지므로 서버에 대한 과부하를 완화시킬 수 있다는 장점도 있다.
+
+Cache를 활용하면 브라우저의 모든 HTTP 요청은 먼저 **브라우저 Cache**로 라우팅되어 요청을 수행하는 데 사용할 수 있는 유효한 Cache 응답이 있는지 확인하게 된다. 이때 일치하는 항목이 있다면 **브라우저 Cache**에서 응답을 가져와 네트워크 대기 시간과 데이터 비용을 줄일 수 있다.
+
+다만, 모든 리소스가 영원히 동일하지는 않기 때문에 리소스가 변하면 Cache를 재검증하여 갱신해야 리소스의 최신성을 보장할 수 있다.
+
+Goggle Workbox의 문서에 따르면 `Cache-First`, `Network-First`, `Network-Only`, `Cache-Only` 등의 다양한 Caching 전략이 존재한다.
+
+## `[stale-while-revalidate](https://www.rfc-editor.org/rfc/rfc5861#section-3)`?
+
+하나의 Cache 제어 전략으로 Cache된 컨텐츠를 즉시 로드하는 **즉시성**과 Cache된 컨텐츠에 대한 업데이트가 향후에 사용되도록 보장하는 **최신성** 간의 균형을 유지하는 데 도움이 된다. 정기적으로 업데이트 되는 서비스, 라이브러리 유지 관리, 수명이 짧은 자산의 관리 등에서 기존 Caching 정책에 유용한 추가 기능이 될 수 있다.
+
+브라우저는 Cache의 응답이 오래된 것인지, 즉, stale한 것인지 여부를 응답 헤더에 포함된 `max-age`를 기반으로 판단한다. `max-age`보다 새로운 응답은 stale하지 않은 것으로 간주되고, 더 오래된 응답은 stale한 것으로 판단된다.
+
+![Untitled](/images/Stale-While-Revalidate/SWR.png)
+
+결국, 브라우저는 Cache-Control의 `max-age`를 기준으로 최신성을 판단하는데, `stale-while-revalidate` 전략이 Caching된 응답이 stale되었을 때에 대한 확장된 지시를 설정한다.
+
+!https://web-dev.imgix.net/image/admin/C8lg2FSEqhTKR6WmYky3.svg
+
+즉, HTTP 요청이 max-age로 설정된 시간 이내에 발생하면 Caching된 데이터를 반환하고, `stale-while-revalidate`으로 설정된 시간 이내에 발생하면 우선 Caching된 데이터를 반환하고, 재검증 요청이 발생하여 새로운 데이터를 서버로부터 요청한다. 만약, `stale-while-revalidate`으로 설정된 시간 이후에 발생하는 요청은 서버로부터 응답을 받게 된다.
+
+## [`SWR`](https://swr.vercel.app/ko)
+
+데이터를 가져오기 위한 React Hooks라는 설명을 가진 라이브러리 `SWR`은 [HTTP RFC 5861](https://tools.ietf.org/html/rfc5861)
+에 의해 알려진 HTTP 캐시 무효 전략인 `stale-while-revalidate`에서 유래되었다고 말한다. 즉, SWR 라이브러리는 먼저 Cache로부터 데이터를 반환하고, 재검증을 하여 최종적으로 데이터의 최신성을 유지할 수 있게 된다.
+
+```tsx
+import useSWR from 'swr';
+
+function Profile() {
+  const { data, error } = useSWR('/api/user', fetcher);
+
+  if (error) return <div>failed to load</div>;
+  if (!data) return <div>loading...</div>;
+  return <div>hello {data.name}!</div>;
+}
+```
+
+`useSWR` Hook을 활용해서 HTTP 요청에 따른 상태인 `data`, `error`를 받아 사용자의 현재 요청의 상태를 확인하고, 그에 맞는 UI를 렌더링해줄 수 있다. `useSWR`의 인자는 `key`와 `fetcher` 함수인데, `key`로는 고유한 식별자를 활용해야 하기 때문에 일반적으로 엔드포인트가 다르다는 이유로 API URL을 활용한다.
+
+### `fetcher`
+
+`fetcher` 함수는 `fetch`의 단순한 Wrapper 함수로, 다음과 같이 표현된다.
+
+## 참고자료
+
+- **[HTTP Cache로 불필요한 네트워크 요청 방지](https://web.dev/http-cache/#max-age)**
+- **[`stale-while-revalidate`로 최신 상태 유지](https://web.dev/stale-while-revalidate/)**
+- [**HTTP Spec RFC 5861**](https://tools.ietf.org/html/rfc5861)
+- **[MDN HTTP caching](https://developer.mozilla.org/ko/docs/Web/HTTP/Caching)**
+- **[S.W.R = Stale-While-Revalidate](https://iborymagic.tistory.com/135)**
+- **[전역 상태 관리에 대한 단상 (stale-while-revalidate)](https://jbee.io/react/thinking-about-global-state/)**
+- **[Break up ReactJS application State into Types](https://bobbyhadz.com/blog/react-state-types)**
+- **[프론트엔드 상태 관리에 대한 생각 - 무엇인가, 왜 하는가, 어떻게 잘 하는가](https://blog.hoseung.me/2021-12-05-state-management/)**
+- **[리액트 어플리케이션의 상태 관리하기](https://tech.toktokhan.dev/2021/04/23/react-state-management/)**
+- **[Next.js와 함께 사용하는 방법](https://swr.vercel.app/ko/docs/with-nextjs)**
