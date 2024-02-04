@@ -1,0 +1,195 @@
+---
+title: Next.js로 레이아웃 설정하기
+description: Next.js의 Page Router에서 레이아웃 설정하는 방법
+createdAt: 2022-10-23
+category: Next.js
+tags:
+  - React
+  - TypeScript
+  - Next.js
+  - Tailwind CSS
+---
+
+## Next.js의 Custom App
+
+Next.js에서 `_app.tsx` 즉, `MyApp` 컴포넌트는 페이지를 초기화하는 데 사용된다. 이외에도 다음과 같은 기능을 추가적으로 제공한다.
+
+- 페이지 전환 시 유지되는 레이아웃 설정
+- 페이지 Navigation 중 상태 유지
+- `componentDidCatch`를 활용한 에러 핸들링 커스터마이징
+- 페이지에 추가적인 데이터 주입
+- 전역 스타일 설정
+
+```tsx
+import 'styles/globals.css';
+import type { AppProps } from 'next/app';
+
+const MyApp = ({ Component, pageProps }: AppProps) => {
+  return <Component {...pageProps} />;
+};
+
+export default MyApp;
+```
+
+여기서 `MyApp` 컴포넌트의 인자 중 `Component`는 페이지를 의미하여 라우팅 기능을 통해 페이지를 이동할 때마다 변경되므로, `MyApp` 컴포넌트는 지속적으로 새로운 페이지를 인자로 받게 된다.
+
+또다른 인자인 `pageProps`는 사전에 로드된 Initial Props 객체로, 없으면 빈 객체이다. 다만, `getInitialProps`보다 `getSereverSideProps`나 `getStaticProps`를 활용하는 것을 공식 문서에서 추천하기 때문에 잘 활용되지 않는 것으로 보인다.
+
+다만, 다른 데이터 가져오는 방법인 `getSereverSideProps`나 `getStaticProps`가 App 컴포넌트에서 지원되지 않기 때문에 사실상 불필요한 것 아닌가 생각이 드는데 활용하는 다른 방식이 있을 듯 하다.
+
+## Next.js의 Custom Document
+
+App 컴포넌트와 유사하게 페이지를 렌더링하는 데 사용되는 `html`, `body` 태그를 커스텀할 수 있는 `_document.tsx` 파일이 존재한다. 이 파일은 서버에서만 렌더링되는 파일이기 때문에 이벤트 핸들러를 추가할 수 없는 것이 주의할 점이다.
+
+```tsx
+import { Html, Head, Main, NextScript } from 'next/document';
+
+export default function Document() {
+  return (
+    <Html>
+      <Head />
+      <body>
+        <Main />
+        <NextScript />
+      </body>
+    </Html>
+  );
+}
+```
+
+다만, title과 같이 페이지마다 다른 경우에는 해당 페이지나 컴포넌트에서 설정해야 하고`, _docuement.tsx`에서 설정하는 것은 모든 페이지에서 공통되는 요소를 설정해야 한다.
+
+## Next.js에서 레이아웃 설정하기
+
+전체 어플리케이션에서 하나의 레이아웃을 활용하는 경우에는 `Layout` 공통 컴포넌트를 생성하고, 이를 `_app.tsx`에 적용하여 해당 레이아웃을 설정할 수 있다.
+
+```tsx
+import Layout from '../components/layout';
+
+export default function MyApp({ Component, pageProps }) {
+  return (
+    <Layout>
+      <Component {...pageProps} />
+    </Layout>
+  );
+}
+```
+
+페이지 별로 다른 레이아웃을 설정하기 위해서는 `getLayout` 속성을 활용할 수 있다. 각 페이지에서 다음과 같이 레이아웃을 별도로 설정할 수 있다.
+
+```tsx
+import type { ReactElement } from 'react';
+import Layout from '../components/layout';
+import NestedLayout from '../components/nested-layout';
+import type { NextPageWithLayout } from './_app';
+
+const Page: NextPageWithLayout = () => {
+  return <p>hello world</p>;
+};
+
+Page.getLayout = function getLayout(page: ReactElement) {
+  return (
+    <Layout>
+      <NestedLayout>{page}</NestedLayout>
+    </Layout>
+  );
+};
+
+export default Page;
+```
+
+`Layout` 컴포넌트에서 `useEffect`, `useSWR` 등을 활용해 클라이언트 측에서 데이터를 가져올 수 있다.
+
+다만, 블로그의 경우 하나의 레이아웃을 설정하는 것이 통일성있기 때문에 전자의 방법을 활용해 `Layout` 컴포넌트를 생성하고 `_app.tsx`에서 처리하도록 한다.
+
+```tsx
+// Header.tsx
+
+import Link from 'next/link';
+import React from 'react';
+import { ROUTES } from 'constants/routes';
+
+const Header = () => {
+  return (
+    <header className='flex justify-center gap-5 text-2xl italic tracking-wider text-bold md:text-3xl'>
+      <nav>
+        <Link href={ROUTES.HOME}>HOME</Link>
+        <Link href={ROUTES.BLOG}>BLOG</Link>
+      </nav>
+    </header>
+  );
+};
+
+export default Header;
+```
+
+```tsx
+// Footer.tsx
+
+import Link from 'next/link';
+import React from 'react';
+import { URL } from 'constants/url';
+
+const Footer = () => {
+  return (
+    <footer className='mx-auto text-base w-fit'>
+      Copyright 2022. <Link href={URL.GITHUB}>Hyoungmin</Link>. All rights
+      reserved.
+    </footer>
+  );
+};
+
+export default Footer;
+```
+
+우선 `Header`와 `Footer` 컴포넌트를 생성하고 이를 바탕으로 `Layout` 컴포넌트를 생성했다. 특히 `Header` 컴포넌트 내부의 Navigation Bar는 확장성을 고려해 상수화된 `Routes`를 활용해 추가 기능을 구현할 때 쉽게 더할 수 있게 했다.
+
+```tsx
+import React, { PropsWithChildren } from 'react';
+import Header from 'components/common/layout/Header';
+import Footer from 'components/common/layout/Footer';
+
+const Layout = ({ children }: PropsWithChildren) => {
+  return (
+    <>
+      <Header />
+      <main className='flex flex-col items-center w-4/5 min-h-screen py-5 mx-auto md:w-3/5 md:py-10'>
+        {children}
+      </main>
+      <Footer />
+    </>
+  );
+};
+
+export default Layout;
+```
+
+`Layout` 컴포넌트에는 가장 선호하는 `width` 사이즈인 모바일은 스크린의 `80%`, 웹은 스크린의 `60%`로 본문 영역의 크기를 제한했다. 이제 이렇게 완성된 Layout 컴포넌트를 `_app.tsx`에 적용해 모든 페이지의 레이아웃을 통일성있게 설정했다.
+
+```tsx
+import 'styles/globals.css';
+import type { AppProps } from 'next/app';
+import Layout from 'components/common/layout/Layout';
+import Head from 'next/head';
+
+const MyApp = ({ Component, pageProps }: AppProps) => {
+  return (
+    <>
+      <Head>
+        <title>미니로그</title>
+      </Head>
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
+    </>
+  );
+};
+
+export default MyApp;
+```
+
+### 참고자료
+
+- [**Custom App**](https://nextjs.org/docs/advanced-features/custom-app)
+- **[Custom Document](https://nextjs.org/docs/advanced-features/custom-document)**
+- [**Layouts**](https://nextjs.org/docs/basic-features/layouts)
