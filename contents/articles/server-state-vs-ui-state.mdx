@@ -1,0 +1,76 @@
+---
+title: State와 Server State, UI State
+description: State에 대해 깊이 이해해보자
+createdAt: 2022-12-10
+category: React
+tags:
+  - React
+  - TypeScript
+  - State
+  - Server State
+  - UI State
+---
+
+## State
+
+> In React, Data that changes over time is called _state_.
+
+React에서 가장 중요한 개념 중 하나인 State는 “**시간에 따라 변화하는 컴포넌트 내부의 데이터**”를 의미한다. 즉, React에서 State는 특정 시점의 컴포넌트 별 메모리를 의미한다.
+
+State는 특정 시점의 컴포넌트의 메모리로서 기능하는데, 컴포넌트는 종종 사용자의 인터렉션의 결과로 뷰를 업데이트해야할 필요가 있다. 이때 컴포넌트는 사용자가 클릭한 button, 작성한 input의 값 등을 기억해야 할 필요성을 가지는데, State가 그 역할을 대신해준다는 것이다.
+
+Props 또한 State와 마찬가지로 렌더링 결과물에 영향을 주는 정보를 가지고 있다는 공통점이 존재한다. 하지만, Props는 State와 달리 컴포넌트에 전달되는 반면, State는 함수 내에서 선언된 변수처럼 컴포넌트 안에서 관리된다는 점이 큰 차이점이다.
+
+### 그냥 단순히 `let`으로 선언한 변수를 활용하면 되는거 아니야?
+
+컴포넌트 내부에서 `let`으로 선언한 변수는 두 가지 문제를 가진다.
+
+- 렌더링될 때 유지되지 않고 다시 선언되기 때문에 결국 그 값은 초기화된다.
+- 해당 변수를 변경하는 것이 렌더링을 유발하지 않는다.
+
+### 그렇다면, 컴포넌트를 업데이트하기 위해서 필요한 것은 뭔데?
+
+컴포넌트를 새로운 데이터와 함께 업데이트하기 위해서는 두 가지가 필요하다.
+
+- 렌더링 사이에 기존 데이터를 보관해야 한다.
+- 새로운 데이터를 기반으로 컴포넌트를 재렌더링을 유발해야 한다.
+
+`useState` Hook을 활용하면 두 가지를 모두 충족할 수 있다! 즉, `useState`를 호출하면 해당 컴포넌트가 어떤 데이터를 기억하고, 그 데이터의 변경에 따라 렌더링을 유발하게끔 설정하는 것이다.
+
+### `useState`
+
+```jsx
+const [index, setIndex] = useState(0);
+```
+
+컴포넌트에서 State를 활용하기 위해서는 직관적인 이름을 가진 `useState` Hook을 활용해야 한다. `useState` Hook은 **초기값**을 받아 다음 두 가지를 반환한다.
+
+- **현재 State 값**(the current state) → 보관한 기존 데이터
+- **State setter 함수**(a state setter function) → 현재 State를 변경하고 렌더링을 유발하는 함수
+
+이때 React는 어떤 State가 반환되어야 하는지 어떻게 알 수 있을까?
+
+이는 JavaScript의 클로저와 밀접하게 관련이 있다. 자세한 설명은 해당 글에서 다시 다루는 것으로 하고, 간단하게 말하면, 가장 최상위 레벨에서만 Hook을 호출할 수 있다는 규칙때문에 항상 동일한 순서로 호출되게 된다. 내부적으로는 호출된 Hook 배열에 따라 순서대로 동작하기 때문에 어떤 State가 반환되어야 하는지 알고 있는 것이다.
+
+마지막으로 컴포넌트를 여러번 호출한다 해도 컴포넌트는 호출될 때마다 인스턴스를 생성하기 때문에 State 또한 완벽히 독립적이고 선언하는 컴포넌트에 완전히 비공개적이다. 또한, State는 특정 함수나 코드의 위치에 얽매이지 않고, 단지 컴포넌트의 지역적 변수로 기능한다.
+
+## Server State와 Client State
+
+State를 **시간에 따라 변화하는 컴포넌트 내부의 데이터**로 보면, 해당 데이터의 변화에 대한 제어가 사용자에게 있는지 여부를 기준으로 Server State인지 Client State인지 구분할 수 있다.
+
+### Server State
+
+비동기적인 State로서 서버에 저장되어 있고, 보통 성능 이슈를 해결하고자 Cache를 활용해 클라이언트에서 활용하는 State를 Server State라 한다. 이러한 Server State는 최종 사용자가 소유하고 제어하지 않는 데이터이다.
+
+### Client State
+
+반면에 동기적인 State로 브라우저에서 관리되며 새로고침을 하는 경우 사라지는 State를 Client State라고 한다. 이러한 Client State는 사용자가 제어권을 가져 언제든 변경할 수 있다.
+
+주로 하나 혹은 몇몇개의 컴포넌트에서만 활용되는 Local Client State, UI State와 어플리케이션 전체를 관통하며 여러 컴포넌트에서 동일하게 유지해야만 하는 데이터를 관리하기 위한 Global Client State로 구분된다.
+
+### 참고자료
+
+- **[Component State](https://ko.reactjs.org/docs/faq-state.html)**
+- [**React Docs Beta: Adding Interactivity**](https://beta.reactjs.org/learn/adding-interactivity)
+- [**props vs state**](https://github.com/uberVU/react-guide/blob/master/props-vs-state.md#props-vs-state)
+- **[Types of States in a React.js Application](https://bobbyhadz.com/blog/react-state-types#types-of-states-in-a-reactjs-application)**
