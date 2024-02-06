@@ -7,7 +7,7 @@ export const articleService = {
     category: article.category,
     createdAt: new Date(article.createdAt).toLocaleDateString(),
     tags: article.tags,
-    slug: article.slug,
+    slug: article._raw.flattenedPath,
     thumbnail: {
       src: article.thumbnail,
       alt: article.title,
