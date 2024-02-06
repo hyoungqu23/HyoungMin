@@ -1,8 +1,9 @@
+import { cls } from '@/src/libs/utils';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ComponentProps } from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
 
-interface ICardProps extends ComponentProps<'a'> {
+interface ICardProps extends ComponentPropsWithoutRef<'a'> {
   articlePreview: {
     category: string;
     title: string;
@@ -24,11 +25,17 @@ const Card = ({
     createdAt,
     slug,
   },
+  className,
+  ...props
 }: ICardProps) => {
   return (
     <Link
       href={slug}
-      className='relative w-full tablet:w-100 aspect-square gap-y-3 rounded-xl overflow-hidden grid grid-cols-2 grid-rows-[1.5fr_15%_1fr] group'
+      className={cls(
+        'relative my-8 w-full tablet:w-100 aspect-square gap-y-3 rounded-xl overflow-hidden grid grid-cols-2 grid-rows-[1.5fr_15%_1fr] group',
+        className,
+      )}
+      {...props}
     >
       <div className='relative col-span-2 bg-white row-span-2 rounded-br-xl before:z-10 before:absolute before:left-1/2 before:-bottom-3 before:-translate-x-1/4 before:w-12 before:h-12 before:rounded-full before:shadow-[-24px_24px_0px_rgb(61,82,255)] after:absolute after:w-6 after:h-6 after:bottom-0 after:left-1/2 after:rounded-full after:shadow-[-12px_12px_0px_rgb(23,23,23)]'>
         {thumbnail.src ? (
@@ -69,7 +76,7 @@ const Card = ({
           </p>
         </div>
         <div className='flex gap-1 flex-nowrap whitespace-nowrap'>
-          {tags.map((tag) => (
+          {tags.map(tag => (
             <span key={tag} className='px-1 text-caption1 text-primary-50/50'>
               {tag}
             </span>
