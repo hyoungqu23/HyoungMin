@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 
+import Footer from '@/src/components/ui/Footer';
+import Header from '@/src/components/ui/Header';
 import { ILayoutProps } from '@/src/interfaces';
 import { cls } from '@/src/libs/utils';
 
 import '../styles/globals.css';
 
-export const Pretendard = localFont({
+const Pretendard = localFont({
   src: [
     {
       path: '../../public/fonts/Pretendard-Black.subset.woff2',
@@ -67,8 +69,17 @@ export const metadata: Metadata = {
 const RootLayout = ({ children }: ILayoutProps) => {
   return (
     <html lang='ko'>
-      <body className={cls(Pretendard.className, 'bg-pink-100')}>
-        {children}
+      <body
+        className={cls(
+          Pretendard.className,
+          'relative bg-secondary-500 text-primary-50 w-screen flex flex-col min-h-screen overflow-x-hidden',
+        )}
+      >
+        <Header />
+        <main role='main' className='flex flex-col flex-1 gap-4 tablet:gap-10'>
+          {children}
+        </main>
+        <Footer />
       </body>
     </html>
   );
