@@ -1,6 +1,19 @@
 const HomePage = () => {
   return (
-    <main className='flex min-h-screen flex-col items-center justify-between p-24'></main>
+    <section className='w-full min-h-screen py-10 px-8'>
+      <section className='flex gap-8'>
+        <section className='w-full h-[50vh] bg-[url("/images/web/hero_background.png")] bg-no-repeat bg-center bg-contain bg-white rounded-3xl grid grid-cols-[3fr_100px_1.2fr_100px] grid-rows-[2fr_1fr_150px_80px_50px]'>
+          <div className='relative col-start-4 col-end-5 bg-secondary-500 text-white row-start-3 row-end-4 rounded-tl-3xl before:absolute before:shadow-[24px_24px_0px_rgb(23,23,23)] before:rounded-full before:right-0 before:bottom-full before:w-12 before:h-12' />
+          <div className='relative col-start-3 col-end-5 bg-secondary-500 text-white row-start-4 row-end-5 rounded-tl-3xl flex items-end justify-end pr-4 font-bold text-3xl before:absolute before:shadow-[24px_24px_0px_rgb(23,23,23)] before:rounded-full before:right-[100px] before:bottom-full before:w-12 before:h-12'>
+            <h2>프론트엔드 개발자</h2>
+          </div>
+          <div className='relative col-start-2 col-end-5 bg-secondary-500 text-white row-start-5 row-end-6 rounded-tl-3xl flex items-start justify-end pr-4 font-bold text-3xl before:absolute before:shadow-[24px_24px_0px_rgb(23,23,23)] before:rounded-full before:left-[100px] before:-translate-x-full  before:bottom-full before:w-12 before:h-12 after:absolute after:shadow-[24px_24px_0px_rgb(23,23,23)] after:rounded-full after:right-full after:bottom-0 after:w-12 after:h-12'>
+            <h2>이형민</h2>
+          </div>
+        </section>
+        <section className='bg-white rounded-3xl w-[25vw]'></section>
+      </section>
+    </section>
   );
 };
 
