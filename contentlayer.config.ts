@@ -34,6 +34,11 @@ export const Article = defineDocumentType(() => ({
       type: 'string',
       required: false,
     },
+    isRecommended: {
+      type: 'boolean',
+      required: false,
+      default: false,
+    },
   },
   computedFields: {
     slug: {
