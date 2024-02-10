@@ -2,20 +2,21 @@ import { allArticles } from '@contentlayer';
 import { useMDXComponent } from 'next-contentlayer/hooks';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import { getRandomColor } from '@/src/libs/utils';
 
 interface IArticlePageProps {
   params: { slug: string };
 }
 
 const ArticlePage = ({ params: { slug } }: IArticlePageProps) => {
-  const article = allArticles.find(article => article.slugAsParams === slug);
+  const article = allArticles.find((article) => article.slugAsParams === slug);
 
   if (!article) notFound();
 
   const MDXContent = useMDXComponent(article.body.code);
 
   return (
-    <section className='flex flex-col px-4 py-10 items-center'>
+    <section className='flex flex-col px-4 pt-10 pb-40 items-center'>
       <>
         {article.thumbnail ? (
           <Image
@@ -32,9 +33,11 @@ const ArticlePage = ({ params: { slug } }: IArticlePageProps) => {
       <p>{new Date(article.createdAt).toLocaleDateString()}</p>
       <p>{article.category}</p>
 
-      <ul>
-        {article.tags.map(tag => (
-          <span key={tag}>{tag}</span>
+      <ul className='flex gap-1'>
+        {article.tags.map((tag) => (
+          <span key={tag} style={{ color: getRandomColor() }}>
+            {tag}
+          </span>
         ))}
       </ul>
       <div className='w-full h-0.5 bg-primary-500 my-4' />
@@ -48,7 +51,7 @@ const ArticlePage = ({ params: { slug } }: IArticlePageProps) => {
 export default ArticlePage;
 
 export const generateStaticParams = async () => {
-  return allArticles.map(article => {
+  return allArticles.map((article) => {
     return {
       slug: article._raw.flattenedPath,
     };
