@@ -1,4 +1,4 @@
-import { Article } from '@/.contentlayer/generated';
+import { Article } from '@contentlayer';
 
 export const articleService = {
   getPreview: (article: Article) => ({

@@ -6,7 +6,7 @@ import Header from '@/src/components/ui/Header';
 import { ILayoutProps } from '@/src/interfaces';
 import { cls } from '@/src/libs/utils';
 
-import '../styles/globals.css';
+import '@/src/styles/globals.css';
 
 const Pretendard = localFont({
   src: [
