@@ -1,6 +1,6 @@
 import type { Config } from 'tailwindcss';
 
-const config = {
+const config: Config = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -76,7 +76,7 @@ const config = {
         'automatic-infinite-carousel':
           'automatic-infinite-carousel 60s linear infinite',
       },
-      typography: ({ theme }) => ({
+      typography: ({ theme }: any) => ({
         primary: {
           css: {
             '--tw-prose-body': theme('colors.primary[50]'),
