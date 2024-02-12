@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 import Footer from '@/src/components/ui/Footer';
 import Header from '@/src/components/ui/Header';
@@ -80,6 +81,7 @@ const RootLayout = ({ children }: ILayoutProps) => {
           {children}
         </main>
         <Footer />
+        <SpeedInsights />
       </body>
     </html>
   );
