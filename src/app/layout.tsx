@@ -1,7 +1,8 @@
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
-import { SpeedInsights } from '@vercel/speed-insights/next';
 
+import TrackingTools from '@/src/components/common/TrackingTools';
 import Footer from '@/src/components/ui/Footer';
 import Header from '@/src/components/ui/Header';
 import { ILayoutProps } from '@/src/interfaces';
@@ -70,6 +71,7 @@ export const metadata: Metadata = {
 const RootLayout = ({ children }: ILayoutProps) => {
   return (
     <html lang='ko'>
+      <TrackingTools />
       <body
         className={cls(
           Pretendard.className,
