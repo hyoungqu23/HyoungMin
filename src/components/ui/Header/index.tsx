@@ -6,7 +6,7 @@ const Header = () => {
   return (
     <header className='sticky z-50 top-0 flex items-center justify-center w-screen h-16 bg-secondary-900/50 backdrop-blur-sm bg-clip-padding backdrop-filter'>
       <nav className='flex gap-8'>
-        {NAVIGATION_ITEMS.map((item) => (
+        {Object.values(NAVIGATION_ITEMS).map(item => (
           <Link
             key={item.id}
             href={item.route}
