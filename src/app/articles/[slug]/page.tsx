@@ -1,23 +1,23 @@
+import { BASE_URL, LINKS, NAVIGATION_ITEMS } from '@/src/assets/constants';
+import { getRandomColor } from '@/src/libs/utils';
 import { allArticles } from '@contentlayer';
 import { useMDXComponent } from 'next-contentlayer/hooks';
-import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { getRandomColor } from '@/src/libs/utils';
-import { BASE_URL, LINKS } from '@/src/assets/constants';
+import { notFound } from 'next/navigation';
 
 interface IArticlePageProps {
   params: { slug: string };
 }
 
 export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
-  const article = allArticles.find(article => article.slugAsParams === slug);
+  const article = allArticles.find((article) => article.slugAsParams === slug);
 
   return {
     metadataBase: new URL(BASE_URL),
     title: article?.title,
     description: article?.description,
     keywords: article?.tags,
-    authors: [{ name: 'HyoungMin', url: LINKS.GITHUB }],
+    authors: [{ name: 'HyoungMin', url: LINKS.GITHUB.href }],
     robots: {
       index: true,
       follow: true,
@@ -38,10 +38,12 @@ export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
       siteName: 'HyoungMin Tech Blog',
       locale: 'ko',
       type: 'website',
+      url: new URL(`${BASE_URL}/${NAVIGATION_ITEMS.ARTICLES.id}/${slug}`),
     },
     twitter: {
       title: article?.title,
       description: article?.description,
+      url: new URL(`${BASE_URL}/${NAVIGATION_ITEMS.ARTICLES.id}/${slug}`),
       // images: {
       //   url: article?.IMAGE,
       //   alt: `${article?.TITLE} Image`,
@@ -51,7 +53,7 @@ export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
 };
 
 const ArticlePage = ({ params: { slug } }: IArticlePageProps) => {
-  const article = allArticles.find(article => article.slugAsParams === slug);
+  const article = allArticles.find((article) => article.slugAsParams === slug);
 
   if (!article) notFound();
 
@@ -76,7 +78,7 @@ const ArticlePage = ({ params: { slug } }: IArticlePageProps) => {
       <p>{article.category}</p>
 
       <ul className='flex gap-1'>
-        {article.tags.map(tag => (
+        {article.tags.map((tag) => (
           <span key={tag} style={{ color: getRandomColor() }}>
             {tag}
           </span>
@@ -93,7 +95,7 @@ const ArticlePage = ({ params: { slug } }: IArticlePageProps) => {
 export default ArticlePage;
 
 export const generateStaticParams = async () => {
-  return allArticles.map(article => {
+  return allArticles.map((article) => {
     return {
       slug: article._raw.flattenedPath,
     };
