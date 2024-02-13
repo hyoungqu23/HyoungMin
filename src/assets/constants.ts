@@ -1,3 +1,4 @@
+export const BASE_URL = 'https://hyoungmin2.vercel.app';
 
 export const NAVIGATION_ITEMS = {
   HOME: { id: 'home', route: '/' },
