@@ -3,8 +3,8 @@ import { ImageResponse } from 'next/og';
 
 export const alt = 'HyoungMin Tech Blog Article';
 export const size = {
-  width: 1200,
-  height: 630,
+  width: 600,
+  height: 315,
 };
 export const contentType = 'image/png';
 
