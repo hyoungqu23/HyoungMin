@@ -34,7 +34,13 @@ export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
     openGraph: {
       title: article?.title,
       description: article?.description,
-      // images: [{ url: article?.IMAGE, width: 800, height: 600 }],
+      images: [
+        {
+          url: article?.thumbnail ?? '/images/web/hero_background.png',
+          width: 1200,
+          height: 630,
+        },
+      ],
       siteName: 'HyoungMin Tech Blog',
       locale: 'ko',
       type: 'website',
@@ -44,10 +50,10 @@ export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
       title: article?.title,
       description: article?.description,
       url: new URL(`${BASE_URL}/${NAVIGATION_ITEMS.ARTICLES.id}/${slug}`),
-      // images: {
-      //   url: article?.IMAGE,
-      //   alt: `${article?.TITLE} Image`,
-      // },
+      images: {
+        url: article?.thumbnail ?? '/images/web/hero_background.png',
+        alt: `${article?.title} Thumbnail`,
+      },
     },
   };
 };
