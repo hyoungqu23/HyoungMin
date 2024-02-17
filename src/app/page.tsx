@@ -4,7 +4,7 @@ import { allArticles } from '@contentlayer';
 
 const HomePage = () => {
   const recommendedArticles = allArticles.filter(
-    (article) => article.isRecommended,
+    article => article.isRecommended,
   );
 
   const recentArticles = allArticles
@@ -28,11 +28,12 @@ const HomePage = () => {
         </section>
         <section className='bg-[url("/images/web/profile.jpg")] bg-bottom bg-cover bg-no-repeat rounded-3xl tablet:w-[25vw] h-[25vh] tablet:h-auto'></section>
       </section>
+
       {/* Recommended Articles */}
       <section className='flex flex-col items-center justify-center'>
         <h3 className='text-heading2 font-bold'>Recommended</h3>
-        <div className='flex gap-8'>
-          {recommendedArticles.map((article) => (
+        <div className='flex flex-wrap gap-8 w-full justify-center'>
+          {recommendedArticles.map(article => (
             <Card
               key={article._id}
               articlePreview={articleService.getPreview(article)}
@@ -40,11 +41,12 @@ const HomePage = () => {
           ))}
         </div>
       </section>
+
       {/* Recent Articles */}
       <section className='flex flex-col items-center justify-center'>
         <h3 className='text-heading2 font-bold'>Recent</h3>
-        <div className='flex gap-8'>
-          {recentArticles.map((article) => (
+        <div className='flex flex-wrap gap-8 w-full justify-center'>
+          {recentArticles.map(article => (
             <Card
               key={article._id}
               articlePreview={articleService.getPreview(article)}
