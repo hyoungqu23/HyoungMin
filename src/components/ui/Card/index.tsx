@@ -32,7 +32,7 @@ const Card = ({
     <Link
       href={slug}
       className={cls(
-        'relative my-8 w-full tablet:w-100 aspect-square gap-y-3 rounded-xl overflow-hidden grid grid-cols-2 grid-rows-[1.5fr_15%_1fr] group',
+        'relative my-8 w-full active:scale-95 tablet:w-100 aspect-square gap-y-3 rounded-xl overflow-hidden grid grid-cols-2 grid-rows-[1.5fr_15%_1fr] group',
         className,
       )}
       {...props}
