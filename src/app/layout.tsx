@@ -1,8 +1,8 @@
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 
+import { BASE_URL, LINKS } from '@/src/assets/constants';
 import TrackingTools from '@/src/components/common/TrackingTools';
 import Footer from '@/src/components/ui/Footer';
 import Header from '@/src/components/ui/Header';
@@ -64,9 +64,52 @@ const Pretendard = localFont({
   variable: '--pretendard',
 });
 
-export const metadata: Metadata = {
-  title: 'HyoungMin',
-  description: 'Tech Blog by HyoungMin',
+export const generateMetadata = () => {
+  return {
+    metadataBase: new URL(BASE_URL),
+    title: 'HyoungMin Tech Blog',
+    description: 'Tech Blog By Frontend Engineer HyoungMin',
+    keywords:
+      'Next.js, React, Git, GitHub, React-Three-Fiber, R3F, Three.js, React-Hook-Form, App Router, Page Router, Firebase, Supabase, Frontend, Engineer, Backend, Fullstack, I18N, Internationalization, L11N, Localization, Route Handler, 프론트엔드, 리액트, 넥스트, 개발자, 개발자 블로그, 개발 블로그, 테크 블로그, 이형민, 개발자 이형민, 프론트엔드 이형민, 프론트엔드 개발자 이형민',
+    authors: [{ name: 'HyoungMin', url: LINKS.GITHUB.href }],
+    robots: {
+      index: true,
+      follow: true,
+      nocache: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        noimageindex: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    openGraph: {
+      title: 'HyoungMin Tech Blog',
+      description: 'Tech Blog By Frontend Engineer HyoungMin',
+      images: [
+        {
+          url: '' ?? '/images/web/hero_background.png',
+          width: 1200,
+          height: 630,
+        },
+      ],
+      siteName: 'HyoungMin Tech Blog',
+      locale: 'ko',
+      type: 'website',
+      url: new URL(BASE_URL),
+    },
+    twitter: {
+      title: 'HyoungMin Tech Blog',
+      description: 'Tech Blog By Frontend Engineer HyoungMin',
+      url: new URL(BASE_URL),
+      images: {
+        url: '' ?? '/images/web/hero_background.png',
+        alt: 'Thumbnail',
+      },
+    },
+  };
 };
 
 const RootLayout = ({ children }: ILayoutProps) => {
