@@ -1,0 +1,486 @@
+---
+title: Monorepo with TurboRepo & pnpm
+description: 어떻게 하면 Monorepo 프로젝트를 만들 수 있을까?
+createdAt: 2023-06-28
+category: React
+tags:
+  - React
+  - TypeScript
+  - Monorepo
+  - 모노레포
+  - TurboRepo
+  - pnpm
+---
+
+# Create Monorepo Project with TurboRepo
+
+우선 다음 단계를 따라 새로운 TurboRepo 프로젝트를 생성할 수 있다.
+
+```bash
+npx create-turbo@latest
+```
+
+```bash
+? Where would you like to create your turborepo? ./monorepo-project
+? Which package manager do you want to use? pnpm
+
+Downloading files. This might take a moment.
+
+>>> Created a new Turborepo with the following:
+
+apps
+ - apps/docs
+ - apps/web
+packages
+ - packages/eslint-config-custom
+ - packages/tsconfig
+ - packages/ui
+
+Installing packages. This might take a couple of minutes.
+
+>>> Success! Your new Turborepo is ready.
+Inside this directory, you can run several commands:
+
+  yarn run build
+     Build all apps and packages
+
+  yarn run dev
+     Develop all apps and packages
+
+  yarn run lint
+     Lint all apps and packages
+
+Turborepo will cache locally by default. For an additional
+speed boost, enable Remote Caching with Vercel by
+entering the following command:
+
+  npx turbo login
+
+We suggest that you begin by typing:
+
+  npx turbo login
+```
+
+## 디렉토리 구조
+
+처음 생성된 디렉토리 구조는 아래와 같이 두 가지 `apps`과 세 가지 `packages`로 구성되어 있다.
+
+```
+apps
+	- docs
+	- web
+node_modules
+packages
+	- eslint-config-custom
+	- tsconfig
+	- ui
+.gitignore
+.npmrc
+package.json
+pnpm-lock.yaml
+pnpm-workspace.yaml
+README.md
+tsconfig.json
+turbo.json
+```
+
+Root에 존재하는 `package.json` 파일을 확인해보면, 두 가지 `workspaces`가 존재하고, 전체 프로젝트를 빌드하거나 각 프로젝트의 개발 서버를 병렬적으로 실행할 수 있는 `scripts` 등으로 구성되어 있다.
+
+```json
+// package.json
+
+{
+  "name": "monorepo-project",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "packageManager": "pnpm@8.6.10",
+  "devDependencies": {
+    "eslint": "^8.48.0",
+    "prettier": "^3.0.3",
+    "tsconfig": "*",
+    "turbo": "latest"
+  }
+}
+```
+
+동일한 위치에 존재하는 `turbo.json` 파일에서는 다양한 스크립트나 작업을 실행하기 위한 파이프라인을 정의하거나, cache 등 옵션을 설정할 수 있다.
+
+```json
+// turbo.json
+
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["**/.env.*local"],
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "lint": {},
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
+```
+
+### 하위 프로젝트 디렉토리 구조
+
+하위 `apps` 프로젝트의 디렉토리 구조는 어떤 프레임워크를 활용하는 지에 따라 달라지지만, 폴리레포와 다른 점은 해당 모노레포의 다른 `packages` 프로젝트에 만들어진 패키지를 가져와 사용할 수 있다는 점이다. 따라서 수많은 apps 프로젝트가 존재해도, 동일한 UI 컴포넌트를 활용할 수 있고, 보다 유지보수에 유리하다고 볼 수 있다.
+
+```json
+// apps/web/package.json
+
+{
+  "name": "web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^13.4.19",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    **"ui": "workspace:*"**
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^13.4.19",
+    "@types/node": "^17.0.12",
+    "@types/react": "^18.0.22",
+    "@types/react-dom": "^18.0.7",
+    **"eslint-config-custom": "workspace:*",**
+    **"tsconfig": "workspace:*",**
+    "typescript": "^4.5.3"
+  }
+}
+```
+
+위와 같이 하위 `apps` 프로젝트, `web`에서 `ui`, `eslint-config-custom`, `tsconfig` 의존성은 로컬에 존재하는 `packages`이므로 버전 정보가 `workspace:*`(`yarn` 패키지 매니저를 사용하는 경우에는 `*`)으로 표기되는 것을 확인할 수 있다.
+
+# Development with Monorepo
+
+## 모든 개발 서버를 실행하기
+
+이전에 확인한 프로젝트 Root에 존재하는 `package.json`에서 확인한 것처럼 개발 서버를 병렬적으로 실행시켜서 개발을 진행할 수 있다.
+
+```bash
+yarn run dev
+```
+
+즉, 해당 명령어를 활용하면, 병렬적으로 `dev` 명령어가 존재하는 하위 프로젝트의 개발 서버를 실행시킬 수 있다. 이때, 각 `apps` 프로젝트에서 공통적으로 활용되는 UI 컴포넌트 라이브러리의 경우, 수정한 사항이 즉시 반영되는 것을 볼 수 있다.
+
+## 특정 프로젝트의 개발 서버를 실행하기
+
+TurboRepo에서 권장하는 `pnpm`을 패키지 매니저로 사용하는 경우에는 다음 명령어를 활용해서 특정 하위 프로젝트의 개발 서버만을 실행시킬 수 있다.
+
+```bash
+pnpm --filter web run dev
+```
+
+`yarn`을 패키지 매니저로 활용하는 경우에는 다음 명령어로 동일한 기능을 수행할 수 있다.
+
+```bash
+yarn workspace web run dev
+```
+
+## 루트 프로젝트에 패키지를 추가하기
+
+`pnpm`을 패키지 매니저로 사용하는 경우에는 다음 명령어를 활용해서 Root 프로젝트에 패키지를 추가할 수 있다.
+
+```bash
+pnpm add -w -D tailwindcss postcss autoprefixer
+```
+
+`yarn`을 패키지 매니저로 활용하는 경우에는 다음 명령어로 동일한 기능을 수행할 수 있다.
+
+```bash
+yarn -w add -D tailwindcss postcss autoprefixer
+```
+
+## 특정 프로젝트에 패키지를 추가하기
+
+`pnpm`을 패키지 매니저로 사용하는 경우에는 다음 명령어를 활용해서 특정 하위 프로젝트에 패키지를 추가할 수 있다.
+
+```bash
+pnpm --filter web add -D tailwindcss postcss autoprefixer
+```
+
+`yarn`을 패키지 매니저로 활용하는 경우에는 다음 명령어로 동일한 기능을 수행할 수 있다.
+
+```bash
+yarn workspace web add -D tailwindcss postcss autoprefixer
+```
+
+# Build with Monorepo
+
+```bash
+pnpm run build
+```
+
+처음으로 빌드 명령어를 실행하면 다음과 같은 결과가 나온다. 다음 결과를 잘 확인하면, `web`, `docs` 두 프로젝트가 병렬적으로 빌드되고 있음을 확인할 수 있다.
+
+```
+pnpm run build
+
+> monorepo-project@ build /Users/programming/study/monorepo-project
+> turbo run build
+
+• Packages in scope: docs, eslint-config-custom, tsconfig, ui, web
+• Running build in 5 packages
+• Remote caching disabled
+
+docs:build: cache miss, executing 08637bfb305dc8f1
+web:build: cache miss, executing f269907a3b817454
+docs:build:
+docs:build: > docs@1.0.0 build /Users/hyoungmin/IMLAB/imlab-web/apps/docs
+docs:build: > next build
+docs:build:
+web:build:
+web:build: > web@1.0.0 build /Users/hyoungmin/IMLAB/imlab-web/apps/web
+web:build: > next build
+web:build:
+web:build: - info Creating an optimized production build...
+docs:build: - info Creating an optimized production build...
+web:build: - info Compiled successfully
+web:build: - info Linting and checking validity of types...
+docs:build: - info Compiled successfully
+docs:build: - info Linting and checking validity of types...
+docs:build: - info Collecting page data...
+web:build: - info Collecting page data...
+web:build: - info Generating static pages (0/3)
+docs:build: - info Generating static pages (0/3)
+web:build: - info Generating static pages (3/3)
+docs:build: - info Generating static pages (3/3)
+web:build: - info Finalizing page optimization...
+web:build:
+web:build: Route (app)                                Size     First Load JS
+web:build: ─ ○ /                                      748 B          79.1 kB
+web:build: + First Load JS shared by all              78.4 kB
+web:build:   ├ chunks/934-196dcc5a61008b80.js         26.1 kB
+web:build:   ├ chunks/c260e7fb-1dc88cd74c938f5d.js    50.5 kB
+web:build:   ├ chunks/main-app-f3bce50815c03a34.js    219 B
+web:build:   └ chunks/webpack-bf1a64d1eafd2816.js     1.61 kB
+web:build:
+web:build: Route (pages)                              Size     First Load JS
+web:build: ─ ○ /404                                   182 B          76.4 kB
+web:build: + First Load JS shared by all              76.2 kB
+web:build:   ├ chunks/framework-eb124dc7acb3bb04.js   45.1 kB
+web:build:   ├ chunks/main-77496bdd9701df8a.js        29.4 kB
+web:build:   ├ chunks/pages/_app-82ff52170628f1f6.js  191 B
+web:build:   └ chunks/webpack-bf1a64d1eafd2816.js     1.61 kB
+web:build:
+web:build: ○  (Static)  automatically rendered as static HTML (uses no initial props)
+web:build:
+docs:build: - info Finalizing page optimization...
+docs:build:
+docs:build: Route (app)                                Size     First Load JS
+docs:build: ─ ○ /                                      748 B          79.1 kB
+docs:build: + First Load JS shared by all              78.4 kB
+docs:build:   ├ chunks/934-196dcc5a61008b80.js         26.1 kB
+docs:build:   ├ chunks/c260e7fb-1dc88cd74c938f5d.js    50.5 kB
+docs:build:   ├ chunks/main-app-1855f10c4ca6401f.js    218 B
+docs:build:   └ chunks/webpack-bf1a64d1eafd2816.js     1.61 kB
+docs:build:
+docs:build: Route (pages)                              Size     First Load JS
+docs:build: ─ ○ /404                                   182 B          76.4 kB
+docs:build: + First Load JS shared by all              76.2 kB
+docs:build:   ├ chunks/framework-eb124dc7acb3bb04.js   45.1 kB
+docs:build:   ├ chunks/main-77496bdd9701df8a.js        29.4 kB
+docs:build:   ├ chunks/pages/_app-82ff52170628f1f6.js  191 B
+docs:build:   └ chunks/webpack-bf1a64d1eafd2816.js     1.61 kB
+docs:build:
+docs:build: ○  (Static)  automatically rendered as static HTML (uses no initial props)
+docs:build:
+
+ Tasks:    **2 successful**, 2 total
+Cached:    **0 cached**, 2 total
+  Time:    **12.741s**
+```
+
+하지만, 여기서 TurboRepo의 강력함을 확인할 수 있는데, 다시 빌드하는 경우, 변경된 사항이 없으면 캐시된 데이터를 활용해 빌드를 진행하여 다음과 같은 결과를 얻을 수 있다.
+
+```
+pnpm run build                                                                                                                                                                                         ✔  14s   14:16:46  ▓▒░
+
+> monorepo-project@ build /Users/programming/study/monorepo-project
+> turbo run build
+
+• Packages in scope: docs, eslint-config-custom, tsconfig, ui, web
+• Running build in 5 packages
+• Remote caching disabled
+
+docs:build: **cache hit** (outputs already on disk), replaying logs 08637bfb305dc8f1
+web:build: **cache hit** (outputs already on disk), replaying logs f269907a3b817454
+docs:build:
+docs:build: > docs@1.0.0 build /Users/hyoungmin/IMLAB/imlab-web/apps/docs
+docs:build: > next build
+docs:build:
+docs:build: - info Creating an optimized production build...
+docs:build: - info Compiled successfully
+docs:build: - info Linting and checking validity of types...
+docs:build: - info Collecting page data...
+docs:build: - info Generating static pages (0/3)
+docs:build: - info Generating static pages (3/3)
+docs:build: - info Finalizing page optimization...
+docs:build:
+docs:build: Route (app)                                Size     First Load JS
+docs:build: ─ ○ /                                      748 B          79.1 kB
+docs:build: + First Load JS shared by all              78.4 kB
+docs:build:   ├ chunks/934-196dcc5a61008b80.js         26.1 kB
+docs:build:   ├ chunks/c260e7fb-1dc88cd74c938f5d.js    50.5 kB
+docs:build:   ├ chunks/main-app-1855f10c4ca6401f.js    218 B
+docs:build:   └ chunks/webpack-bf1a64d1eafd2816.js     1.61 kB
+docs:build:
+docs:build: Route (pages)                              Size     First Load JS
+docs:build: ─ ○ /404                                   182 B          76.4 kB
+docs:build: + First Load JS shared by all              76.2 kB
+docs:build:   ├ chunks/framework-eb124dc7acb3bb04.js   45.1 kB
+docs:build:   ├ chunks/main-77496bdd9701df8a.js        29.4 kB
+docs:build:   ├ chunks/pages/_app-82ff52170628f1f6.js  191 B
+docs:build:   └ chunks/webpack-bf1a64d1eafd2816.js     1.61 kB
+docs:build:
+docs:build: ○  (Static)  automatically rendered as static HTML (uses no initial props)
+docs:build:
+web:build:
+web:build: > web@1.0.0 build /Users/hyoungmin/IMLAB/imlab-web/apps/web
+web:build: > next build
+web:build:
+web:build: - info Creating an optimized production build...
+web:build: - info Compiled successfully
+web:build: - info Linting and checking validity of types...
+web:build: - info Collecting page data...
+web:build: - info Generating static pages (0/3)
+web:build: - info Generating static pages (3/3)
+web:build: - info Finalizing page optimization...
+web:build:
+web:build: Route (app)                                Size     First Load JS
+web:build: ─ ○ /                                      748 B          79.1 kB
+web:build: + First Load JS shared by all              78.4 kB
+web:build:   ├ chunks/934-196dcc5a61008b80.js         26.1 kB
+web:build:   ├ chunks/c260e7fb-1dc88cd74c938f5d.js    50.5 kB
+web:build:   ├ chunks/main-app-f3bce50815c03a34.js    219 B
+web:build:   └ chunks/webpack-bf1a64d1eafd2816.js     1.61 kB
+web:build:
+web:build: Route (pages)                              Size     First Load JS
+web:build: ─ ○ /404                                   182 B          76.4 kB
+web:build: + First Load JS shared by all              76.2 kB
+web:build:   ├ chunks/framework-eb124dc7acb3bb04.js   45.1 kB
+web:build:   ├ chunks/main-77496bdd9701df8a.js        29.4 kB
+web:build:   ├ chunks/pages/_app-82ff52170628f1f6.js  191 B
+web:build:   └ chunks/webpack-bf1a64d1eafd2816.js     1.61 kB
+web:build:
+web:build: ○  (Static)  automatically rendered as static HTML (uses no initial props)
+web:build:
+
+ Tasks:    **2 successful**, 2 total
+Cached:    **2 cached**, 2 total
+  Time:    **414ms** **>>> FULL TURBO**
+```
+
+사실상 약 12초였던 빌드 시간이 414밀리초로 약 29배가량 감소되는 것을 확인할 수 있다…😲
+
+# Create new Custom Package
+
+모노레포에서 모두 Tailwind CSS를 활용할 것이기 때문에 Tailwind CSS 관련 Config를 내보내는 로컬 패키지 `tailwind-config-custom`를 생성한다.
+
+```bash
+mkdir packages/tailwind-config-custom
+touch packages/tailwind-config-custom/package.json
+```
+
+그 결과 생성된 `package.json`을 다음과 같이 작성한다.
+
+```json
+// packages/tailwind-config-custom/package.json
+
+{
+  "name": "tailwind-config-custom",
+  "version": "0.0.0",
+  "private": true,
+  "files": ["tailwind.config.js"]
+}
+```
+
+이후 해당 디렉토리 내에서 `tailwind.config.js` 파일을 생성하고, 기본적인 Tailwind CSS의 기본적인 설정을 추가한다.
+
+```bash
+touch packages/tailwind-config-custom/tailwind.config.js
+```
+
+```jsx
+// tailwind.config.js
+
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    // for apps
+    `src/**/*.{js,jsx,ts,tsx}`,
+    // for packages
+    `../../packages/**/*.{js,jsx,ts,tsx}`,
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+```
+
+이제 로컬 패키지 생성이 완료되었으니 `apps/web` 프로젝트에서 의존성으로 추가하고, 활용하면 된다.
+
+```json
+// apps/web/package.json
+
+{
+  "name": "web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^13.4.19",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^13.4.19",
+    "@types/node": "^17.0.12",
+    "@types/react": "^18.0.22",
+    "@types/react-dom": "^18.0.7",
+    "autoprefixer": "^10.4.15",
+    "eslint-config-custom": "workspace:*",
+    "postcss": "^8.4.29",
+    "tailwindcss": "^3.3.3",
+    **"tailwind-config-custom": "workspace:*",**
+    "tsconfig": "workspace:*",
+    "typescript": "^4.5.3"
+  }
+}
+```
+
+```jsx
+// apps/web/tailwind.config.
+
+const commonConfig = require('tailwind-config-custom/tailwind.config.js');
+
+module.exports = {
+  ...commonConfig,
+};
+```
+
+이후에는 폴리레포에서 Tailwind CSS를 활용하듯 지시어를 추가한 `globals.css`를 `RootLayout`에 가져오면 된다.
