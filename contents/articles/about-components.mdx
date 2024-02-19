@@ -1,0 +1,174 @@
+---
+title: 컴포넌트란 무엇이고, 어떻게 만들어야 하는가
+description: React의 Component에 대한 고찰
+createdAt: 2023-03-01
+category: React
+tags:
+  - React
+  - TypeScript
+  - Component
+  - 컴포넌트
+  - 컴포넌트 설계 원칙
+  - 컴포넌트 설계
+  - Best Practice Component
+---
+
+# React가 해결하고자 했던 문제
+
+React가 프론트엔드 시장을 지배하는 JavaScript 프레임워크가 되기까지는 많은 일이 있었다.
+
+추가적으로 React.js: The Documentary를 보면, “any time anything happened, in the app: API state changes, user type something, we just blow away the entire UI and we re-render all of it”이라고 한다.
+
+당시 프론트엔드에서 가장 어려운 일 중 하나가 Update라고 지적했다. 즉, 변경할 DOM의 Node를 찾아 이벤트 리스너를 변경하고, 제거하는 등의 복잡하고 많은 작업이 필요한 Update는 Facebook의 엄청난 버그의 원인이 되기도 했다.
+
+# React의 설계 원칙
+
+React 공식 문서의 설계 원칙에 대한 소개에 따르면 React가 무엇을 하고, 무엇을 하지 않는지를 알 수 있다고 말하고 있다. React의 설계 원칙을 기반으로 React 기반의 프론트엔드 아키텍쳐를 고민해 본 경험을 공유하고자 한다.
+
+공식 문서에 따르면 React의 컴포넌트는 **구성 가능한 모든 동작**으로 설명되고 있다. 이를 바탕으로 React는 핵심 기능으로 컴포넌트의 합성을 언급하고 있으며, 코드에 변화를 일으키지 않고 컴포넌트에 기능을 추가할 수 있는 것을 중요시하고 있다. 예를 들어, 컴포넌트를 사용하는 쪽을 변경하지 않고 컴포넌트에 어떤 로컬 state를 도입할 수 있어야 하며, 필요한 경우 어떤 컴포넌트에 초기화 및 해체 코드를 추가할 수 있어야 한다고 말하고 있다.
+
+또한, React는 최소한의 공통의 추상화와 안정성 등에 가치를 두고 있으며, 보다 나은 개발자 경험을 위해 디버깅이나 개발자 경고에 대해서도 신경을 쓰고 있다.
+
+# 더 나은 컴포넌트를 만드는 방법
+
+컴포넌트는 **주로 재사용 가능한 소프트웨어 단위**를 의미하며, 프론트엔드 개발자가 웹 어플리케이션을 만들 때 가장 많이 고민하는 주제이기도 하다. 특히, 어떤 기준으로 어떤 단위까지 컴포넌트를 분리하고, 어떤 방식으로 사용할 것인지 등에 대한 고민은 모든 프론트엔드 개발자가 매일 하고 있다고 자신있게 말할 수 있다.
+
+사실 단순한 변명에 불과하겠지만 신입 프론트엔드 개발자로서 아키텍쳐나 디자인 패턴에 대해 학습하기만 하고, 이를 실제로 적용해보지는 못했었다. 익숙하지 않은 방법으로 개발 생산성과 효율성이 낮아져 스프린트 목표나, 프로젝트의 데드라인, 더 크게는 회사의 KPI를 달성하지 못할 가능성이 존재하기 때문에, 회사에서 하는 모든 프로젝트는 기존에 익숙했던 `Atomic` 패턴 이나 `Presentation - Container` 패턴을 항상 활용해 프로젝트를 진행했다.
+
+Atomic 패턴의 경우에도, 크게 컴포넌트를 만들어 나가다가 너무 길어지거나, 문제가 생길 것 같다고 생각할 때 즈음에 나누어 분할하기 시작했기 때문에 컴포넌트의 설계에 대해 깊게 생각할 시간은 없었다.
+
+최근에 대시보드와 유사한 기능을 만들게 되면서, 더더욱 컴포넌트를 어떻게 나누어 재사용성을 극대화할 수 있을지에 대해 고민을 하게 되었다. 특히, 다수의 카드 형태의 컴포넌트가 재사용될 것으로 예측되며, 나아가 차트 혹은 다운로드 기능 등이 재사용될 가능성이 높다고 판단했다. 따라서, 어떤 디자인 패턴을 활용해서 어떻게 컴포넌트를 분리할 지에 대해 조금 더 깊게 파고들어 봐야한다는 생각이 들었다.
+
+추가적으로 프론트엔드의 특성 상 기획, UI/UX 디자인, 백엔드 등과의 상호 작용 결과물을 보여주어야 하기 때문에 언제든 쉽고 유연하게 수정될 수 있어야 하며 이러한 철학은 컴포넌트를 구성할 때 반영되어야 한다고 생각한다. 예를 들면, 버튼의 UI를 변경할 때 모든 버튼을 찾아 변경하게 된다면 이는 생산성 저하를 유발할 것이지만, 하나의 분리된 버튼 컴포넌트를 모든 페이지에서 사용하고 있는 경우 쉽고 유연하게 버튼의 UI 등을 변경할 수 있게 된다. 따라서 컴포넌트를 구성할 때 크게 고려해야할 두 가지는 **재사용성**과 **유연성**이라고 할 수 있다.
+
+프론트엔드는 대부분 고객과의 접점에 존재한다. 다시 말하면, 기업의 입장에서는 마지막 출입문이 되는 것이다. 즉, 백엔드, 디자인, UI/UX, 비즈니스 로직 등의 연장선상에 놓여있기 때문에 반드시 변화에 대해 탄력적이고 유연해야 하며, 안정성을 보유해야 한다고 생각한다.
+
+# 그러면 어떻게 컴포넌트를 설계할 것인가?
+
+## 재사용성
+
+나에게는 재사용성은 해당 컴포넌트가 어떤 맥락에서도 활용이 가능하다는 뜻으로 받아들여 진다. 즉, 해당 컴포넌트가 포괄적이고 일반적이고 보편적이라는 의미가 된다.
+
+## 유연성
+
+유연성은 다르게 말하면, 맥락과 상황에 약하게 결합된, 의존된 컴포넌트를 의미한다고 볼 수 있다. 맥락과 상황에 약하게 의존하고 있으면, 쉽게 변경이 가능하고, 단일 책임을 가지게 되므로 재사용성 또한 향상된다.
+
+## 버튼 컴포넌트를 만들기 위한 나만의 고군분투(?)
+
+다음 컴포넌트는 필요해서 분할한 첫 번째 버전의 버튼 컴포넌트이다.
+
+```tsx
+// Button.tsx
+
+type Props = {
+  text: string;
+  className?: string;
+};
+
+const Button = ({ text }: Props) => {
+  return <button className={className}>{text}</button>;
+};
+```
+
+필요한 부분에서 해당 컴포넌트를 사용하는 것은 문제가 되지 않았다. 단순히 내부에 배치될 `text`와 CSS를 위한 `className`을 받아 렌더링해주기 때문에 처음에는 큰 문제 없이 활용이 가능했다. 다만, 이후 버튼 디자인이 추가되고, 버튼을 눌렀을 때 특정 링크로 이동하는 등의 기능이 추가되자 제대로 설계하지 않은 컴포넌트의 부정적인 면모만 부각되었다.
+
+```tsx
+// Button.tsx
+
+import Link from 'next/link';
+
+type Props = {
+  text: string;
+  className?: string;
+  to?: string;
+  target?: string;
+};
+
+const Button = ({ text, to, target, className }: Props) => {
+  if (to) {
+    return (
+      <Link href={to} target={target ? target : '_self'} className={className}>
+        {text}
+      </Link>
+    );
+  }
+
+  return <button className={`${className}`}>{text}</button>;
+};
+
+export default Button;
+```
+
+고작 버튼 컴포넌트 내에서 분기 처리가 두 가지나 존재하고 있으며, 해당 컴포넌트는 기능이나 디자인이 추가될 때마다 Props가 늘어나는 기형적인 구조가 될 것으로 예측되었다.
+
+따라서 새롭게 버튼 컴포넌트를 설계하게 되었다. 버튼 컴포넌트는 HTML의 `<button>`으로 렌더링되기 때문에 해당 요소의 모든 `attributes`를 가져야 하며, 자주 사용되는 컴포넌트이기 때문에 활용성과 재사용성을 높이며 변경에 유연해야 한다고 생각했다.
+
+즉, 다음과 같은 특성이 반드시 필수적이라고 생각했다.
+
+- `<button>` 요소의 `attributes`를 모두 가진다.
+- 활용성과 재사용성을 높이기 위해 자주 사용되는 디자인을 `varient`로 추가한다.
+  - 이는 UI Framework에서 자주 사용되기에 차용했다.
+- 유연성과 변경 가능성을 충족하기 위해 컴포넌트 하위 요소를 외부에서 주입한다.
+
+이러한 특성을 나름대로 반영하여 만들어낸 새로운 버튼 컴포넌트는 다음과 같다.
+
+```tsx
+// Button.tsx
+
+import type { ButtonHTMLAttributes } from 'react';
+
+export interface IButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: React.ReactNode;
+  varient?: 'primaryBtn' | 'secondaryBtn' | 'formBtn';
+}
+
+const Button = ({ children, varient, className, ...props }: IButtonProps) => {
+  return (
+    <button className={`${varient} ${className}`} {...props}>
+      {children}
+    </button>
+  );
+};
+
+export default Button;
+```
+
+```tsx
+// Usage.tsx
+
+import Button from 'Button.tsx';
+
+const Usage = () => {
+  return (
+    <>
+      <Button varient='primary'>
+        <Image src='image.png' alt='image' />
+      </Button>
+
+      <Button varitent='secondary'>
+        <Link href='www.google.com'>구글로 이동합니다.</Link>
+      </Button>
+
+      <Button>단순한 버튼입니다.</Button>
+    </>
+  );
+};
+```
+
+조금 더 쉽고 간편하게 활용할 수 있도록 만들어 재사용성을 높였고, 변경에도 유연하게 대응할 수 있는 컴포넌트가 된 것 같다.
+
+다만, 이처럼 Atomic하게 재사용되는 모든 UI를 컴포넌트로 분리하는 것은 리소스 낭비라고 생각이 들었다.
+
+특히, 버튼이 아니라 여러 요소가 결합된 select, table 등과 같은 요소를 만들면 똑같이 수많은 props가 만들어지거나 select 요소와 option 요소가 분리되어 응집도가 낮아질 것 같다는 생각을 했다.
+
+추가적으로 데이터 로직이 결합된 컴포넌트를 Atomic하게 나누면 재사용이 사실상 불가능하다는 생각이 들었다.
+
+## React 어플리케이션의 최적화
+
+[재조정 (Reconciliation) – React](https://ko.reactjs.org/docs/reconciliation.html)
+
+React는 선언적 API를 가지고 있기 때문에 앱의 각 상태에 대한 View만 설계하면, 데이터의 변경에 따라 무엇이 변경되는 지에 대해 고민할 필요가 없고, 단지 React가 렌더링해준다.
+
+단순히 React가 렌더링해주는 대로 앱을 만들면 쉽고 효율적으로 만들 수 있지만, React 내부에서 어떤 방식으로 비교를 하여 컴포넌트의 갱신이 이루어지는 지 알게 되면 최적화하는 데 더 도움이 될 것이라고 생각한다.
+
+특히 [한재엽님의 글](https://jbee.io/web/components-should-be-flexible/)을 읽으면서 내가 이상하다고 생각했던 점을 깔끔하게 작성해두셨다.
