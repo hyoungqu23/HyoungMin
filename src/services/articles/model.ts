@@ -12,3 +12,7 @@ export interface IArticlePreview
     alt: string;
   };
 }
+
+export interface IArticleAdapter {
+  toPreview(article: IArticle): IArticlePreview;
+}
