@@ -11,8 +11,14 @@ export class ArticleViewModel {
   getPreview = (articles: Array<IArticle>) =>
     articles.map(this.adapter.toPreview);
 
-  filter = (filterBy: string) =>
+  filterByCategory = (filterBy: string) =>
     this.articles.filter(article => article.category === filterBy);
+
+  filterByRecommendation = () =>
+    this.articles.filter(article => article.isRecommended).slice(0, 3);
+
+  filterByRecentCreated = () => this.sortByCreatedAt().slice(0, 3);
+
   sortByCreatedAt = () =>
     this.articles.sort(
       (a, b) =>
