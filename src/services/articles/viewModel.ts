@@ -13,4 +13,9 @@ export class ArticleViewModel {
 
   filter = (filterBy: string) =>
     this.articles.filter(article => article.category === filterBy);
+  sortByCreatedAt = () =>
+    this.articles.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
 }
