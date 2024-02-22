@@ -2,17 +2,10 @@ import { cls } from '@/src/libs/utils';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ComponentPropsWithoutRef } from 'react';
+import { IArticlePreview } from '@/src/services/articles/model';
 
 interface ICardProps extends ComponentPropsWithoutRef<'a'> {
-  articlePreview: {
-    category: string;
-    title: string;
-    description?: string;
-    tags: Array<string>;
-    thumbnail: { src?: string; alt: string };
-    createdAt: string;
-    slug: string;
-  };
+  articlePreview: IArticlePreview;
 }
 
 const Card = ({
