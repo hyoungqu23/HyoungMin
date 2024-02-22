@@ -1,18 +1,9 @@
 import Card from '@/src/components/ui/Card';
-import { articleService } from '@/src/services/article';
-import { allArticles } from '@contentlayer';
+import { ArticleAdapter } from '@/src/services/articles/adapter';
+import { ArticleViewModel } from '@/src/services/articles/viewModel';
 
 const HomePage = () => {
-  const recommendedArticles = allArticles.filter(
-    article => article.isRecommended,
-  );
-
-  const recentArticles = allArticles
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    )
-    .slice(0, 3);
+  const articleService = new ArticleViewModel(new ArticleAdapter());
 
   return (
     <section className='flex flex-col items-center w-full px-8 py-10 gap-y-20'>
@@ -35,7 +26,7 @@ const HomePage = () => {
           Recommended
         </h3>
         <div className='flex flex-wrap justify-center w-full gap-8'>
-          {recommendedArticles.map(article => (
+          {articleService.filterByRecommendation().map(article => (
             <Card
               key={article._id}
               articlePreview={articleService.getPreview(article)}
@@ -48,7 +39,7 @@ const HomePage = () => {
       <section className='flex flex-col items-center justify-center'>
         <h3 className='font-bold text-heading4 tablet:text-heading2'>Recent</h3>
         <div className='flex flex-wrap justify-center w-full gap-8'>
-          {recentArticles.map(article => (
+          {articleService.filterByRecentCreated().map(article => (
             <Card
               key={article._id}
               articlePreview={articleService.getPreview(article)}
