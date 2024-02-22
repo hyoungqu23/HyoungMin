@@ -1,6 +1,6 @@
 import { IArticle, IArticleAdapter } from '@/src/services/articles/model';
 
-class ArticleAdapter implements IArticleAdapter {
+export class ArticleAdapter implements IArticleAdapter {
   toPreview = (article: IArticle) => ({
     title: article.title,
     description: article.description,

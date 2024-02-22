@@ -1,7 +1,7 @@
 import { IArticle, IArticleAdapter } from '@/src/services/articles/model';
 import { allArticles } from '@contentlayer';
 
-class ArticleViewModel {
+export class ArticleViewModel {
   private articles: Array<IArticle> = [];
 
   constructor(private adapter: IArticleAdapter) {
