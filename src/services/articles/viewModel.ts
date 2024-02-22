@@ -8,8 +8,7 @@ export class ArticleViewModel {
     this.articles = allArticles;
   }
 
-  getPreview = (articles: Array<IArticle>) =>
-    articles.map(this.adapter.toPreview);
+  getPreview = (article: IArticle) => this.adapter.toPreview(article);
 
   filterByCategory = (filterBy: string) =>
     this.articles.filter(article => article.category === filterBy);
