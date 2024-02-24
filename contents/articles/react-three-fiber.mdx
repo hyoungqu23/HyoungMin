@@ -1,0 +1,206 @@
+---
+title: React Three Fiber
+description: React Three Fiber 공식 문서를 읽어보자
+createdAt: 2024-02-06
+category: React
+tags:
+  - React
+  - TypeScript
+  - React-Three-Fiber
+  - R3F
+  - Three.js
+---
+
+# Introduction
+
+R3F는 `Three.js`를 위한 React 렌더러입니다.
+
+상태에 반응하고 쉽게 상호작용하며 React 생태계에 참여할 수 있는 재사용 가능한 독립형 컴포넌트를 활용해 선언적으로 장면을 생성해보세요.
+
+```bash
+pnpm add three @types/three @react-three/fiber
+```
+
+## 제한이 있나요?
+
+없어요. `Three.js`에서 동작하는 모든 것이 예외없이 R3F에서 동작해요.
+
+## 순수한 `Three.js`보다 느린가요?
+
+아니요. 오버헤드가 없어요. 컴포넌트는 React 외부에서 렌더링돼요. React 스케줄링 기능으로 인해 규모 면에서 `Three.js`보다 성능이 뛰어나요.
+
+## `Three.js`의 빈번한 기능 업데이트를 따라갈 수 있나요?
+
+네. R3F는 단지 JSX로 `Three.js`를 표현할 뿐이에요. `<mesh />`는 동적으로 새로운 `THREE.Mesh()`로 변경돼요. 새로운 `Three.js` 버전이 기능을 추가, 제거, 수정하면, R3F 라이브러리의 업데이트에 의존하지 않고 즉시 활용할 수 있어요.
+
+## Live Example([Link](https://codesandbox.io/s/icy-tree-brnsm?file=/src/App.tsx))
+
+```tsx
+import * as THREE from 'three';
+import { createRoot } from 'react-dom/client';
+import React, { useRef, useState } from 'react';
+import { Canvas, useFrame, ThreeElements } from '@react-three/fiber';
+
+function Box(props: ThreeElements['mesh']) {
+  const meshRef = useRef<THREE.Mesh>(null!);
+  const [hovered, setHover] = useState(false);
+  const [active, setActive] = useState(false);
+  useFrame((state, delta) => (meshRef.current.rotation.x += delta));
+  return (
+    <mesh
+      {...props}
+      ref={meshRef}
+      scale={active ? 1.5 : 1}
+      onClick={event => setActive(!active)}
+      onPointerOver={event => setHover(true)}
+      onPointerOut={event => setHover(false)}
+    >
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color={hovered ? 'hotpink' : 'orange'} />
+    </mesh>
+  );
+}
+
+createRoot(document.getElementById('root')).render(
+  <Canvas>
+    <ambientLight intensity={Math.PI / 2} />
+    <spotLight
+      position={[10, 10, 10]}
+      angle={0.15}
+      penumbra={1}
+      decay={0}
+      intensity={Math.PI}
+    />
+    <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
+    <Box position={[-1.2, 0, 0]} />
+    <Box position={[1.2, 0, 0]} />
+  </Canvas>,
+);
+```
+
+## First Step
+
+R3F에 뛰어들기 전에 React와 `Three.js`에 대해 잘 알고 있어야 해요. React에 대해 잘 모르겠다면 공식 React 문서, 특히 Hooks에 관한 섹션을 참조하세요. `Three.js`에 대해서는 다음 링크들을 확인해보세요.
+
+- `Three.js`에 대한 [기본적인 이해](https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene)가 있는지 확인하세요. `[Three.js` 공식문서](https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene)를 계속 열어 두세요.
+- `scene`, `camera`, `mesh`, `geometry`, `material`이 무엇인지 알았다면 [Live Example](https://codesandbox.io/s/icy-tree-brnsm?file=/src/App.tsx)를 가져오세요.
+- Live Example에서 보이는 JSX 요소(`<mesh />`, `<ambientLight />` 등)를 `[Three.js` 공식문서](https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene)에서 찾아보세요. `Three.js`에서 내보낸 모든 요소는 R3F에서 기본으로 제공돼요.
+- 몇 가지 값을 변경해보고, [R3F 공식문서](https://docs.pmnd.rs/react-three-fiber/getting-started/introduction)를 확인하며 다양한 설정과 Hooks가 어떤 기능을 하는지 살펴보세요.
+
+추가적으로 유용한 자료예요.
+
+- `[Three.js` 공식 문서](https://threejs.org/docs/) 및 [예제](https://threejs.org/examples)
+- [Discover `Three.js` 문서](https://discoverthreejs.com/), 특히 [Tips and Tricks 챕터](https://discoverthreejs.com/tips-and-tricks/)에서 모범 사례를 살펴보세요.
+- 최고의 학습 자료인 [Bruno Simons Threejs Jouney](https://threejs-journey.com/)에 이제 전체 [R3F 챕터](https://threejs-journey.com/lessons/what-are-react-and-react-three-fiber)가 포함되어 있어요.
+
+# **Installation**
+
+```bash
+npm install three @react-three/fiber
+```
+
+> R3F는 React 18버전 이상과 호환되며, ReactDOM과 React Native에서도 동작해요.
+
+## Next.js
+
+R3F는 Next.js에서 즉시 사용 가능하지만, `Three.js` 생태계에서 트랜스파일되지 않은 애드온에 직면하게 될 거에요.
+
+```tsx
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  transpilePackages: ['three'],
+};
+
+module.exports = nextConfig;
+```
+
+이를 해결하기 위해서는 `next.config.js`의 `transpilePackages`에 `three`를 추가해야 해요.
+
+# Your First Scene
+
+이번 가이드는 첫 번째 R3F Scene을 설정하는 데 도움을 주고, R3F의 핵심 컨셉을 소개할 거에요.
+
+## Setting up the Canvas
+
+`<Canvas />` 컴포넌트를 R3F에서 불러와 React 렌더 트리에 추가한다.
+
+```tsx
+import { createRoot } from 'react-dom/client';
+import { Canvas } from '@react-three/fiber';
+
+function App() {
+  return (
+    <div id='canvas-container'>
+      <Canvas />
+    </div>
+  );
+}
+
+createRoot(document.getElementById('root')).render(<App />);
+```
+
+`<Canvas />` 컴포넌트는 Scene 뒤에서 몇 가지 중요한 설정 작업을 수행해요.
+
+- 렌더링에 필요한 기본 구성 요소인 Scene과 Camera를 설정해요.
+- 매 프레임마다 Scene을 렌더링하므로 기존의 렌더 루프가 필요하지 않아요.
+
+<aside>
+💡 Canvas는 부모 Node에 맞게 반응하므로, 부모의 너비와 높이를 변경하여 Canvas의 크기를 제어할 수 있어요.
+
+</aside>
+
+## Adding a Mesh Component
+
+Scene에서 실제로 무언가를 보기 위해서는 `new THREE.Mesh()`와 동일한 `<mesh />` 컴포넌트를 추가해야 한다.
+
+```tsx
+<Canvas>
+  <mesh />
+</Canvas>
+```
+
+Mesh는 `Three.js`에서 기본 Scene 개체로, 3D 공간에서 모양을 표현하는 데 필요한 Geometry, Material을 보관하는 데 사용해요. `BoxGeometry`와 `MeshStandardMaterial`을 활용해서 부모 Node에 자동적으로 첨부되는 새로운 Mesh를 생성할 수 있어요.
+
+```tsx
+<Canvas>
+  <mesh>
+    <boxGeometry />
+    <meshStandardMaterial />
+  </mesh>
+</Canvas>
+```
+
+위 R3F 코드는 아래의 `Three.js` 코드와 동일해요.
+
+```tsx
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(width, height);
+document.querySelector('#canvas-container').appendChild(renderer.domElement);
+
+const mesh = new THREE.Mesh();
+mesh.geometry = new THREE.BoxGeometry();
+mesh.material = new THREE.MeshStandardMaterial();
+
+scene.add(mesh);
+
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+
+animate();
+```
+
+## Adding Lights
+
+다음으로, Scene에 아래 `<ambientLight />`, `<directionalLight />` 컴포넌트를 추가하여 빛을 추가할 수 있어요.
+
+```jsx
+<Canvas>
+  <ambientLight intensity={0.1} />
+  <directionalLight color='red' position={[0, 0, 5]} />
+</Canvas>
+```
