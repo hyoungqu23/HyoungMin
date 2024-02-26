@@ -10,8 +10,14 @@ export class ArticleViewModel {
 
   getPreview = (article: IArticle) => this.adapter.toPreview(article);
 
+  getCategories = () => [
+    ...new Set(this.articles.map(this.adapter.toCategory)),
+  ];
+
   filterByCategory = (filterBy: string) =>
-    this.articles.filter(article => article.category === filterBy);
+    this.articles.filter(
+      article => article.category.toLowerCase() === filterBy,
+    );
 
   filterByRecommendation = () =>
     this.articles.filter(article => article.isRecommended).slice(0, 3);
