@@ -13,4 +13,5 @@ export class ArticleAdapter implements IArticleAdapter {
       alt: article.title,
     },
   });
+  toCategory = (article: IArticle) => article.category.toLowerCase();
 }
