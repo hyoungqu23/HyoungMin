@@ -15,4 +15,5 @@ export interface IArticlePreview
 
 export interface IArticleAdapter {
   toPreview(article: IArticle): IArticlePreview;
+  toCategory(article: IArticle): string;
 }
