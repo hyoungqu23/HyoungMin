@@ -11,6 +11,17 @@ const CategoryPage = ({ params: { category } }: ICategoryPageProps) => {
   const articleService = new ArticleViewModel(new ArticleAdapter());
 
   const categories = articleService.getCategories();
+
+  if (!categories.map(category => category.toLowerCase()).includes(category)) {
+    notFound();
+  }
+
+  const categoryInArticle = categories.find(c => c.toLowerCase() === category);
+
+  if (!categoryInArticle) {
+    notFound();
+  }
+
   const articlesInCategory = articleService.filterByCategory(categoryInArticle);
 
   return (
