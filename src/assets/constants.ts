@@ -24,7 +24,7 @@ export const LINKS = {
   INSTAGRAM: { id: 'instagram', href: 'https://www.instagram.com/hyoungqu23/' },
   LINKEDIN: {
     id: 'linkedin',
-    href: 'https://www.linkedin.com/in/hyoungmin-lee-9b5489196/',
+    href: 'https://www.linkedin.com/in/hyoungmin2',
   },
   GMAIL: { id: 'gmail', href: 'hyoungqu23@gmail.com' },
   CAREERLY: {
@@ -32,6 +32,10 @@ export const LINKS = {
     href: 'https://careerly.co.kr/profiles/147137',
   },
   PORTFOLIO: { id: 'portfolio', href: 'https://hyoungmin.vercel.app/' },
+  KAKAO_TALK_OPEN_CHAT: {
+    id: 'kakao open chat',
+    href: 'https://open.kakao.com/o/szcSNlHe',
+  },
 };
 
 export const COPYRIGHT = `© Copyright ${new Date().getFullYear()} HyoungMin. All rights reserved.`;
