@@ -1,13 +1,13 @@
-import { COPYRIGHT, LINKS } from '@/src/assets/constants';
-import AutoInfiniteSkills from '@/src/components/ui/Footer/AutoInfiniteSkills';
+import { COPYRIGHT, LINKS } from '@shared';
 import Link from 'next/link';
+import AutoInfiniteSkills from './AutoInfiniteSkills';
 
-const Footer = () => {
+export const Footer = () => {
   return (
     <footer className='tablet:h-[25vh] h-[33vh] w-screen overflow-x-hidden px-4 flex flex-col justify-between pb-4'>
       <AutoInfiniteSkills />
       <ul className='flex flex-row flex-wrap justify-end font-medium tablet:gap-x-8 gap-x-3 tablet:text-heading2 text-heading4'>
-        {Object.values(LINKS).map(link => (
+        {Object.values(LINKS).map((link) => (
           <Link
             key={link.id}
             href={link.href}
@@ -23,5 +23,3 @@ const Footer = () => {
     </footer>
   );
 };
-
-export default Footer;
