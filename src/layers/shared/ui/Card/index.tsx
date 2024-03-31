@@ -1,4 +1,4 @@
-import { cls } from '@/src/libs/utils';
+import { cls } from '@/src/layers/shared/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ComponentPropsWithoutRef } from 'react';
@@ -8,7 +8,7 @@ interface ICardProps extends ComponentPropsWithoutRef<'a'> {
   articlePreview: IArticlePreview;
 }
 
-const Card = ({
+export const Card = ({
   articlePreview: {
     category,
     tags,
@@ -69,7 +69,7 @@ const Card = ({
           </p>
         </div>
         <div className='flex gap-1 flex-nowrap whitespace-nowrap'>
-          {tags.map(tag => (
+          {tags.map((tag) => (
             <span key={tag} className='px-1 text-caption1 text-primary-50/50'>
               {tag}
             </span>
@@ -79,5 +79,3 @@ const Card = ({
     </Link>
   );
 };
-
-export default Card;
