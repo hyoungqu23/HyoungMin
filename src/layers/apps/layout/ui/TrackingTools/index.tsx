@@ -1,6 +1,6 @@
 import Script from 'next/script';
 
-const TrackingTools = () => {
+export const TrackingTools = () => {
   return (
     <>
       <Script
@@ -33,5 +33,3 @@ const TrackingTools = () => {
     </>
   );
 };
-
-export default TrackingTools;
