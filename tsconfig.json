@@ -20,6 +20,18 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@apps/*": ["./src/layers/apps/*"],
+      "@pages/*": ["./src/layers/pages/*"],
+      "@widgets/*": ["./src/layers/widgets/*"],
+      "@features/*": ["./src/layers/features/*"],
+      "@entities/*": ["./src/layers/entities/*"],
+      "@shared/*": ["./src/layers/shared/*"],
+      "@apps": ["./src/layers/apps/index.ts"],
+      "@pages": ["./src/layers/pages/index.ts"],
+      "@widgets": ["./src/layers/widgets/index.ts"],
+      "@features": ["./src/layers/features/index.ts"],
+      "@entities": ["./src/layers/entities/index.ts"],
+      "@shared": ["./src/layers/shared/index.ts"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
