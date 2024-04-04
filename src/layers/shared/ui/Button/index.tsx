@@ -1,4 +1,4 @@
-import { cls } from '@/src/layers/shared/lib/utils';
+import { cls } from '@shared';
 import type { ComponentPropsWithoutRef } from 'react';
 
 interface IButtonProps extends ComponentPropsWithoutRef<'button'> {
