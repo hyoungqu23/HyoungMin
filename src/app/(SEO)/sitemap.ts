@@ -1,4 +1,4 @@
-import { BASE_URL } from '@/src/assets/constants';
+import { BASE_URL } from '@shared';
 import { allArticles } from '@contentlayer';
 import type { MetadataRoute } from 'next';
 
