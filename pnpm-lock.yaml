@@ -58,7 +58,9 @@ devDependencies:
   eslint-config-next:
     specifier: 14.0.0
     version: 14.0.0(eslint@8.57.0)(typescript@5.4.3)
-    version: 14.0.0(eslint@8.52.0)(typescript@5.2.2)
+  gray-matter:
+    specifier: ^4.0.3
+    version: 4.0.3
   postcss:
     specifier: ^8
     version: 8.4.38
@@ -1690,7 +1692,7 @@ packages:
       kind-of: 6.0.3
       section-matter: 1.0.0
       strip-bom-string: 1.0.0
-    dev: false
+    dev: true
 
   /has-bigints@1.0.2:
     resolution: {integrity: sha512-tSvCKtBr9lkF0Ex0aQiP9N+OpV4zi2r/Nee5VkRDbaqv35RLYMzbwQfFSZZH0kR+Rd6302UJZ2p/bJCEoR3VoQ==}
