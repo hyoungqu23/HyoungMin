@@ -1,4 +1,4 @@
-import { INFORMATION, SKILLS } from '@/src/layers/shared/asset/constants';
+import { INFORMATION, SKILLS } from '@shared';
 
 const INFINITE_CAROUSEL_ITEMS = INFORMATION.concat(SKILLS);
 
