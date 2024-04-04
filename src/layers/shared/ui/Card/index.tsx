@@ -1,11 +1,18 @@
-import { cls } from '@/src/layers/shared/lib/utils';
+import { cls } from '@shared';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ComponentPropsWithoutRef } from 'react';
-import { IArticlePreview } from '@/src/services/articles/model';
 
 interface ICardProps extends ComponentPropsWithoutRef<'a'> {
-  articlePreview: IArticlePreview;
+  articlePreview: {
+    category: string;
+    tags: Array<string>;
+    thumbnail: { src: string; alt: string };
+    title: string;
+    description: string;
+    createdAt: string;
+    slug: string;
+  };
 }
 
 export const Card = ({
