@@ -42,3 +42,8 @@ export const LINKS = {
 };
 
 export const COPYRIGHT = `© Copyright ${new Date().getFullYear()} HyoungMin. All rights reserved.`;
+
+export const CONTENTS_PATH_MAP = {
+  ROOT: 'contents',
+  ARTICLES: 'articles',
+};
