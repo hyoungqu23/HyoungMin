@@ -36,4 +36,9 @@ export const articleService: TArticleService = {
 
     return articleService._parse(articleFile).data;
   },
+  getContent: (slug) => {
+    const articleFile = articleService._get(slug);
+
+    return articleService._parse(articleFile).content;
+  },
 };
