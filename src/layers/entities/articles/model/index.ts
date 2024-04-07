@@ -6,6 +6,7 @@ import {
 import fs from 'fs';
 import matter from 'gray-matter';
 import path from 'path';
+import { _calculateReadingTimePerMinute } from '../lib/utils';
 
 type TArticleService = {
   _parse: (file: string) => { data: TMetadata; content: string };
@@ -40,5 +41,8 @@ export const articleService: TArticleService = {
     const articleFile = articleService._get(slug);
 
     return articleService._parse(articleFile).content;
+  },
+  getReadingTime: (article: string) => {
+    return _calculateReadingTimePerMinute(article);
   },
 };
