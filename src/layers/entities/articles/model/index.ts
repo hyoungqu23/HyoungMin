@@ -31,4 +31,9 @@ export const articleService: TArticleService = {
 
     return fs.readFileSync(articlePath, 'utf-8');
   },
+  getPreview: (slug) => {
+    const articleFile = articleService._get(slug);
+
+    return articleService._parse(articleFile).data;
+  },
 };
