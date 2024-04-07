@@ -9,6 +9,13 @@ export type TBaseErrorProps = {
   reset: () => void;
 };
 
+export type TMetadata = {
+  title: string;
+  createdAt: string;
+  category: string;
+  tags: Array<string>;
+};
+
 declare module 'gray-matter' {
   function matter<
     D,
