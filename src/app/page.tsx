@@ -1,9 +1,7 @@
-import Card from '@/src/components/ui/Card';
-import { ArticleAdapter } from '@/src/services/articles/adapter';
-import { ArticleViewModel } from '@/src/services/articles/viewModel';
+// import Card from '@/src/layers/shared/ui/Card';
 
 const HomePage = () => {
-  const articleService = new ArticleViewModel(new ArticleAdapter());
+  // const articleService = new ArticleViewModel(new ArticleAdapter());
 
   return (
     <section className='flex flex-col items-center w-full px-8 py-10 gap-y-20'>
@@ -21,7 +19,7 @@ const HomePage = () => {
       </section>
 
       {/* Recommended Articles */}
-      <section className='flex flex-col items-center justify-center'>
+      {/* <section className='flex flex-col items-center justify-center'>
         <h3 className='font-bold text-heading4 tablet:text-heading2'>
           Recommended
         </h3>
@@ -33,10 +31,10 @@ const HomePage = () => {
             />
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* Recent Articles */}
-      <section className='flex flex-col items-center justify-center'>
+      {/* <section className='flex flex-col items-center justify-center'>
         <h3 className='font-bold text-heading4 tablet:text-heading2'>Recent</h3>
         <div className='flex flex-wrap justify-center w-full gap-8'>
           {articleService.filterByRecentCreated().map(article => (
@@ -46,7 +44,7 @@ const HomePage = () => {
             />
           ))}
         </div>
-      </section>
+      </section> */}
     </section>
   );
 };
