@@ -1,8 +1,5 @@
-import { BASE_URL, LINKS, NAVIGATION_ITEMS } from '@/src/assets/constants';
-import { getRandomColor } from '@/src/libs/utils';
-import { allArticles } from '@contentlayer';
-import { useMDXComponent } from 'next-contentlayer/hooks';
-import Image from 'next/image';
+import { articleService, articlesService } from '@entities';
+import { BASE_URL, LINKS, NAVIGATION_ITEMS } from '@shared';
 import { notFound } from 'next/navigation';
 
 interface IArticlePageProps {
@@ -10,13 +7,14 @@ interface IArticlePageProps {
 }
 
 export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
-  const article = allArticles.find((article) => article.slugAsParams === slug);
+  const previewOfArticle = articleService.getPreview(slug);
+  const contentOfArticle = articleService.getContent(slug);
 
   return {
     metadataBase: new URL(BASE_URL),
-    title: article?.title,
-    description: article?.description,
-    keywords: article?.tags,
+    title: previewOfArticle.title,
+    description: contentOfArticle.slice(0, 100),
+    keywords: previewOfArticle.tags,
     authors: [{ name: 'HyoungMin', url: LINKS.GITHUB.href }],
     robots: {
       index: true,
@@ -32,11 +30,11 @@ export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
       },
     },
     openGraph: {
-      title: article?.title,
-      description: article?.description,
+      title: previewOfArticle.title,
+      description: contentOfArticle.slice(0, 100),
       images: [
         {
-          url: article?.thumbnail ?? '/images/web/hero_background.png',
+          url: previewOfArticle.thumbnail ?? '/images/web/hero_background.png',
           width: 1200,
           height: 630,
         },
@@ -47,27 +45,28 @@ export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
       url: new URL(`${BASE_URL}/${NAVIGATION_ITEMS.ARTICLES.id}/${slug}`),
     },
     twitter: {
-      title: article?.title,
-      description: article?.description,
+      title: previewOfArticle.title,
+      description: contentOfArticle.slice(0, 100),
       url: new URL(`${BASE_URL}/${NAVIGATION_ITEMS.ARTICLES.id}/${slug}`),
       images: {
-        url: article?.thumbnail ?? '/images/web/hero_background.png',
-        alt: `${article?.title} Thumbnail`,
+        url: previewOfArticle.thumbnail ?? '/images/web/hero_background.png',
+        alt: `${previewOfArticle.title} Thumbnail`,
       },
     },
   };
 };
 
 const ArticlePage = ({ params: { slug } }: IArticlePageProps) => {
-  const article = allArticles.find((article) => article.slugAsParams === slug);
+  const previewOfArticle = articleService.getPreview(slug);
+  const contentOfArticle = articleService.getContent(slug);
 
-  if (!article) notFound();
-
-  const MDXContent = useMDXComponent(article.body.code);
+  if (!previewOfArticle || !contentOfArticle) {
+    notFound();
+  }
 
   return (
     <section className='flex flex-col px-4 pt-10 pb-40 items-center'>
-      <>
+      {/* <>
         {article.thumbnail ? (
           <Image
             src={article.thumbnail}
@@ -93,7 +92,7 @@ const ArticlePage = ({ params: { slug } }: IArticlePageProps) => {
       <div className='w-full h-0.5 bg-primary-500 my-4' />
       <article className='prose prose-primary max-w-3xl'>
         <MDXContent />
-      </article>
+      </article> */}
     </section>
   );
 };
@@ -101,9 +100,5 @@ const ArticlePage = ({ params: { slug } }: IArticlePageProps) => {
 export default ArticlePage;
 
 export const generateStaticParams = async () => {
-  return allArticles.map((article) => {
-    return {
-      slug: article._raw.flattenedPath,
-    };
-  });
+  return articlesService.get().map((article) => article.slug);
 };
