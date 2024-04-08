@@ -9,6 +9,11 @@ export type TBaseErrorProps = {
   reset: () => void;
 };
 
+export type TImageProps = {
+  src: string;
+  alt: string;
+};
+
 export type TMetadata = {
   title: string;
   createdAt: string;
