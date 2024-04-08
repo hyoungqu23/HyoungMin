@@ -1,15 +1,10 @@
+import { Footer, Header, TrackingTools } from '@apps';
+import { BASE_URL, LINKS, cls, type TLayoutProps } from '@shared';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import localFont from 'next/font/local';
 
-import { BASE_URL, LINKS } from '@/src/assets/constants';
-import TrackingTools from '@/src/components/common/TrackingTools';
-import Footer from '@/src/components/ui/Footer';
-import Header from '@/src/components/ui/Header';
-import { ILayoutProps } from '@/src/interfaces';
-import { cls } from '@/src/libs/utils';
-
-import '@/src/styles/globals.css';
+import '@apps/styles/globals.css';
 
 const Pretendard = localFont({
   src: [
@@ -112,18 +107,18 @@ export const generateMetadata = () => {
   };
 };
 
-const RootLayout = ({ children }: ILayoutProps) => {
+const RootLayout = ({ children }: TLayoutProps) => {
   return (
     <html lang='ko'>
       <TrackingTools />
       <body
         className={cls(
           Pretendard.className,
-          'relative bg-secondary-500 text-primary-50 w-screen flex flex-col min-h-screen overflow-x-hidden',
+          'relative bg-secondary-500 text-primary-50 w-screen flex flex-col items-center min-h-screen overflow-x-hidden',
         )}
       >
         <Header />
-        <main role='main' className='flex flex-col flex-1 gap-4 tablet:gap-10'>
+        <main role='main' className='max-w-[1024px] flex-1'>
           {children}
         </main>
         <Footer />
