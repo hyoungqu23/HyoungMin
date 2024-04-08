@@ -14,6 +14,7 @@ export type TMetadata = {
   createdAt: string;
   category: string;
   tags: Array<string>;
+  thumbnail: string;
 };
 
 declare module 'gray-matter' {
