@@ -11,9 +11,9 @@ import type { TArticleService } from '../model';
 
 export const articleService: TArticleService = {
   _parse: (articleFile) => {
-    const { data, content } = matter<TMetadata, string, {}>(articleFile);
+    const { data, content } = matter(articleFile);
 
-    return { data, content };
+    return { data: data as TMetadata, content };
   },
   _get: (slug) => {
     const articlePath = path.join(
