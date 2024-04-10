@@ -34,7 +34,8 @@ export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
       description: contentOfArticle.slice(0, 100),
       images: [
         {
-          url: previewOfArticle.thumbnail ?? '/images/web/hero_background.png',
+          url:
+            previewOfArticle.thumbnail.src ?? '/images/web/hero_background.png',
           width: 1200,
           height: 630,
         },
@@ -49,7 +50,8 @@ export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
       description: contentOfArticle.slice(0, 100),
       url: new URL(`${BASE_URL}/${NAVIGATION_ITEMS.ARTICLES.id}/${slug}`),
       images: {
-        url: previewOfArticle.thumbnail ?? '/images/web/hero_background.png',
+        url:
+          previewOfArticle.thumbnail.src ?? '/images/web/hero_background.png',
         alt: `${previewOfArticle.title} Thumbnail`,
       },
     },
@@ -99,6 +101,6 @@ const ArticlePage = ({ params: { slug } }: IArticlePageProps) => {
 
 export default ArticlePage;
 
-export const generateStaticParams = async () => {
-  return articlesService.get().map((article) => article.slug);
+export const generateStaticParams = () => {
+  return articlesService.get().map((article) => ({ slug: article.slug }));
 };
