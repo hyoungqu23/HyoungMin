@@ -14,7 +14,9 @@ export const articlesService: TArticlesService = {
 
     const slugOfArticles = fs.readdirSync(articlesPath);
 
-    return slugOfArticles.map((slug) => articleService.getPreview(slug));
+    return slugOfArticles.map((slug) =>
+      articleService.getPreview(slug.replace('.mdx', '')),
+    );
   },
   filter: (filterBy) => {
     const articles = articlesService.get();
