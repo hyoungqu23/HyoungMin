@@ -7,10 +7,10 @@ const config: Config = {
   ],
   theme: {
     screens: {
-      mobile: '640px',
-      tablet: '768px',
-      laptop: '1280px',
-      desktop: '1920px',
+      minimum: '375px',
+      tablet: '640px',
+      desktop: '1280px',
+      maximum: '1920px',
     },
     extend: {
       colors: {
