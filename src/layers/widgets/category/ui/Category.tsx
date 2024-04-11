@@ -15,7 +15,7 @@ export const Category = ({ category }: ICategoryProps) => {
   return (
     <li
       className={cls(
-        'w-fit h-full flex items-center justify-center px-4 py-3 rounded-md',
+        'w-fit h-full flex items-center justify-center px-1 py-0.5 tablet:px-4 tablet:py-3 rounded-md',
         isInCategory(pathname, category.toLowerCase())
           ? 'border-2 border-white'
           : 'opacity-50',
