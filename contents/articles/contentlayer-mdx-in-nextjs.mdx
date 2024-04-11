@@ -1,0 +1,323 @@
+---
+title: Contentlayer를 활용해 MDX를 Next.js에서 렌더링하기
+description: Contentlayer를 활용한 MDX 파일 렌더링
+createdAt: 2024-03-03
+category: Next.js
+tags:
+  - Next.js
+  - MDX
+  - Markdown
+  - Side Project
+  - React
+  - Contentlayer
+  - 사이드 프로젝트
+  - 블로그
+  - 개발 블로그
+---
+
+# 개요
+
+Contentlayer는 블로그의 컨텐츠를 활용하기 위해 두 번째로 선택한 기술이다. 이전 글에서 확인할 수 있듯이, Notion API를 먼저 활용했었으나, 다음과 같은 이유로 Contentlayer로 마이그레이션하게 되었다.
+
+- 이미지 만료 기한이 1시간으로 고정되어, 강제로 ISR을 적용해야 했던 점
+- Notion API의 응답 데이터가 JSON 형태라 각 블록 타입에 대해 각각 렌더링할 컴포넌트를 지정해주어야 하는 점.
+
+이와 달리 Contentlayer는 Markdown을 활용하기 때문에 보다 쉽게 렌더링할 수 있고, 이미지 또한 프로젝트 Public에 추가하여 활용할 수 있다는 점이 매우 만족스러워서 선택하게 되었다. 컨텐츠 데이터 스키마를 설정하는 경우 별도로 TypeScript의 인터페이스를 설정하지 않아도 된다는 점이 개발 생산성을 향상시킬 수 있다는 점 또한 Contentlayer 도입을 결정한 이유 중 하나이다.
+
+Contentlayer의 공식 문서에 따르면 웹 애플리케이션의 코드는 주로 Next.js, Gatsby.js와 같은 프론트엔드 프레임워크를 활용해 작성되고, 컨텐츠는 경우 Headless CMS인 Contentful, Sanity 등이나 로컬에 저장된다. 이때, Contentlayer는 컨텐츠와 코드 사이에 위치하여 주로 로컬에 저장된 컨텐츠 데이터를 웹 애플리케이션의 코드에 활용될 수 있는 데이터로 변환하는 작업을 하는데, 이를 위해 컨텐츠의 스키마를 우선 작성하게 된다.
+
+# Contentlayer 설정
+
+우선, Contentlayer와 Next.js 플러그인을 설치해야 한다.
+
+```bash
+npm install contentlayer next-contentlayer
+```
+
+패키지를 설치한 후에는 Next.js의 Configuration 파일에서 Next.js Contentlayer 플러그인의 `withContentlayer`으로 감싸주어야 적용된다.
+
+```tsx
+// next.config.js
+
+const { withContentlayer } = require('next-contentlayer');
+
+/** @type {import('next').NextConfig} */
+
+const nextConfig = { swcMinify: true };
+
+module.exports = withContentlayer(nextConfig);
+```
+
+추가적으로 TypeScript Configuration 파일에 Contentlayer를 위한 `path`를 설정하고, TypeScript에 포함시켜주어야 한다.
+
+```json
+// tsconfig.json
+
+{
+  "compilerOptions": {
+    ...
+    "baseUrl": ".",
+    "paths": {
+      "@contentlayer": ["./.contentlayer/generated"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".contentlayer/generated"
+  ],
+}
+```
+
+이렇게 기본적인 설정을 마무리해주면 이제 컨텐츠의 데이터 스키마를 설정해주어야 한다. 먼저 다음과 같이 문서의 타입을 정의해야 한다. 이렇게 설정된 문서 타입은 자동으로 웹 애플리케이션에서 활용되는 코드 내에서 TypeScript의 타입을 생성해주기 때문에 추가적인 인터페이스 작성 과정이 불필요해진다.
+
+```tsx
+// contentlayer.config.ts
+
+import { defineDocumentType } from 'contentlayer/source-files';
+
+export const Article = defineDocumentType(() => ({
+  name: 'Article',
+  filePathPattern: `articles/**/*.mdx`,
+  contentType: 'mdx',
+  fields: {
+    title: {
+      type: 'string',
+      required: true,
+    },
+    description: {
+      type: 'string',
+    },
+    createdAt: {
+      type: 'date',
+      required: true,
+    },
+    category: {
+      type: 'string',
+      required: true,
+    },
+    tags: {
+      type: 'list',
+      of: { type: 'string' },
+      required: true,
+    },
+    thumbnail: {
+      type: 'string',
+      required: false,
+    },
+    isRecommended: {
+      type: 'boolean',
+      required: false,
+      default: false,
+    },
+  },
+  computedFields: {
+    slug: {
+      type: 'string',
+      resolve: (doc) => `/${doc._raw.flattenedPath}`,
+    },
+    slugAsParams: {
+      type: 'string',
+      resolve: (doc) => doc._raw.flattenedPath.split('/').slice(1).join('/'),
+    },
+  },
+}));
+```
+
+이렇게 설정한 컨텐츠의 데이터 스키마를 기반으로, 실제 컨텐츠의 데이터를 코드에 적용할 데이터로 변환할 수 있다. 다음 Configuration 설정은 프로젝트 Root에 존재하는 `contents` 디렉토리에서 미리 설정한 `Article` 데이터 스키마를 활용해 코드에 데이터로 변환할 수 있다.
+
+```tsx
+import { makeSource } from 'contentlayer/source-files';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypePrettyCode from 'rehype-pretty-code';
+import rehypeSlug from 'rehype-slug';
+import remarkGfm from 'remark-gfm';
+import rehypeExternalLinks from 'rehype-external-links';
+
+export default makeSource({
+  contentDirPath: './contents',
+  documentTypes: [Article],
+  mdx: {
+    remarkPlugins: [remarkGfm],
+    rehypePlugins: [
+      rehypeSlug,
+      [
+        rehypePrettyCode,
+        {
+          theme: 'one-dark-pro',
+          defaultLang: 'typescript',
+        },
+      ],
+      [
+        rehypeExternalLinks,
+        {
+          target: ['_blank'],
+          rel: ['noreferrer noopener'],
+        },
+      ],
+      [
+        rehypeAutolinkHeadings,
+        {
+          properties: {
+            className: ['subheading-anchor'],
+            ariaLabel: 'Link to section',
+          },
+        },
+      ],
+    ],
+  },
+});
+```
+
+추가적으로 여러 플러그인(`rehype-autolink-headings`, `rehype-pretty-code`, `rehype-slug`, `remark-gfm`, `rehype-external-links`)을 활용해 외부 링크 활용, 코드 블록 스타일 등을 함께 추가 설정할 수 있다.
+
+# 컨텐츠 Markdown 작성
+
+이제 `content` 디렉토리에 컨텐츠 Markdown을 추가하면 된다.
+
+```markdown
+---
+title: Contentlayer 활용하기
+description: Next.js에서 Contentlayer를 통해 Markdown 파일 렌더링하기
+createdAt: 2023-12-23
+category: Next.js
+tags:
+  - React
+  - TypeScript
+  - Next.js
+  - Tailwind CSS
+  - Contentlayer
+---
+
+# 개요
+
+...
+```
+
+# Markdown 컨텐츠 렌더링
+
+URL Params에 포함된 `slug`와 `allArticles` 배열을 활용해 해당 페이지에 맞는 컨텐츠 데이터를 찾고, 이를 `useMDXComponent` 훅을 활용해 렌더링할 수 있는 코드로 변환하여 React 생태계로 컨텐츠 데이터를 추가할 수 있다.
+
+```tsx
+import { getRandomColor } from '@/src/libs/utils';
+import { allArticles } from '@contentlayer';
+import { useMDXComponent } from 'next-contentlayer/hooks';
+import Image from 'next/image';
+import { notFound } from 'next/navigation';
+
+interface IArticlePageProps {
+  params: { slug: string };
+}
+
+const ArticlePage = ({ params: { slug } }: IArticlePageProps) => {
+  const article = allArticles.find((article) => article.slugAsParams === slug);
+
+  if (!article) notFound();
+
+  const MDXContent = useMDXComponent(article.body.code);
+
+  return (
+    <section className='flex flex-col px-4 pt-10 pb-40 items-center'>
+      <>
+        {article.thumbnail ? (
+          <Image
+            src={article.thumbnail}
+            alt={article.title}
+            width={400}
+            height={300}
+            className='object-contain'
+          />
+        ) : null}
+      </>
+      <h1 className='text-display2 font-extrabold'>{article.title}</h1>
+      <p>{article.description}</p>
+      <p>{new Date(article.createdAt).toLocaleDateString()}</p>
+      <p>{article.category}</p>
+
+      <ul className='flex gap-1'>
+        {article.tags.map((tag) => (
+          <span key={tag} style={{ color: getRandomColor() }}>
+            {tag}
+          </span>
+        ))}
+      </ul>
+      <div className='w-full h-0.5 bg-primary-500 my-4' />
+      <article className='prose prose-primary max-w-3xl'>
+        <MDXContent />
+      </article>
+    </section>
+  );
+};
+
+export default ArticlePage;
+```
+
+```tsx
+import { BASE_URL, LINKS, NAVIGATION_ITEMS } from '@/src/assets/constants';
+import { allArticles } from '@contentlayer';
+
+interface IArticlePageProps {
+  params: { slug: string };
+}
+
+export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
+  const article = allArticles.find((article) => article.slugAsParams === slug);
+
+  return {
+    metadataBase: new URL(BASE_URL),
+    title: article?.title,
+    description: article?.description,
+    keywords: article?.tags,
+    authors: [{ name: 'HyoungMin', url: LINKS.GITHUB.href }],
+    robots: {
+      index: true,
+      follow: true,
+      nocache: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        noimageindex: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    openGraph: {
+      title: article?.title,
+      description: article?.description,
+      images: [
+        {
+          url: article?.thumbnail ?? '/images/web/hero_background.png',
+          width: 1200,
+          height: 630,
+        },
+      ],
+      siteName: 'HyoungMin Tech Blog',
+      locale: 'ko',
+      type: 'website',
+      url: new URL(`${BASE_URL}/${NAVIGATION_ITEMS.ARTICLES.id}/${slug}`),
+    },
+    twitter: {
+      title: article?.title,
+      description: article?.description,
+      url: new URL(`${BASE_URL}/${NAVIGATION_ITEMS.ARTICLES.id}/${slug}`),
+      images: {
+        url: article?.thumbnail ?? '/images/web/hero_background.png',
+        alt: `${article?.title} Thumbnail`,
+      },
+    },
+  };
+};
+
+export const generateStaticParams = async () => {
+  return allArticles.map((article) => {
+    return {
+      slug: article._raw.flattenedPath,
+    };
+  });
+};
+```
+
+이외에도, SSG 렌더링 방식을 활용하기 위해 `generateStaticParams` 메서드를 활용할 수 있고, 해당 페이지의 SEO을 개선하기 위해 Next.js v13 이후 추가된 Metadata 타입의 `metadata`를 설정할 수도 있다.
