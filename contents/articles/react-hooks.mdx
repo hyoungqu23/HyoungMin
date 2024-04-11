@@ -1,7 +1,7 @@
 ---
 title: React Hooks 기초
 description: React의 Hooks은 무엇이고, 대표적인 Hooks를 알아보자
-createdAt: 2022-06-10
+createdAt: 2022-06-28
 category: React
 tags:
   - React
@@ -96,6 +96,7 @@ Function Component 내부에서 Side Effect를 수행하는 Hook.
 - Component가 최초로 렌더링될 때, 지정한 State나 Props가 변경될 때 등 다양한 경우에 `effectCallback` 함수가 호출된다.
 - Deps가 빈 배열`[]`이라면, Component 최초 생성 시 한번만 실행하는 효과를 지정하는 것이다.
 - useEffect Hook 내에서 다른 함수를 반환하는 것은 `state` 값이 변경되어 Component가 다시 렌더링되기 전과 Component가 없어질 때 호출할 함수를 반환하는 것이다.
+
   ```jsx
   const App = () => {
   	useEffect(() => {
