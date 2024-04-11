@@ -1,0 +1,127 @@
+---
+title: 무한 스크롤 캐러셀 제작기
+description: 자동으로 흐르는 캐러셀을 만들어보자
+createdAt: 2024-01-29
+category: React
+tags:
+  - Next.js
+  - React
+  - Animation
+  - marquee
+  - 무한 스크롤 캐러셀
+---
+
+# 시작
+
+요구사항 중 하나로, 무한히 흐르는 캐러셀을 구현해달라는 요청이 있었다. 주로 업무적으로 웹 페이지 작업을 할 때는 8시간 이내로 **개발 → 테스트 → 배포 → 이슈 트래킹**까지 마무리하기 위해 애니메이션을 최대한 지양하고 있었지만, 해당 부분은 필요한 부분이기 때문에 2 ~ 3시간 가량을 더 투입하여 애니메이션을 처리하고자 했다.
+
+참고 사례를 개발자 도구로 열어보던 와중에 애플 엔터테인먼트 페이지에 `marquee`라는 키워드가 존재하는 것을 확인했다. 이를 구글링해보니, 이미 deprecated된 태그 중 하나로, 텍스트의 스크롤 영역을 삽입하는 태그로 현재 구현하고자 하는 캐러셀 애니메이션과 비슷한 유형임을 알게 되었고, 또한 [codepen](https://codepen.io/tag/marquee)에 이를 만들고자 한 수많은 예제가 존재하고 있음을 파악했다.
+
+쉽게 마무리될 것으로 보여 예제들을 분석하고 빠르게 구현하기 시작했다.
+
+# 예제 분석
+
+대부분의 예제의 경우, 동일한 형태로 구현되어 있었다.
+
+- 이미지 혹은 텍스트 목록을 감싸는 Flexbox
+  - 해당 Flexbox는 복제되어 동일한 Flexbox가 하나 더 있다.
+- 위 두 개의 Flexbox를 감싸는 Container Section
+- 해당 Container를 감싸는 최종 Container Section
+
+Container Section를 `position: absolute;`로 처리하고, 애니메이션에서 `left` 값을 `0`에서 `-100%`로 주거나, 아니면 그냥 `transformX` 값을 `0`에서 `-100%`로 처리하는 두 가지 애니메이션을 활용하게 된다.
+
+# 실제 구현
+
+우선 이미지 배열을 만들고 해당 이미지를 목록화하여 Flexbox를 생성하고, 이를 복제한다.
+
+```tsx
+const IMAGES = [
+  { src: '/images/example_01.webp', alt: 'example 01 image' },
+  { src: '/images/example_02.webp', alt: 'example 02 image' },
+  { src: '/images/example_03.webp', alt: 'example 03 image' },
+  { src: '/images/example_04.webp', alt: 'example 04 image' },
+  { src: '/images/example_05.webp', alt: 'example 05 image' },
+];
+
+const Marquee = () => {
+  return (
+    <section>
+      <div classname='flex gap-8 w-fit'>
+        {IMAGES.map((image) => (
+          <Image
+            key={image.alt}
+            src={image.src}
+            alt={image.alt}
+            width={400}
+            height={300}
+          />
+        ))}
+      </div>
+      <div classname='flex gap-8 w-fit'>
+        {IMAGES.map((image) => (
+          <Image
+            key={image.alt}
+            src={image.src}
+            alt={image.alt}
+            width={400}
+            height={300}
+          />
+        ))}
+      </div>
+    </section>
+  );
+};
+```
+
+이렇게 하면 중복된 두 이미지 배열이 존재하는데, 이때 복제된 두 배열을 감싸는 Container Section을 정확히 `x`축 기준으로 `-100%` 이동시키는 애니메이션을 추가하면, 복제된 두 번째 배열로 인해서 연속적으로 흐르는 것처럼 보이게 된다.
+
+만약 복제된 두 번째 배열이 없는 경우에는, 다음과 같이 연결된 이미지가 무한으로 흐르는 것이 아니라, 흐를수록 빈 화면이 나오게 된다.
+
+이때 가장 중요한 점은, Container Section의 width는 자연스러운 애니메이션 연결을 위해 복제된 두 Flexbox와 그 사이 Gap을 포함한 값이 되어야 한다. 따라서 다음과 같이 처리할 수 있다.
+
+```tsx
+const IMAGES = [
+  { src: '/images/example_01.webp', alt: 'example 01 image' },
+  { src: '/images/example_02.webp', alt: 'example 02 image' },
+  { src: '/images/example_03.webp', alt: 'example 03 image' },
+  { src: '/images/example_04.webp', alt: 'example 04 image' },
+  { src: '/images/example_05.webp', alt: 'example 05 image' },
+];
+
+const Marquee = () => {
+  return (
+    <section className='relative w-[2340px] h-[350px] overflow-x-hidden py-10 mx-auto'>
+      <section className='absolute w-[200%] flex gap-8 animate-infinite-scroll'>
+        <div className='flex gap-8 w-fit'>
+          {IMAGES.map((image) => (
+            <Image
+              key={image.alt}
+              src={image.src}
+              alt={image.alt}
+              width={400}
+              height={300}
+            />
+          ))}
+        </div>
+        <div classname='flex gap-8 w-fit'>
+          {IMAGES.map((image) => (
+            <Image
+              key={image.alt}
+              src={image.src}
+              alt={image.alt}
+              width={400}
+              height={300}
+            />
+          ))}
+        </div>
+      </section>
+    </section>
+  );
+};
+```
+
+# 참고 사례
+
+- [채널톡 홈페이지의 고객 사례 섹션](https://channel.io/ko)
+- [애플 엔터테인먼트 페이지](https://www.apple.com/kr/services/)
+- [marquee 태그](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/marquee)
