@@ -25,7 +25,8 @@ export const articlesService: TArticlesService = {
     const articles = articlesService.get();
 
     return articles.filter(
-      (article) => article.category.toLowerCase() === filterBy,
+      (article) =>
+        article.category.toLowerCase().replaceAll('.', '') === filterBy,
     );
   },
 };
