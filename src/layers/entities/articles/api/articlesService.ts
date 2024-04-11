@@ -21,6 +21,8 @@ export const articlesService: TArticlesService = {
   filter: (filterBy) => {
     const articles = articlesService.get();
 
-    return articles.filter((article) => article.category === filterBy);
+    return articles.filter(
+      (article) => article.category.toLowerCase() === filterBy,
+    );
   },
 };
