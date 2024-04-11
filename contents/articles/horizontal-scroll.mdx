@@ -1,0 +1,110 @@
+---
+title: 수평 스크롤 애니메이션 제작기
+description: 스크롤을 내릴 때 수평으로 스크롤되는 캐러셀을 만들어보자
+createdAt: 2023-11-15
+category: React
+tags:
+  - React
+  - Animation
+  - Horizontal Scroll
+  - 수평 스크롤 캐러셀
+---
+
+# Horizontal Carousel
+
+## with Overflow in CSS
+
+https://alvarotrigo.com/blog/css-snap-scroll-horizontally/
+
+```tsx
+<section className='flex items-center justify-start w-full min-h-screen gap-3 overflow-x-scroll text-5xl bg-gray-200 flex-nowrap'>
+  {Array(10)
+    .fill(1)
+    .map((n, i) => n + i)
+    .map((n) => (
+      <div
+        key={n}
+        className='w-[250px] h-[250px] border-2 rounded-xl aspect-square flex items-center justify-center text-3xl'
+      >
+        {n}
+      </div>
+    ))}
+</section>
+```
+
+아마 나에게 가장 간단한 수평 스크롤되는 캐러셀을 구현해달라고 한다면 다음과 같이 CSS의 `overflow-x` 속성의 값을 `scroll` 또는 `auto`로 부여하여 구현할 것이다. 굳이 SwiperJS와 같은 라이브러리를 활용하거나, 직접 TypeScript로 구현하는 것보다 CSS로 처리하는 것이 개발 리소스 측면에서 효율적이라고 판단되기 때문이다.
+
+하지만 이는 기획자나 디자이너의 의도를 반영하지 못할 가능성이 높다. 보통 캐러셀을 사용하는 이유는 해당 섹션의 컨텐츠(이미지 등)이 많아 페이지가 너무 길어지지 않게 하여 이탈을 방지하기 위해서라고 생각된다.
+
+즉, CSS의 Overflow 속성만을 활용한 수평 캐러셀은 사실상 캐러셀이 아니라 그냥 단순한 스크롤일 뿐이기에 사용자가 해당 페이지를 스크롤하는 과정에서 기본 동작인 스크롤링이 아닌 다른 동작을 해야한다는 문제가 있으며, 아무런 제약이 없기 때문에 한 번에 모든 스크롤을 넘겨버릴 수 있어 컨텐츠를 보게 한다는 목적에 부합하지 않는다.
+
+## with Scroll-\* in CSS
+
+https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Scroll_Snap/Basic_concepts
+
+그렇다면, CSS의 Scroll-\* 속성을 활용하여 사용자의 스크롤을 제어하면 어떨까?
+
+이 방식도 단순히 CSS로만 구현하기 때문에, 다른 라이브러리를 활용하지 않아도 된다. 추가적으로 CSS의 Overflow 속성만을 활용하는 방식과 달리 사용자에 따라 달라지는 스크롤 위치를 특정 컨테이너 박스에서 제어할 수 있으므로, 기획자와 디자이너의 의도를 반영하고 사용자로 하여금 해당 컨텐츠를 보게 한다는 목적을 달성할 수 있다.
+
+```tsx
+
+```
+
+다만 여전히 UX 관점에서는 사용자가 스크롤링 중 다른 동작을 해야한다는 점은 변함이 없으며, 오히려 트랙패드 등을 통해 수평 스크롤을 진행하는 경우 크게 제어되지 않는 문제도 존재한다. 특히, scroll-snap-stop 속성의 경우 트랙패드로 빠르게 스크롤하는 경우 무시되며, iOS 버전 15 이상부터 모바일 safari에서 지원한다는 한계점도 존재한다.
+
+https://caniuse.com/?search=scroll-snap-stop
+
+https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-snap-stop
+
+## with Framer Motion
+
+https://www.hover.dev/components/carousels
+
+https://www.framer.com/motion/use-scroll/
+
+https://www.framer.com/motion/use-transform/
+
+https://github.com/hyoungqu23/animations/blob/main/src/components/ui/HorizontalScrollContainer.tsx
+
+```tsx
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+
+const HorizontalScrollContainer = () => {
+  const targetRef = useRef(null);
+
+  const { scrollYProgress } = useScroll({
+    target: targetRef,
+  });
+
+  const scrollX = useTransform(scrollYProgress, [0, 1], ['0%', '-100%']);
+
+  return (
+    <section ref={targetRef} className='relative h-[300vh]'>
+      <div className='sticky top-0 flex h-[100vh] items-center overflow-hidden'>
+        <motion.div style={{ x: scrollX }} className='flex gap-3'>
+          {Array(10)
+            .fill(1)
+            .map((n, i) => n + i)
+            .map((n) => (
+              <div
+                key={n}
+                className='w-[100vw] border-2 rounded-xl aspect-square flex items-center justify-center text-5xl'
+              >
+                {n}
+              </div>
+            ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+export default HorizontalScrollContainer;
+```
+
+Framer Motion의 `useScroll` 훅과 `useTransform` 훅을 적절히 활용하면, 사용자가 수직 스크롤을 할 때, 해당 스크롤을 캡쳐하여 수평적인 움직임을 만들어낼 수 있다. 즉, 수평 스크롤이 가능한 캐러셀처럼 보이지만, 사실 이는 수직 스크롤이고, 스크롤되는 만큼 수평적으로 Sticky한 Box 내부의 Box를 x축에서 이동시키는 기법으로 구현된 것이다. 따라서, 사용자의 스크롤을 캡쳐하여 수평적 움직임을 만들어내는 위 `HorizontalScrollContainer`는 적절한 UX가 될 수 있다고 생각한다.
+
+Framer Motion의 `useScroll` 훅은 뷰포트 전체, 타겟, 특정 컨테이너에서의 절대적인 스크롤 위치(px 단위)와 스크롤된 비율을 반환하는데, 가장 외부의 `section` 태그의 스크롤된 비율을 받아오고 있다. 이 값을 기반으로 우리는 스크롤된 만큼 Sticky한 Box(`div` 태그) 내부의 Box(`motion.div` 태그)에게 수평적인 움직임, 즉 x축 움직임을 부여해야 하므로, Framer Motion의 `useTransform` 훅을 활용해야 한다.
+
+`useTransform` 훅은 Framer Motion의 `MotionValue`를 인자로 받아, 새로운 `MotionValue`를 생성하여 반환하는데, 이를 통해 y축 스크롤 데이터를 x축 움직임 데이터로 변환할 수 있다. 특히 `offset`을 설정하여 y축 스크롤이 0에서 1까지 진행된다고 가정했을 때, x축 움직임은 0%에서 -100%로 움직인다고 설정하면, y축 스크롤에 따라 x축 기준으로 우측에서 좌측으로 움직이게 된다.
