@@ -6,6 +6,7 @@ export const BASE_URL =
 export const NAVIGATION_ITEMS = {
   HOME: { id: 'home', route: '/' },
   ARTICLES: { id: 'articles', route: '/articles' },
+  CATEGORY: { id: 'category', route: '/about' },
 };
 
 export const INFORMATION = ['HyoungMin', 'Frontend Engineer'];
