@@ -1,0 +1,81 @@
+---
+title: ffmpeg로 썸네일 추출하기
+description: React 프로젝트의 비디오에서 썸네일을 추출해보자
+createdAt: 2023-12-07
+category: React
+tags:
+  - React
+  - ffmpeg
+  - Thumbnail
+---
+
+# 시작
+
+업무 중 썸네일 추출 로직을 구현해야 했는데, 검색해본 결과 `ffmpeg` 패키지를 활용해 구현할 수 있다는 것을 알아냈다. 다만, C 언어로 개발된 `ffmpeg` 패키지는 서버에서 실행해야 하는데, 이는 서버리스 플랫폼을 활용하고 있는 프로젝트 특성상 불가능했고, 따라서 웹 어셈블리로 해당 패키지를 실행하는 방식으로 처리하고자 했다.
+
+# 활용 방법
+
+## `ffmpeg` 패키지 추가 및 초기화
+
+```bash
+pnpm add @ffmpeg/ffmpe @ffmpeg/core
+```
+
+```tsx
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+
+const ffmpegRef = useRef(new FFmpeg());
+```
+
+## `BaseURL`을 통해 `ffmpeg` 불러오기
+
+```tsx
+const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.4/dist/umd';
+
+const ffmpeg = ffmpegRef.current;
+
+await ffmpeg.load({
+  coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+  wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+});
+```
+
+## 사용자가 업로드한 비디오의 썸네일 추출하기
+
+```tsx
+const file = data.fileToSend[0];
+
+await ffmpeg.writeFile(fileName, await fetchFile(file));
+
+await ffmpeg.exec([
+  '-i',
+  fileName,
+  '-ss',
+  '00:00:00',
+  '-frames:v',
+  '1',
+  '-vf',
+  'scale=150:-1',
+  `${fileNameOfDate}.png`,
+]);
+
+const thumbnail = await ffmpeg.readFile(`${fileNameOfDate}.png`);
+
+const thumbnailBlobData = new Blob([thumbnail], { type: 'image/png' });
+
+const thumbnailFile = new File([thumbnailBlobData], 'image.png', {
+  type: 'image/png',
+});
+```
+
+# 웹 어셈블리 `ffmpeg`의 특징
+
+`ffmpeg` 라이브러리는 다음과 같이 다양한 활용 분야를 가지고 있다.
+
+- 영상 인코딩 및 디코딩
+- 영상 변환
+- 영상 합성
+- 영상 스트리밍
+- 영상 편집
+
+이러한 다양한 활용 분야를 웹 브라우저에서도 사용할 수 있게 하는 것이 웹 어셈블리 기술이고, 기존 JavaScript 기반의 `ffmpeg` 패키지보다 훨씬 고성능으로 사용할 수 있게 해준다.
