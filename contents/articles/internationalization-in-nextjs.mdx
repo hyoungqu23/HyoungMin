@@ -1,0 +1,299 @@
+---
+title: Internationalization in Next.js App Router with Middleware
+description: Next.js App Router에서 다국어 지원 기능 만들기
+createdAt: 2023-09-22
+category: Next.js
+tags:
+  - Next.js
+  - i18n
+  - Internationalization
+  - Localization
+  - React
+  - App Router
+  - Middleware
+---
+
+# Intro
+
+최근에는 다국어를 지원하는 웹 사이트들이 늘어났다. 사용자들은 손쉽게 Google Chrome이나 Naver Whale의 번역 기능을 통해 약간 어색하지만 이해할 수 있는 정도로 번역하기도 하지만, 기업을 소개하는 기업의 홈페이지 웹 사이트나 다수의 국가에서 접속되는 웹 사이트 등의 경우에는, 정확한 정보를 기반으로 컨텐츠를 제공해야 하기 때문에 기본적으로 다국어를 지원하는 것이 적합하다.
+
+i18n과 l12n을 구분하면서 국제화와 지역화는 다르다고 말하는 의견도 있다. 물론 두 단어 자체의 의미가 다르지만, 대체로 웹 사이트를 국제화를 하기 위해서는 다국어를 지원하여야 하고 이는 지역화와 별반 차이가 없다고 생각해 해당 기능을 구현할 때 국제화와 지역화를 하나로 생각했다.
+
+처음에는 Next.js 13.4.9 버전으로 업그레이드 한 웹 사이트 프로젝트에서 웹 사이트를 국제화하기 위해서 공식 문서의 예제와 유튜브 영상을 참조했고, 특별한 이슈 없이 국제화를 지원할 수 있게 되었다. 이번 글에서는 공식 문서를 기반으로 Next.js 웹 앱이나 웹 사이트에 국제화 기능을 추가하는 방법을 소개한다.
+
+# 공식 문서의 i18n
+
+[App Router 공식 문서](https://nextjs.org/docs)(이하 공식 문서라고 한다.)에서 의미하는 국제화는 다국어를 지원하는 기능을 의미하는데, 다국어를 지원하기 위해서는 접속한 사용자가 보기를 원하는 언어가 어떤 언어인지를 확인하는 것이 중요하다. [Next.js 공식 문서의 Internationalization 파트](https://nextjs.org/docs/app/building-your-application/routing/internationalization)에서는 사용자가 선호하는 언어를, 브라우저에서 설정된 언어라고 생각하고, 이를 사용자의 요청 Header의 `accept-language`를 Middleware에서 확인하는 방법으로 다국어를 지원한다.
+
+## Middleware에서 사용자 선호 언어 확인하기
+
+기본적으로 Next.js 웹에서는 [Next.js의 내장 Middleware API](https://nextjs.org/docs/app/building-your-application/routing/middleware)를 활용하여, 웹 사이트에 접속 요청이 올 때, 특정 로직을 수행하게끔 처리할 수 있다. 이때 두 가지 방식으로 다국어를 지원할 수 있는데, 첫 번째는 URL의 path를 활용해 언어 정보를 전달하는 방식이고, 두 번째는 도메인 자체의 하위 도메인을 통해 언어 정보를 전달하는 방식이다. 둘 모두, Middleware에서 서버에 재요청(Redirect)하는 방식으로 진행된다.
+
+이제, 해당 방식을 활용해 국제화 기능을 구현하는 방식을 알아보자.
+
+## 지원할 언어 목록과 기본 언어 설정하기
+
+공식 문서에서는 모두 `middleware.ts`에서 관리하지만, 해당 부분은 Config의 성격이 강하고, 언어를 추가할 때마다 Middleware를 수정하는 것은 적합하지 않다고 생각하여 프로젝트 Root에 `i18n.config.ts`로 분리하였다.
+
+```tsx
+// i18n.config.ts
+
+export const i18n = {
+  defaultLocale: 'en',
+  locales: ['ko', 'en', 'zh', 'de', 'fr'],
+} as const;
+
+export type TLanguage = (typeof i18n.locales)[number];
+```
+
+`i18n` 객체를 `as const`로 선언하여, `i18n.locales`를 튜플 타입으로 추론할 수 있게 하여, 결국 `TLanguage`의 타입 안정성을 높일 수 있고, 해당 배열의 변경에 따라 가변적으로 새로운 언어를 추가할 수 있어 유지보수에 장점을 가질 수 있다.
+
+## Middleware에서 사용자의 브라우저 언어를 지원할 언어 목록으로 파싱하기
+
+라이브러리를 사용하지 않는다면, `request`의 `header`에 존재하는 `accept-language`를 활용해서 사용자의 선호 언어, 즉 브라우저에서 설정된 언어를 확인할 수 있다.
+
+```tsx
+const languages = request.headers.get('accept-language');
+```
+
+다만 다음과 같이 직접 문자열인 `accept-language`를 파싱해야하고, 물론 GPT가 이런 손쉬운 코드는 오류 없이 작성하기도 하지만 굳이 잘 되어 있는 라이브러리를 냅두고 직접 바퀴를 개발할 이유는 없다고 생각한다.
+
+```tsx
+const languages = acceptLanguage.split(',').map((lang) => {
+  const [language, qvalue] = lang.split(';');
+
+  return {
+    language: language.trim(),
+    qvalue: qvalue ? Number(qvalue.split('=')[1]) : 1,
+  };
+});
+
+languages.sort((a, b) => b.qvalue - a.qvalue);
+
+const preferredLanguage = languages[0].language;
+```
+
+공식 문서에서도 `@formatjs/intl-localematcher`, `negotiator` 라이브러리를 활용해 예제 코드를 만들었다는 점에서 동일한 라이브러리를 활용하지 않을 이유가 없다.
+
+```tsx
+// libs/i18n/index.ts
+
+export const getBrowserLanguage = (
+  request: NextRequest,
+): string | undefined => {
+  try {
+    const negotiatorHeaders: Record<string, string> = {};
+
+    request.headers.forEach((value, key) => (negotiatorHeaders[key] = value));
+
+    const languages = new Negotiator({
+      headers: negotiatorHeaders,
+    }).languages();
+
+    const locale = matchLocale(
+      languages,
+      i18n.locales as Mutable<typeof i18n.locales>, // as const로 인한 Readonly를 제거한다.
+      i18n.defaultLocale,
+    );
+
+    return locale;
+  } catch (error) {
+    console.log(error);
+    return i18n.defaultLocale;
+  }
+};
+```
+
+위 `getBrowserLanguage` 함수는 사용자의 요청 Header(`request.headers`)에서 가져온 languages 데이터와 이전에 `i18n.config.ts`에서 설정한 지원 언어 목록과 기본 설정 언어를 통해 하나의 지원 언어를 반환한다.
+
+그렇다면 해당 함수를 활용해 우리의 **웹 앱이나 사이트에서 지원하는 언어 중 사용자가 선호하는 언어**를 가져와 해당 언어를 URL에 포함시켜 재할당시켜주면, 해당 페이지에서 URL에 포함된 데이터를 기반으로 손쉽게 그에 맞는 페이지 언어 데이터를 그려줄 수 있다.
+
+```tsx
+// middleware.ts
+
+export const middleware = async (request: NextRequest) => {
+  try {
+    const pathname = request.nextUrl.pathname;
+
+    // 사용자가 접속 요청을 보낸 URL에 language parameter의 존재 여부를 확인
+    const hasNoLocaleInPathname = i18n.locales.every(
+      (locale) =>
+        !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`,
+    );
+
+    // language parameter가 없는 경우
+    if (hasNoLocaleInPathname) {
+      // 브라우저의 사용자 선호 언어 중 지원 언어 확인
+      const locale = getLocale(request);
+
+      // 해당 언어로 language parameter를 추가
+      const newURL = new URL(
+        `/${locale}${pathname.startsWith('/') ? '' : '/'}${pathname}`,
+        request.url,
+      );
+
+      // 기존 URL Query Search Params를 다시 설정
+      newURL.search = request.nextUrl.search;
+
+      return NextResponse.redirect(newURL);
+    }
+  } catch (error) {
+    return NextResponse.redirect(ROUTES.HOME);
+  }
+};
+```
+
+그렇다면, Middleware에서 접속한 URL이 language parameter를 가지고 있는 경우에는 그대로 넘겨주고, 없는 경우에는 브라우저에 저장된 사용자의 선호 언어를 URL에 language parameter로 추가하여 넘겨준다.
+
+## 선택한 언어에 따라 페이지 그려주기
+
+이제 클라이언트 측에서 페이지를 그려줄 때, URL의 language parameter를 확인해서 그에 맞는 JSON 언어 데이터를 가져오면 된다.
+
+```tsx
+// libs/dictionary/index.ts
+
+import type { Locale } from '@/i18n.config';
+import { notFound } from 'next/navigation';
+
+export const dictionaries = {
+  ko: () =>
+    import('@/src/dictionaries/ko/index.json').then((module) => module.default),
+  en: () =>
+    import('@/src/dictionaries/en/index.json').then((module) => module.default),
+  zh: () =>
+    import('@/src/dictionaries/zh/index.json').then((module) => module.default),
+  de: () =>
+    import('@/src/dictionaries/de/index.json').then((module) => module.default),
+  fr: () =>
+    import('@/src/dictionaries/fr/index.json').then((module) => module.default),
+};
+
+export const getDictionary = async (locale: Locale) => {
+  if (!Object.keys(dictionaries).includes(locale)) {
+    notFound();
+  }
+
+  const dictionary = dictionaries[locale];
+
+  if (typeof dictionary !== 'function') {
+    notFound();
+  }
+
+  try {
+    return await dictionary();
+  } catch (error) {
+    notFound();
+  }
+};
+```
+
+```tsx
+// [lang]/page.tsx
+
+import { Locale } from '@/i18n.config';
+import { getDictionary } from '@/src/libs/dictionary';
+
+interface IHomePageProps {
+  params: { lang: Locale };
+}
+
+const HomePage = async ({ params: { lang } }: IHomePageProps) => {
+  const DICTIONARY = await getDictionary(lang);
+
+  return (
+    <section>
+      <h1>{DICTIONARY.MAIN_PAGE.TITLE}</h1>
+      <p>{DICTIONARY.MAIN_PAGE.CONTENT}</p>
+    </section>
+  );
+};
+
+export default HomePage;
+```
+
+## 언어 변경 기능 추가하기
+
+클라이언트에서 사용자가 언어를 변경하기 위해서는 접속 URL의 language parameter를 변경하여 요청을 보내면 된다.
+
+```tsx
+// libs/hooks/useLangParams.ts
+
+'use client';
+
+import { i18n } from '@/i18n.config';
+import { useParams } from 'next/navigation';
+
+const useLangParams = () => {
+  const params = useParams();
+
+  if (typeof params.lang !== 'string') return;
+
+  return params.lang ?? i18n.defaultLocale;
+};
+
+export default useLangParams;
+```
+
+```tsx
+// components/common/LocaleSwitcher.tsx
+
+'use client';
+
+import { i18n, type Locale } from '@/i18n.config';
+import useLangParams from '@/src/libs/hooks/useLangParams';
+import { cls, switchLocale } from '@/src/libs/utils';
+import Link from 'next/link';
+
+const switchLocale = (locale: Locale) => {
+  const pathname = usePathname();
+
+  const pathnameIsMissingLocale = i18n.locales.every(
+    (locale) =>
+      !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`,
+  );
+
+  if (pathnameIsMissingLocale) {
+    if (locale === i18n.defaultLocale) return pathname;
+
+    return `/${locale}${pathname}`;
+  } else {
+    const segments = pathname.split('/');
+
+    segments[1] = locale;
+
+    return segments.join('/');
+  }
+};
+
+const LocaleSwitcher: React.FC<ILocaleSwitcherProps> = () => {
+  const lang = useLangParams();
+
+  return (
+    <ul className='flex self-end gap-3 select-none'>
+      {i18n.locales.map((locale) => (
+        <li
+          key={locale}
+          className={cls(
+            'text-center text-xl cursor-pointer uppercase font-bold transition-colors hover:text-imlab-red-300 active:text-imlab-red-600',
+            lang
+              ? locale === lang
+                ? 'font-bold text-white'
+                : 'text-imlab-gray-600'
+              : locale === i18n.defaultLocale
+              ? 'font-bold text-white'
+              : 'text-imlab-gray-600',
+          )}
+        >
+          <Link href={switchLocale(locale)}>{locale}</Link>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+export default LocaleSwitcher;
+```
+
+# 결론
+
+공식 문서의 글만 따라가면 너무 쉽게 완성이 되기 때문에 어렵지 않았다. 하지만 URL에 language parameter를 반드시 추가해야 활용할 수 있는 기능이기 때문에, 기획 상 URL에 language parameter가 포함되지 않는 것을 요구하는 경우에는 활용할 수 없다는 점이 문제이긴 하다.
