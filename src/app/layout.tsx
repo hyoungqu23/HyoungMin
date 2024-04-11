@@ -118,7 +118,7 @@ const RootLayout = ({ children }: TLayoutProps) => {
         )}
       >
         <Header />
-        <main role='main' className='max-w-[1024px] flex-1'>
+        <main role='main' className='max-w-[1024px] flex-1 w-full'>
           {children}
         </main>
         <Footer />
