@@ -1,4 +1,5 @@
 import type { TArticlePreview } from '@entities';
+import { format } from '@shared';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 
 interface IArticlePageProps {
@@ -15,7 +16,7 @@ export const ArticlePage = ({ preview, content }: IArticlePageProps) => {
             {preview.category}
           </p>
           <p className='self-end text-body1 opacity-50'>
-            {new Date(preview.createdAt).toLocaleDateString()}
+            {format(new Date(preview.createdAt))}
           </p>
         </div>
         <h1 className='text-heading3 tablet:text-heading1 font-extrabold'>

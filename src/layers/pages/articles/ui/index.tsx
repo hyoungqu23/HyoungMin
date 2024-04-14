@@ -1,4 +1,5 @@
 import type { TArticlePreview } from '@entities';
+import { format } from '@shared';
 import Link from 'next/link';
 
 interface IArticlesPageProps {
@@ -28,7 +29,7 @@ export const ArticlesPage = ({ articles }: IArticlesPageProps) => {
           <div className='flex gap-2 text-body3 font-semibold self-end tablet:text-body1 text-nowrap'>
             <span>{article.readingTime ?? 1} min.</span>
             <span className='underline'>
-              {new Date(article.createdAt).toLocaleDateString()}
+              {format(new Date(article.createdAt))}
             </span>
           </div>
         </Link>
