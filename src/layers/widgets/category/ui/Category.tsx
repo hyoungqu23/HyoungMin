@@ -24,7 +24,7 @@ export const Category = ({ category }: ICategoryProps) => {
       )}
     >
       <Link
-        href={`${NAVIGATION_ITEMS.ARTICLES.route}/${NAVIGATION_ITEMS.CATEGORY.route}/${adaptedCategory}`}
+        href={`${NAVIGATION_ITEMS.ARTICLES.route}${NAVIGATION_ITEMS.CATEGORY.route}/${adaptedCategory}`}
       >
         {category}
       </Link>
