@@ -1,0 +1,297 @@
+---
+title: Next.js에서 FSD 적용하기
+description: Next.js에 맞게 Feature Sliced Design 아키텍처를 개선해 팀 컨벤션으로 만들기!
+createdAt: 2024-06-14
+category: Next.js
+tags:
+  - Next.js
+  - Feature Sliced Design
+  - FSD
+  - Architecture
+  - Coding Convention
+  - Frontend Architecture
+---
+
+# Feature Sliced Design Architecture
+
+처음에는 Feature Sliced Design Architecture(이하 FSD라 한다.)가 구성하고 있는 Layer에는 App Layer가 존재하는 바, 이를 순종적으로 이행하기 위해서 layers 디렉토리 하위에 각각 `app`, `widgets`, `features`, `entities`, `shared` 디렉토리를 각각 Layer로 하여 프로젝트 구조를 기획하고 개발을 진행했다.
+
+하지만 Next.js App Router의 `layout.tsx`, `page.tsx`, `loading.tsx`와 `app` 디렉토리의 경우 이미 프레임워크에서 강제된 사항이다. Next.js는 라이브러리가 아니라 프레임워크이기 때문에 해당 프레임워크에서 강제하고 있는 디렉토리 기반 라우팅 시스템을 활용하지 않을 이유가 없을 뿐더러 충분한 효용이 있다.
+
+다만, 실제 개발을 진행하면서, 시행착오를 겪어본 결과 Next.js App Router 프로젝트에서 FSD를 반영하여 프로젝트 구조를 설계할 때 이를 반영해야만 DX를 향상시킬 수 있으며, 추후 유지보수에서도 FSD의 강점을 발휘할 수 있을 것이라 판단했다.
+
+## 기존 프로젝트 구조와 그 문제점
+
+프로젝트를 시작할 때, 처음 FSD를 적용하면서 설계한 구조는 다음과 같다.
+
+```
+📦 (project root)
+ ┣ ...
+ ┗ 📂 src
+   ┣ 📂 app
+   ┗ 📂 layers
+		 ┣ 📂 app
+ 		 ┣ 📂 pages
+		 ┣ 📂 widgets
+		 ┣ 📂 features
+		 ┣ 📂 entities
+		 ┗ 📂 shared
+```
+
+`src` 디렉토리 하위에 Next.js 디렉토리인 `app`와 FSD 디렉토리인 `layers`를 활용하고, `layers` 디렉토리 하위에 `app`, `pages`, `widgets`, `features`, `entities`, `shared` 디렉토리를 통해 FSD의 각 Layer를 구분하는 방식이었다.
+
+하지만 이러한 방식을 실제 프로젝트에 적용해 프로젝트 개발을 진행할 때 여러 문제가 발생했다.
+
+1. Next.js의 `page.tsx`와 FSD의 Page Layer 사이에 큰 차이가 존재하지 않는다. 결국, 분리하지 않아도 되는 컴포넌트가 과도하게 분리되어 개발 효율을 저해하는 경우가 종종 발생했다.
+
+   예를들어, `src/app/login` 디렉토리 하위의 `page.tsx`에 충분히 `<LoginPage />`를 구현할 수 있음에도 불구하고, Page Layer를 활용하기 위해서 `src/layers/pages` 디렉토리 하위에 `ui` 디렉토리를 생성하고, 그 내부에 `<LoginPage />` 컴포넌트를 추가하는 등 불필요한 작업이 발생하여 개발 경험을 저해하는 요인이 됐다.
+
+   즉, FSD라는 Architecture 도구를 도입하여 개발 경험을 향상시키고, 유지보수의 효율성을 높이는 등의 장점을 반영하기 위해 결국 다시 개발 경험을 낮추게 되는 모순적인 상황이 발생했다. 이는 주객이 전도된 상황으로 FSD를 도입한 목적성을 잃는 방식으로 잘못 적용한 케이스라고 판단했다.
+
+2. 처음 적용해보는 방식이기 때문에 명확히 어떤 Segment에 어떤 로직이 추가되어야 하는 지에 대해 규칙 없이 접근하여, 결국 다시 `components`, `domain` 등의 디렉토리를 활용하는 프론트엔드의 고전적인 Architecture와 유사하게 스파게티 코드가 버린 코드들이 눈에 밟혔다.
+3. 다수의 Directory를 생성하고, 각각 Public API를 구분하여 처리해야 하기 때문에 하나의 Layer의 Slice를 생성할 때 추가해야할 보일러플레이트 코드가 늘어났다.
+4. 다수의 Serverless 서비스를 활용하고 있어 해당 SDK를 선언하고, 이를 활용할 때, Client SDK(예: Firebase Client SDK 등)와 Server SDK(예: Firebase Admin SDK 등)이 동일하게 Shared Layer의 Segment에서 import하게 처리했다. 하지만 Next.js App Router의 Server Component와 Client Component의 구분으로 인해 Client Component에서 이를 import할 수 없는 문제가 발생했다.
+
+각각 발생한 문제점을 되짚어보며, Next.js App Router와 FSD Architecture를 보다 잘 적용할 수 있을 지를 중점적으로 리팩토링 방향성을 결정해보자.
+
+# Next.js에서 FSD 디렉토리 구조와 Slice & Segment 규칙
+
+위 문제점의 첫 번째와 두 번째 이슈를 해결하기 위해서 프로젝트 디렉토리 구조를 재설계하고, Slice & Segment를 위한 명확한 규칙을 설계했다.
+
+## 프로젝트 디렉토리 구조 재설계
+
+먼저 재설계한 프로젝트 디렉토리 구조는 다음과 같다.
+
+```
+📦 (project root)
+ ┣ ...
+ ┗ 📂 src
+	 ┣ 📂 root
+	 ┣ 📂 app
+	 ┣ 📂 widgets
+	 ┣ 📂 features
+	 ┣ 📂 entities
+	 ┗ 📂 shared
+```
+
+기존과 다르게 `layers` 디렉토리를 제거하고, 같은 선상에 모든 디렉토리를 둔 점이 가장 큰 변경점이다. 이는 가독성을 향상시킬 수 있고, 프로젝트 구조를 명확히 받아들일 수 있게 한다.
+
+또한, Next.js App Router의 `app` 디렉토리와 FSD의 Page Layer를 통합했다. 조금 유연성을 발휘한 부분인데, `app` 디렉토리 자체가 Next.js 프레임워크의 강제 사항이다 보니 기존의 App Layer를 `root` 디렉토리로 처리하고, Next.js `app` 디렉토리 그 자체를 Page Layer로 활용하면서 pages 디렉토리를 제거했다. 동일한 이유로 Page Layer를 대체한 Next.js app 디렉토리는 FSD의 Slice, Segment를 활용하지 않게 되고, Next.js의 파일 기반 라우팅 시스템대로 구성된다.
+
+그 이하에 존재하는 Widget Layer, Feature Layer, Entity Layer, Shared Layer의 경우 기존과 동일한 디렉토리 구조를 갖지만, 새로 정립한 Slice & Segment 규칙에 따라 내부 구조는 변경된다.
+
+## Slice & Segment 규칙 설계
+
+FSD Architecture에서는 Slice와 Segment를 잘 구분하고, 이를 잘 활용하는 것이 중요한데, 프로젝트를 진행하면서 해당 부분에 대한 명확한 설계 규칙이 있어야 한다고 느꼈다. 즉, 프로젝트 초반에는 Slice와 Segment를 필요한대로 생성하고, 코드를 작성했더니 결국 기존의 고전적인 프론트엔드 Architecture와 유사한 스파게티 코드가 되어버렸고, 이를 해결하기 위해서는 명확하게 규칙이 필요하다고 생각했다.
+
+회고를 통해 설계한 Slice & Segment 규칙은 다음과 같다.
+
+1. Slice는 각 Layer에 따라 `camelCase`로 작성한 디렉토리로 구성된다.
+
+   1. Shared Layer에는 프로젝트에서 재사용되는 로직과 SDK, UI 등을 작성한다.
+   2. ~~Entity Layer에는 여러 Model(예: user 등)에 대해 작성한다.~~
+
+      Feature Layer를 활용하기 않기로 결정함에 따라 Model의 인터페이스와 메서드를 모두 포함하게 된다.
+
+   3. ~~Feature Layer에는 Entity Layer에서 작성한 여러 Model을 기반으로 하는 기능에 대해 작성한다.~~
+
+      Feature Layer를 활용하지 않고, Entity Layer에서 Model의 인터페이스와 함께 메서드를 작성하는 것으로 변경했다.
+
+   4. ~~Widget Layer에는 기능이 없는 UI, 예를 들어 Layout, Default Loading UI 등을 작성한다.~~
+
+      Feature Layer를 활용하지 않기로 결정함에 따라 Entity Layer에서 작성된 메서드를 기반으로 래핑하는 로직이 추가될 수 있으며 Widget Layer가 사실상 View를 담당하게 된다.
+
+   5. Root Layer(상술한 것과 같이 변경된 디렉토리 구조 하에서의 기존 FSD의 App Layer)에는 프로젝트 전반에서 활용되는 로직이나 UI를 작성한다.
+
+      크게 활용하지는 않는다.
+
+2. Segment는 기본적으로 다음과 같은 디렉토리 구조로 구성된다.
+
+   1. API Segment
+
+      API Segment에는 Server 관련 로직이 포함되며, SDK가 아닌 경우에 모두 `oooApiService`와 같은 컨벤션을 가진다.
+
+   2. Config Segment
+   3. Constant Segment
+   4. Library Segment
+   5. Model Segment
+
+      Model Segment에는 Client 관련 로직이 포함되며, SDK가 아닌 경우에 모두 `oooService`와 같은 컨벤션을 가진다.
+
+   6. Type Segment
+   7. UI Segment
+
+3. 각 Layer는 다음 규칙을 따라 Segment를 가진다.
+   1. Shared Layer는 Slice가 없고, 모든 Segment를 가진다.
+   2. Entity Layer에 속한 Slice는 API, Constant, Library, Model, Type Segment를 가진다.
+   3. Widget Layer에 속한 Slice는 API, Constant, Library, Model, UI Segment를 가진다.
+   4. Root Layer에 속한 Slice는 각 Segment를 모두 옵셔널하게 가진다.
+4. 각 Slice는 `index.ts`를 통해 Public API를 내보내기(`export`)하고, Segment는 DX 향상을 위해 각 파일에서 내보내기하는 방식을 활용한다.
+
+따라서 다음과 같이 대략적인 프로젝트 구조가 생성된다.
+
+```
+📦 (project root)
+ ┣ ...
+ ┣ 📂 public
+ ┗ 📂 src
+	 ┣ 📂 root
+	 ┃ ┣ 📂 layout
+	 ┃ ┃ ┣ 📂 lib
+	 ┃ ┃ ┣ 📂 type
+	 ┃ ┗ ┗ 📂 ui
+	 ┃
+	 ┣ 📂 app
+	 ┃
+	 ┣ 📂 widgets
+	 ┃ ┣ 📂 header
+	 ┃ ┃ ┣ 📂 constant
+	 ┃ ┃ ┣ 📂 lib
+	 ┃ ┃ ┗ 📂 ui
+	 ┃ ┣ 📂 footer
+	 ┃ ┃ ┣ 📂 constant
+	 ┃ ┃ ┣ 📂 lib
+	 ┃ ┗ ┗ 📂 ui
+	 ┃
+	 ┣ 📂 features
+	 ┃ ┣ 📂 login
+	 ┃ ┃ ┣ 📂 api
+	 ┃ ┃ ┣ 📂 constant
+	 ┃ ┃ ┣ 📂 lib
+	 ┃ ┃ ┣ 📂 model
+	 ┃ ┃ ┣ 📂 type
+	 ┃ ┃ ┗ 📂 ui
+	 ┃ ┣ 📂 register
+	 ┃ ┃ ┣ 📂 api
+	 ┃ ┃ ┣ 📂 constant
+	 ┃ ┃ ┣ 📂 lib
+	 ┃ ┃ ┣ 📂 model
+	 ┃ ┗ ┗ 📂 ui
+	 ┃
+	 ┣ 📂 entities
+	 ┃ ┣ 📂 user
+	 ┃ ┃ ┣ 📂 constant
+	 ┃ ┗ ┗ 📂 type
+	 ┃
+	 ┗ 📂 shared
+	 	 ┣ 📂 api
+	 	 ┣ 📂 config
+	 	 ┣ 📂 constant
+		 ┣ 📂 lib
+		 ┣ 📂 model
+		 ┣ 📂 type
+		 ┗ 📂 ui
+```
+
+# (반)자동화한 보일러플레이트 코드 생성
+
+FSD Architecture 하에서는 Public API를 설정하고, 그에 맞게 `import`하는 방식으로 코드를 결합시키기 때문에 필요한 로직이나 UI만을 명확하게 외부로 내보낼 수 있으며 내부에서만 활용되는 UI나 로직과 잘 구분될 수 있다는 장점이 있다. 추가적으로 공개된 API만을 `import`하는 방식을 통해 이후 기획 변경사항에 있어 `import` 구문을 수정할 필요가 없다는 점도 큰 장점이다.
+
+하지만, 항상 빛이 비추는 자리에는 그림자가 존재하듯, 이러한 장점에도 불구하고 공개 API를 생성하고, 구분하여 `export` 해주는 작업이 필요한 것은 단점이다. 이러한 단점을 조금이라도 줄여나가기 위해서 여러 방안을 고민해봤다.
+
+## VS Code 확장 프로그램 생성
+
+현재 코드 에디터로 활용중인 VS Code의 확장 프로그램을 생성하고, 이를 활용하여 디렉토리 구조와 Public API를 쉽게 처리하는 방식을 적용하는 것이다. 기존에 이미 존재하는 FSD 관련 확장 프로그램은 원하는 기능을 제공하지 않아 새롭게 만드는 방식을 고안했으며, chatGPT 등의 도움을 받으면 만드는 데 오래 걸리지 않을 것이라고 예상했다.
+
+하지만, 프로젝트 개발 기간이 줄어들어 시간이 부족한 상태에서 하기에는 일정 이슈가 발생할 것으로 예측되어 이후에 날을 잡고 만들어보는 것으로 한다.
+
+## Script File 추가
+
+로컬에서 활용하기 위해 스크립트 파일을 하나 만들고, 이를 통해 처리하는 방법이 가장 쉽고 간결하고 빠를 것으로 생각되어 바로 스크립트를 만들었다.
+
+```bash
+if [ -z "$1" ]; then
+  echo "경로가 입력되지 않았습니다."
+  exit 1
+fi
+
+base_dir="src"
+target_dir="$base_dir/$1"
+
+mkdir -p $target_dir
+
+last_part=$(basename $1)
+formatted_name="$(tr '[:lower:]' '[:upper:]' <<< ${last_part:0:1})${last_part:1}"
+
+if [[ "$1" == app/* ]]; then
+  if [[ "$1" == app/api/* ]]; then
+    echo "" > "$target_dir/route.ts"
+    echo "$formatted_name Route가 생성되었습니다."
+  else
+    cat << EOF > "$target_dir/page.tsx"
+interface I${formatted_name}PageProps {}
+
+const ${formatted_name}Page = ({}: I${formatted_name}PageProps) => {
+  return <>${formatted_name}</>;
+};
+
+export default ${formatted_name}Page;
+EOF
+    echo "$formatted_name Page가 생성되었습니다."
+  fi
+else
+  declare -a subdirs=("api" "constant" "lib" "model")
+  if [[ "$1" = "shared" ]]; then
+    subdirs+=("config" "ui" "type")
+  elif [[ "$1" == entities/* ]]; then
+    subdirs+=("type")
+  elif [[ "$1" == widgets/* ]]; then
+    subdirs+=("ui")
+  fi
+
+  for subdir in "${subdirs[@]}"; do
+    mkdir -p "$target_dir/$subdir"
+    echo "" > "$target_dir/$subdir/index.ts"
+  done
+
+  echo "$formatted_name Slice가 생성이 완료되었습니다."
+fi
+```
+
+프로젝트 루트 경로에서 생성하기 원하는 디렉토리 경로와 함께 해당 스크립트를 실행할 수 있다.
+
+```bash
+./fsd.sh features/abc
+```
+
+Mac 기준으로 해당 스크립트가 실행되지 않는다면 다음과 같이 Permission을 허용해주어야 한다.
+
+```bash
+chmod +x ./fsd.sh
+```
+
+이렇게 생성된 디렉토리는 다음과 같다.
+
+```
+📦 (project root)
+ ┣ ...
+ ┣ 📂 public
+ ┗ 📂 src
+	 ┣ 📂 root
+	 ┣ 📂 app
+	 ┣ 📂 widgets
+	 ┃
+	 ┣ 📂 features
+	 ┃ ┣ 📂 login
+	 ┃ ┣ 📂 register
+	 ┃ ┗ 📂 **abc**
+	 ┃   ┣ 📂 **api**
+	 ┃   ┣ 📂 **constant**
+	 ┃   ┣ 📂 **lib**
+	 ┃   ┣ 📂 **model**
+	 ┃   ┣ 📂 **type**
+	 ┃   ┗ 📂 **ui**
+	 ┃
+	 ┣ 📂 entities
+	 ┗ 📂 shared
+```
+
+생성이 완료되면 다음과 같이 터미널에 완료 메시지가 남겨진다.
+
+```bash
+abc Slice가 생성이 완료되었습니다.
+```
+
+# SDK 선언 Segment 위치
+
+Firebase, Supabase 등 여러 Serverless 솔루션과 추가적으로 Client를 생성하고 활용해야 하는 BigQuery API, Slack API 등을 선언할 때, 동일한 Segment에서 import하는 방식을 활용할 수 없기 때문에 API Segment에서는 Server 로직이 필요한 SDK를, Model Segment에서는 Client 관련 SDK를 선언하는 것으로 결정한다.
