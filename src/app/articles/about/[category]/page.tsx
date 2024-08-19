@@ -6,11 +6,7 @@ interface ICategoryPageProps {
 }
 
 const CategoryPage = ({ params: { category } }: ICategoryPageProps) => {
-  console.log('✅ category', category);
-
   const articlesInCategory = articlesService.filter(category);
-
-  console.log('✅ articlesInCategory', articlesInCategory);
 
   return <ArticlesPage articles={articlesInCategory} />;
 };
@@ -25,8 +21,6 @@ export const generateStaticParams = () => {
       })),
     ),
   ];
-
-  console.log('✅ params', params);
 
   return params;
 };
