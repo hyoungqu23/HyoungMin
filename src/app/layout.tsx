@@ -104,6 +104,9 @@ export const generateMetadata = () => {
         alt: 'Thumbnail',
       },
     },
+    verification: {
+      google: 'bifggwBk-paprwdgYduW7jTkn7lspxQAmuz2eQOq4Hg',
+    },
   };
 };
 
