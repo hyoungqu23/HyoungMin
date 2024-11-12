@@ -26,10 +26,6 @@ export const TrackingTools = () => {
           gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_PROPERTY_ID}');`,
         }}
       />
-      <meta
-        name='google-site-verification'
-        content='bifggwBk-paprwdgYduW7jTkn7lspxQAmuz2eQOq4Hg'
-      />
     </>
   );
 };
