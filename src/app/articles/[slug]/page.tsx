@@ -1,6 +1,6 @@
 import { articleService, articlesService } from '@entities';
 import { ArticlePage } from '@pages';
-import { BASE_URL, LINKS, NAVIGATION_ITEMS } from '@shared';
+import { BASE_URL, NAVIGATION_ITEMS } from '@shared';
 import { notFound } from 'next/navigation';
 
 interface IArticlePageProps {
@@ -16,20 +16,6 @@ export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
     title: previewOfArticle.title,
     description: contentOfArticle.slice(0, 100),
     keywords: previewOfArticle.tags,
-    authors: [{ name: 'HyoungMin', url: LINKS.GITHUB.href }],
-    robots: {
-      index: true,
-      follow: true,
-      nocache: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        noimageindex: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
     openGraph: {
       title: previewOfArticle.title,
       description: contentOfArticle.slice(0, 100),

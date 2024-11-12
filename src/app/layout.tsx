@@ -62,11 +62,21 @@ const Pretendard = localFont({
 export const generateMetadata = () => {
   return {
     metadataBase: new URL(BASE_URL),
-    title: 'HyoungMin Tech Blog',
+    title: {
+      template: '%s | HyoungMin',
+      default: 'Home',
+    },
     description: 'Tech Blog By Frontend Engineer HyoungMin',
     keywords:
       'Next.js, React, Git, GitHub, React-Three-Fiber, R3F, Three.js, React-Hook-Form, App Router, Page Router, Firebase, Supabase, Frontend, Engineer, Backend, Fullstack, I18N, Internationalization, L11N, Localization, Route Handler, 프론트엔드, 리액트, 넥스트, 개발자, 개발자 블로그, 개발 블로그, 테크 블로그, 이형민, 개발자 이형민, 프론트엔드 이형민, 프론트엔드 개발자 이형민',
     authors: [{ name: 'HyoungMin', url: LINKS.GITHUB.href }],
+    alternates: {
+      canonical: new URL(BASE_URL),
+    },
+    generator: 'Next.js',
+    referrer: 'strict-origin-when-cross-origin',
+    creator: 'HyoungMin',
+    publisher: 'Vercel',
     robots: {
       index: true,
       follow: true,
