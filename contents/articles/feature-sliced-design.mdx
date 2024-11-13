@@ -1,0 +1,115 @@
+---
+title: Feature Sliced Design(FSD), 기능 분할 설계
+description: 기능 분할 설계(FSD)는 프론트엔드 앱을 스캐폴딩하기 위한 아키텍처 방법론이다. 쉽게 말하면 코드 구성에 관한 규칙과 컨벤션의 집합이다. 이 방법론의 주된 목적은 끊임없이 변화하는 비즈니스 요구사항에 직면하면서 프로젝트를 더 이해하기 쉽고 체계적으로 구성하는 것이다.
+createdAt: 2024-02-22
+category: Architectures
+tags:
+  - Next.js
+  - React
+  - Architectures
+  - Feature Sliced Design
+  - FSD
+  - Frontend Architecture
+  - Frontend FSD
+  - 기능 분할 설계
+---
+
+# Feature Sliced Design를 도입한 배경
+
+기존 진행 중이었던 프로젝트에서 Firebase만이 아니라 Supabase도 추가적으로 의존하게 되었고, 또한 기존 코드 베이스가 MVP의 빠른 개발을 위해 작성되었기에 이후 유지보수성과 확장성을 확대할 필요가 있었다. 그래서 프로젝트 아키텍처부터 고민하고 있었는데 병렬적으로 진행하고 있던 Flutter 프로젝트의 아키텍쳐(일부 변형된 MVVM)과 유사한 방식으로 Next.js 프로젝트에 적용한다면, 팀 내 개발자들이 서로의 프로젝트에 온보딩하기 쉽지 않을까라는 생각을 했다.
+
+크게 마무리되지 않는 고민을 하던 시기 즈음에 Feature Sliced Design Architecture(이하 FSD라 한다.)에 대한 [번역 아티클](https://emewjin.github.io/feature-sliced-design)을 메일로 받아봤다. 해당 아티클에서는 FSD 아키텍처에 대한 설명과 그 장단점, 잠재력 등을 말하고 있는데, 처음 보는 순간 러닝 커브나 Next.js 프레임워크와의 호환성과 같은 걱정거리보다 도입했을 때의 깔끔한 프로젝트 구조가 눈 앞에 그려졌다. 다만 역시나 이는 한낱 2년차 개발자의 편협한 사고와 부족한 배경지식에 기반한 오만에 불과했다는 사실만 다시 깨닫게 되었지만, 역시 선배 개발자들의 방법론을 습득하는 것만으로도 충분히 좋은 아키텍처를 만들어낼 수 있다는 사실 또한 다시 한 번 느낄 수 있었다.
+
+특히, 약 1년간 업무를 하면서 가장 부족한 점이 (변명 같겠지만) 시간에 쫓겨 전혀 프론트엔드 아키텍처를 신경쓰지 않고 개발했다는 점이었다. 물론 6개월차를 벗어난 시점부터 MVC, MVVM 등과 같은 수많은 디자인 패턴과 CCP, 합성 컴포넌트와 같은 다양한 컴포넌트 설계 방법론을 적용하고자 했었지만 여전히 마음에 쏙 들고, 활용하기 편한 아키텍처를 구성하는 것은 사실상 하늘의 별 따기라고 생각했다.
+
+그래도 어느 정도 팀 내 Flutter 프로젝트와 유사한 구조를 가지고 도입해보고 싶은 느낌이 들었기에, 혼자 FSD에 대해 스터디를 진행하고 몇 번의 테스트를 실행한 뒤, 현재 고민하고 있던 프로젝트에 적용하기 시작했다. 물론, 어짜피 혼자 개발하는 프로젝트기에 시행착오에도 큰 문제가 없다고 생각하여 도입한 것이기도 하다.
+
+FSD [공식 문서의 첫 페이지](https://feature-sliced.design/docs)에는 다음과 같이 FSD를 설명하고 있다.
+
+> **Feature-Sliced Design** (FSD) is an architectural methodology for scaffolding front-end applications. Simply put, it's a compilation of rules and conventions on organizing code. The main purpose of this methodology is to make the project more understandable and structured in the face of ever-changing business requirements.
+
+기능 분할 설계(FSD)는 프론트엔드 앱을 [스캐폴딩](https://wikidocs.net/152533)(앱의 골격을 빠르게 설정하는 기술, 앱의 뼈대를 빠르게 세우는 기법 등으로 해석할 수 있다.)하기 위한 아키텍처 방법론이다. 쉽게 말하면 코드 구성에 관한 규칙과 컨벤션의 집합이다. 이 방법론의 주된 목적은 끊임없이 변화하는 비즈니스 요구사항에 직면하면서 프로젝트를 더 이해하기 쉽고 체계적으로 구성하는 것이다.
+
+>
+
+FSD가 내 상황에 효과적이다고 생각한 점 또한 이 공식 문서의 서론 때문이었다. 스타트업에서 업무를 하다 보면 확실히 ‘끊임없이 변화하는 비즈니스 요구사항’에 하루에 열 번도 더 개발 중인 기능의 수정 사항이 발생하곤 한다. 물론 완료되었다고 전달받은 UI가 실시간으로 변경되는 것 또한 비일비재하다.
+
+그렇다면 어떤 방식으로 프로젝트를 구성해야 하는지에 대해 고민할 수 밖에 없는데 그 결과 수많은 디자인 패턴의 잔해와 각기 다르게 구성된 컴포넌트들이 활용되는 프로젝트가 내 유지보수 목록에 포함되어 버린다. 결국, 새로운 방법론을 찾게 되고, FSD가 제공하는 스캐폴딩 방법론은 흥미를 끌 수 밖에 없게 되는 것이다.
+
+심지어 공식 문서에서는 프론트엔드 앱 아키텍처이고, 라이브러리나 UI Kit이 아닌 앱 아키텍처라고 단언하고 있으며, 특정 프로그래밍 언어, 프레임워크, 상태 관리 라이브러리를 강제하지 않는다고 하니 프로젝트에서 원하는 기술을 활용할 수 있는 나로서는 매우 적절하다고 판단하게 되었다.
+
+# 기본 개념
+
+FSD에서 프론트엔드 앱 프로젝트는 `Layers`로 구성되며, 각 `Layer`는 `Slices`로, 각 `Slice`는 `Segments`로 구성된다.
+
+![[https://feature-sliced.design/docs/get-started/overview](https://feature-sliced.design/docs/get-started/overview)](<Feature%20Sliced%20Design(FSD),%20%E1%84%80%E1%85%B5%E1%84%82%E1%85%B3%E1%86%BC%20%E1%84%87%E1%85%AE%E1%86%AB%E1%84%92%E1%85%A1%E1%86%AF%20%E1%84%89%E1%85%A5%E1%86%AF%E1%84%80%E1%85%A8%200c8f2c1e83064590bf4ea06ee0cb0977/Layers-Slices-Segments.jpg>)
+
+[https://feature-sliced.design/docs/get-started/overview](https://feature-sliced.design/docs/get-started/overview)
+
+## 레이어(Layers)
+
+레이어는 위 이미지에서 볼 수 있다시피 수직적으로 배열되어 있다. 프로젝트 내에서 모든 레이어를 활용할 필요는 없으며, App, Shared 레이어의 경우 다른 레이어들과 달리 슬라이스를 가지지 않고 세그먼트를 바로 하위에 가진다. 특정 레이어의 슬라이스 내부의 모듈은 반드시 하위 레이어의 슬라이스의 모듈만 참조할 수 있고, 동일 레이어나 상위 레이어의 슬라이스의 모듈을 참조할 수는 없다.
+
+### `App` 레이어
+
+프론트엔드 앱 로직이 초기화되는 `Layer`으로, 앱의 진입점 역할을 한다. 이는 앱의 전체적인 설정과 전역 스타일, Provider, Router, 전역 Type 등을 의미한다.
+
+### `Process` 레이어
+
+복잡한 페이지 간 시나리오, 즉 여러 페이지에 걸쳐 있는 프로세스를 처리하는 기능을 의미한다. 즉, 인증/인가와 같은 페이지 간에 존재하는 횡단 관심사를 의미한다고 생각한다. 이 `Layer`는 더 이상 사용되지 않지만, 가끔씩 마주칠 수 있다.
+
+### `Pages` 레이어
+
+`Widget`, `Features`, `Entities` 레이어로부터 구성된 전체 페이지나 페이지의 주요 파트를 의미한다.
+
+- 아티클 피드, 로그인, 회원가입, 아티클 편집기, 아티클, 사용자 프로필, 설정 등
+
+### `Widgets` 레이어
+
+독립적으로 동작하는 대규모 모듈 또는 UI 컴포넌트로, 이슈 목록, 사용자 프로필, `Entities` 레이어와 `Features` 레이어를 결합하여 구성된 의미 있는 Block을 의미한다. 즉, 페이지 내에서 사용되는 독립적인 UI 컴포넌트를 의미한다. 주로 하나의 완전한 모듈이다.
+
+### `Features` 레이어
+
+프로젝트 전반에 걸쳐 재사용되는 기능 구현체로, 댓글 전송 기능, 장바구니에 담기 기능, 사용자 검색 기능 등과 같이 사용자 인터렉션, 사용자에게 비즈니스 가치를 제공하는 액션 등을 의미한다.
+
+### `Entities` 레이어
+
+Users, Products, Orders, Articles 등의 프로젝트가 다루는 비즈니스 엔티티를 의미한다. 클린 아키텍처 원 내부의 Entity와 동일한 느낌을 받았다.
+
+### `Shared` 레이어
+
+프로젝트나 비즈니스의 특성에서 분리된 재사용 가능한 모듈을 의미한다. 예를 들어 UI Kit, libs, API 등이 있다. 여러 예시 레포지토리를 확인해보면, `Shared Layer`에는 다음과 같은 기능들이 존재한다.
+
+- GET, POST, DELETE 등 API 로직에 대한 편의적 Wrapper 함수
+  - Axios 설정
+  - Socket 활용 로직
+  - Tanstack Query의 QueryClient
+- Route 기본 요소 및 상수
+- I18N 지원 구성
+- 비즈니스 로직이 없는 순수한 UI 컴포넌트
+  - Form에서 활용되는 Input UI, Button UI 등 UI 컴포넌트
+
+## 슬라이스(Slices)
+
+FSD의 슬라이스는 코드를 비즈니스 도메인을 기준으로 분할한다. 이렇게 코드를 분할하면, 논리적으로 관련된 모듈의 응집도를 높여 코드 베이스를 쉽게 탐색할 수 있다. 즉, 비즈니스 도메인이 분할 기준이 되기에 슬라이스의 이름은 자유롭게 작성할 수 있고, 레이어와 달리 수가 정해지지도 않았다.
+
+[FSD 공식 문서](https://feature-sliced.design/kr/docs/get-started/overview#slices)에 의하면, 슬라이스는 동일한 레이어의 다른 슬라이스를 활용할 수 없기에 프로젝트가 높은 응집도와 낮은 경합도를 유지할 수 있게 도움을 준다.
+
+## 세그먼트(Segments)
+
+각 슬라이스와 App, Shared 레이어는 권장되는 이름을 가진 일부와 추가적인 세그먼트들로 구성된다. 이러한 세그먼트는 주로 기술적인 목적에 기반하여 구분된다.
+
+- `api` - 백엔드와의 상호작용을 위한 세그먼트(Request 함수, 데이터 타입, Mapper 등)
+- `ui` - UI와 관련된 세그먼트(UI 컴포넌트, Formatter, 스타일 등
+- `model` - 데이터 모델과 관련된 세그먼트(스키마, 인터페이스, 스토어, 비즈니스 로직 등)
+- `lib` - 슬라이스 내 다른 모듈에서 필요한 라이브러리 세그먼트
+- `config` - 설정, 기능 플래그 등
+- …
+
+[공식 문서](https://feature-sliced.design/kr/docs/guides/examples/types)에 따르면, `types`, `components`, `hooks` 등의 세그먼트는 해당 코드의 목적을 명확하게 설명하지 않기에 권장되지 않는다.
+
+# 참고자료
+
+[https://feature-sliced.design/docs/get-started](https://feature-sliced.design/docs/get-started)
+[https://feature-sliced.design/examples](https://feature-sliced.design/examples)
+[https://emewjin.github.io/feature-sliced-design/](https://emewjin.github.io/feature-sliced-design/)
