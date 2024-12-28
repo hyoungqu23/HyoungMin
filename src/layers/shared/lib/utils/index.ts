@@ -1,9 +1,5 @@
-export const cls = (
-  ...classNames: Array<string | boolean | null | undefined>
-): string => {
-  return classNames
-    .filter((className) => className && typeof className === 'string')
-    .join(' ');
+export const cls = (...classNames: Array<string | boolean | null | undefined>): string => {
+  return classNames.filter((className) => className && typeof className === 'string').join(' ');
 };
 
 export const getRandomColor = () => {
@@ -18,8 +14,7 @@ export const getRandomColor = () => {
   return color;
 };
 
-export const capitalizeFirstLetter = (str: string) =>
-  str.charAt(0).toUpperCase() + str.slice(1);
+export const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 export const getRootDirectoryPath = () => process.cwd();
 

@@ -12,22 +12,13 @@ export const ArticlePage = ({ preview, content }: IArticlePageProps) => {
     <section className='flex flex-col px-4 pt-10 pb-40 text-heading6 w-full'>
       <header className='flex flex-col gap-4'>
         <div className='flex justify-between items-center'>
-          <p className='self-center font-semibold underline underline-offset-2'>
-            {preview.category}
-          </p>
-          <p className='self-end text-body1 opacity-50'>
-            {format(new Date(preview.createdAt))}
-          </p>
+          <p className='self-center font-semibold underline underline-offset-2'>{preview.category}</p>
+          <p className='self-end text-body1 opacity-50'>{format(new Date(preview.createdAt))}</p>
         </div>
-        <h1 className='text-heading3 tablet:text-heading1 font-extrabold'>
-          {preview.title}
-        </h1>
+        <h1 className='text-heading3 tablet:text-heading1 font-extrabold'>{preview.title}</h1>
         <ul className='flex gap-1 text-body2 flex-wrap text-primary-200/50'>
           {preview.tags.map((tag) => (
-            <span
-              key={tag}
-              className='after:content-["|"] after:ml-1 last:after:content-none last:after:ml-0'
-            >
+            <span key={tag} className='after:content-["|"] after:ml-1 last:after:content-none last:after:ml-0'>
               {tag}
             </span>
           ))}

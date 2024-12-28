@@ -16,15 +16,7 @@ interface ICardProps extends ComponentPropsWithoutRef<'a'> {
 }
 
 export const Card = ({
-  articlePreview: {
-    category,
-    tags,
-    thumbnail,
-    title,
-    description,
-    createdAt,
-    slug,
-  },
+  articlePreview: { category, tags, thumbnail, title, description, createdAt, slug },
   className,
   ...props
 }: ICardProps) => {
@@ -48,9 +40,7 @@ export const Card = ({
           />
         ) : (
           <div className='flex items-center justify-center w-full h-full px-4 bg-white rounded-br-xl'>
-            <h2 className='font-bold text-primary-600 text-heading4 line-clamp-1'>
-              {title}
-            </h2>
+            <h2 className='font-bold text-primary-600 text-heading4 line-clamp-1'>{title}</h2>
           </div>
         )}
       </div>
@@ -68,12 +58,8 @@ export const Card = ({
       </div>
       <div className='z-20 flex flex-col justify-between col-span-2 px-3 py-2 bg-primary-900 rounded-tr-xl rounded-b-xl'>
         <div className='space-y-2'>
-          <h2 className='font-bold text-heading5 text-primary-50 line-clamp-1'>
-            {title}
-          </h2>
-          <p className='text-body2 text-primary-50/75 line-clamp-2'>
-            {description}
-          </p>
+          <h2 className='font-bold text-heading5 text-primary-50 line-clamp-1'>{title}</h2>
+          <p className='text-body2 text-primary-50/75 line-clamp-2'>{description}</p>
         </div>
         <div className='flex gap-1 flex-nowrap whitespace-nowrap'>
           {tags.map((tag) => (

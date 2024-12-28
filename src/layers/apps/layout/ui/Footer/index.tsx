@@ -17,9 +17,7 @@ export const Footer = () => {
           </Link>
         ))}
       </ul>
-      <span className='block text-center text-primary-50/75 text-caption1'>
-        {COPYRIGHT}
-      </span>
+      <span className='block text-center text-primary-50/75 text-caption1'>{COPYRIGHT}</span>
     </footer>
   );
 };

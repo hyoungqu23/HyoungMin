@@ -1,8 +1,4 @@
-import {
-  CONTENTS_PATH_MAP,
-  getRootDirectoryPath,
-  type TMetadata,
-} from '@shared';
+import { CONTENTS_PATH_MAP, getRootDirectoryPath, type TMetadata } from '@shared';
 import fs from 'fs';
 import matter from 'gray-matter';
 import path from 'path';
