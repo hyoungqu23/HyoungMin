@@ -9,20 +9,14 @@ const AutoInfiniteSkills = () => {
       <div className='absolute w-[200%] flex gap-2 animate-automatic-infinite-carousel'>
         <ul className='flex gap-2 w-fit'>
           {INFINITE_CAROUSEL_ITEMS.map((item) => (
-            <li
-              key={item}
-              className='px-3 py-2 font-extrabold whitespace-nowrap text-primary-50 text-heading5'
-            >
+            <li key={item} className='px-3 py-2 font-extrabold whitespace-nowrap text-primary-50 text-heading5'>
               {item}
             </li>
           ))}
         </ul>
         <ul className='flex gap-2 w-fit'>
           {INFINITE_CAROUSEL_ITEMS.map((item) => (
-            <li
-              key={item}
-              className='px-3 py-2 font-extrabold whitespace-nowrap text-primary-50 text-heading5'
-            >
+            <li key={item} className='px-3 py-2 font-extrabold whitespace-nowrap text-primary-50 text-heading5'>
               {item}
             </li>
           ))}

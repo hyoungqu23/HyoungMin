@@ -6,27 +6,17 @@ import { articleService } from './articleService';
 
 export const articlesService: TArticlesService = {
   get: () => {
-    const articlesPath = path.join(
-      getRootDirectoryPath(),
-      CONTENTS_PATH_MAP.ROOT,
-      CONTENTS_PATH_MAP.ARTICLES,
-    );
+    const articlesPath = path.join(getRootDirectoryPath(), CONTENTS_PATH_MAP.ROOT, CONTENTS_PATH_MAP.ARTICLES);
 
     const slugOfArticles = fs.readdirSync(articlesPath);
 
     return slugOfArticles
       .map((slug) => articleService.getPreview(slug.replace('.mdx', '')))
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   },
   filter: (filterBy) => {
     const articles = articlesService.get();
 
-    return articles.filter(
-      (article) =>
-        article.category.toLowerCase().replaceAll('.', '') === filterBy,
-    );
+    return articles.filter((article) => article.category.toLowerCase().replaceAll('.', '') === filterBy);
   },
 };

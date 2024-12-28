@@ -18,14 +18,10 @@ export const Category = ({ category }: ICategoryProps) => {
     <li
       className={cls(
         'w-fit h-full flex items-center justify-center px-1 py-0.5 tablet:px-4 tablet:py-3 rounded-md',
-        isInCategory(pathname, adaptedCategory)
-          ? 'border-2 border-white'
-          : 'opacity-50',
+        isInCategory(pathname, adaptedCategory) ? 'border-2 border-white' : 'opacity-50',
       )}
     >
-      <Link
-        href={`${NAVIGATION_ITEMS.ARTICLES.route}${NAVIGATION_ITEMS.CATEGORY.route}/${adaptedCategory}`}
-      >
+      <Link href={`${NAVIGATION_ITEMS.ARTICLES.route}${NAVIGATION_ITEMS.CATEGORY.route}/${adaptedCategory}`}>
         {category}
       </Link>
     </li>

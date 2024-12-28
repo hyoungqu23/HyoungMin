@@ -1,10 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  content: [
-    './src/layers/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
+  content: ['./src/layers/**/*.{js,ts,jsx,tsx,mdx}', './src/app/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     screens: {
       minimum: '375px',
@@ -72,8 +69,7 @@ const config: Config = {
         },
       },
       animation: {
-        'automatic-infinite-carousel':
-          'automatic-infinite-carousel 60s linear infinite',
+        'automatic-infinite-carousel': 'automatic-infinite-carousel 60s linear infinite',
       },
       typography: ({ theme }: any) => ({
         primary: {
