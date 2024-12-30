@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome lint --write",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "api": "vite-node ./scripts/api.ts"
   },
   "dependencies": {
     "@vercel/analytics": "^1.1.3",
