@@ -1,1 +1,0 @@
-export const AVERAGE_NUMBER_OF_WORDS_IN_MINUTE = 225;
