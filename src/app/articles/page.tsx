@@ -1,5 +1,5 @@
 import { getArticles } from '@entities/articles';
-import { formatDate } from '@shared/lib';
+import { ClientTimestamp } from '@shared/ui';
 import Link from 'next/link';
 
 const ArticlesPage = async () => {
@@ -26,7 +26,7 @@ const ArticlesPage = async () => {
           </div>
           <div className='flex flex-col items-end gap-2 text-body3 font-semibold self-end tablet:text-body1 text-nowrap'>
             <span>{article.readingTime ?? 1} min.</span>
-            <span className='underline'>{formatDate(new Date(article.createdAt))}</span>
+            <ClientTimestamp className='underline' date={new Date(article.createdAt)} />
           </div>
         </Link>
       ))}

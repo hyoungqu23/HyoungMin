@@ -1,6 +1,7 @@
 import { getArticles, getContent, getPreviewOfArticle } from '@entities/articles';
 import { formatDate } from '@shared/lib';
 import { BASE_URL, NAVIGATION_ITEMS } from '@shared/routes';
+import { ClientTimestamp } from '@shared/ui';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { notFound } from 'next/navigation';
 
@@ -57,7 +58,7 @@ const Article = ({ params: { slug } }: IArticlePageProps) => {
       <header className='flex flex-col gap-4'>
         <div className='flex justify-between items-center'>
           <p className='self-center font-semibold underline underline-offset-2'>{previewOfArticle.category}</p>
-          <p className='self-end text-body1 opacity-50'>{formatDate(new Date(previewOfArticle.createdAt))}</p>
+          <ClientTimestamp className='self-end text-body1 opacity-50' date={new Date(previewOfArticle.createdAt)} />
         </div>
         <h1 className='text-heading3 tablet:text-heading1 font-extrabold'>{previewOfArticle.title}</h1>
         <ul className='flex gap-1 text-body2 flex-wrap text-primary-200/50'>
