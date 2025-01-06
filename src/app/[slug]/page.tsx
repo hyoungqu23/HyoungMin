@@ -31,12 +31,12 @@ export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
       siteName: 'HyoungMin Tech Blog',
       locale: 'ko',
       type: 'website',
-      url: new URL(`${BASE_URL}/${NAVIGATION_ITEMS.ARTICLES.id}/${slug}`),
+      url: new URL(`${BASE_URL}/${slug}`),
     },
     twitter: {
       title: previewOfArticle.title,
       description: contentOfArticle.slice(0, 100),
-      url: new URL(`${BASE_URL}/${NAVIGATION_ITEMS.ARTICLES.id}/${slug}`),
+      url: new URL(`${BASE_URL}/${slug}`),
       images: {
         url: previewOfArticle.thumbnail.src ?? '/images/web/hero_background.png',
         alt: `${previewOfArticle.title} Thumbnail`,

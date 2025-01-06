@@ -3,7 +3,7 @@ import { cls } from '@shared/lib';
 import { BASE_URL } from '@shared/routes';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { Footer, Header, Trackers } from '@widgets/layout';
+import { Footer, Trackers } from '@widgets/layout';
 import localFont from 'next/font/local';
 
 import './globals.css';
@@ -83,7 +83,7 @@ const RootLayout = ({ children }: TRootLayoutProps) => {
           'relative bg-secondary-500 text-primary-50 w-screen flex flex-col items-center min-h-screen overflow-x-hidden',
         )}
       >
-        <Header />
+        {/* <Header /> */}
         <main role='main' className='max-w-[1024px] flex-1 w-full'>
           {children}
         </main>
