@@ -1,0 +1,218 @@
+---
+title: ‘딸깍’으로 다국어 지원 데이터 변환 시간 99% 줄이기
+description: Google Spreadsheet와 자동화 시스템으로 다국어 데이터 변환 시간을 10분에서 1초로 단축하기
+createdAt: 2024-08-08
+category: Frontend
+tags:
+  - Internationalization
+  - i18n
+  - Next.js
+  - Google Spreadsheet
+  - Automation
+  - Frontend
+  - 다국어 지원
+  - 자동화
+  - 구글 스프레드시트
+---
+
+# **문제와 그 원인**
+
+5개국어를 지원하는 웹 서비스 프로젝트에서 QA 단계에서 지속적으로 다국어 지원 데이터와 관련된 이슈가 발생했다. 이는 여러 프로젝트를 동시에 진행하면서 일부 다국어 지원 데이터의 수정사항이 누락되거나, 수동으로 데이터를 관리하는 과정에서 실수가 발생했기 때문이었다. 이러한 문제로 인해 데이터 일관성이 깨지고, QA 과정에서 번거로운 수정 작업이 반복됐기 때문에 자동화 시스템을 도입하여 다국어 데이터 관리의 오류를 "제로"로 만들고자 했다.
+
+# **어떻게 자동화할 것인가**
+
+다국어 지원을 자동화하기 위해 다음과 같은 접근 방식을 설계했다:
+
+1. **Google Spreadsheet를 활용한 데이터 관리**
+    - 다국어 데이터를 Google Spreadsheet에 저장하고, 이를 자동으로 가져와 JSON 형식으로 변환.
+    - 중앙 집중화된 데이터 소스를 통해 실시간 업데이트와 일관성 유지 가능.
+2. **타입 안정적인 코드 생성**
+    - JSON 변환 시 타입 인터페이스와 설정 파일을 자동으로 생성하여 타입 안정성 확보.
+    - 이를 통해 개발자가 다국어 데이터를 사용할 때 타입 오류를 방지하고, 코드의 안정성 향상.
+3. **페이지별 다국어 데이터 분리**
+    - 모든 다국어 데이터를 하나의 파일에 저장하면 확인이 어렵고, 페이지에서 데이터를 가져와 렌더링할 때 비효율적.
+    - 페이지별로 데이터를 분리하여 필요한 데이터만 효율적으로 로드하도록 설계.
+
+# **자동화 시스템의 구현**
+
+## **`i18n.ts`: 데이터 가져오기와 변환**
+
+`i18n.ts` 타입스크립트 기반 스크립트는 Google Spreadsheet에서 다국어 데이터를 가져와 JSON 파일로 변환하고, 타입 정의와 설정 파일을 생성한다.
+
+```tsx
+// i18n.ts
+
+import dotenv from 'dotenv';
+import * as fs from 'fs';
+import { JWT } from 'google-auth-library';
+import { google } from 'googleapis';
+import * as path from 'path';
+
+dotenv.config({ path: '.env.local' });
+
+const SPREADSHEET_ID = process.env.GOOGLE_SHEET_I18N_DOCUMENT_ID;
+const RANGE = process.env.GOOGLE_SHEET_I18N_RANGE;
+const OUTPUT_DIR = path.join(process.cwd(), 'public/i18n');
+const I18N_TYPES_PATH = path.join(process.cwd(), 'src/shared/i18n', 'types.ts');
+const I18N_CONFIG_PATH = path.join(process.cwd(), 'src/shared/i18n', 'config.ts');
+
+const LANGUAGE_CODES = ['ko', 'en']; // 지원 언어 목록
+
+const fetchRowsInGoogleSpreadsheet = async () => {
+	// Google Spreadsheet 연결
+  const auth = new JWT({
+    email: process.env.FIREBASE_CLIENT_EMAIL,
+    key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+  });
+  const { spreadsheets } = google.sheets({ auth, version: 'v4' });
+
+  const response = await spreadsheets.values.get({
+    range: RANGE,
+    spreadsheetId: SPREADSHEET_ID,
+  });
+
+	// 데이터 파싱
+  const rows = response.data.values || [];
+  const translationsByLanguage: Record<string, Record<string, any>> = {};
+
+  LANGUAGE_CODES.forEach((langCode) => {
+    const langDir = path.join(OUTPUT_DIR, langCode);
+    if (!fs.existsSync(langDir)) fs.mkdirSync(langDir, { recursive: true });
+  });
+
+  rows.forEach((row) => {
+    const [page, section, content1, , , translation] = row;
+    const normalizedPage = page?.toLowerCase().replace(/\s+/g, '_');
+
+    LANGUAGE_CODES.forEach((langCode, langIndex) => {
+      const translationValue = row[5 + langIndex] || '';
+      if (!translationValue) return;
+
+      if (!translationsByLanguage[langCode]) translationsByLanguage[langCode] = {};
+      if (!translationsByLanguage[langCode][normalizedPage]) {
+        translationsByLanguage[langCode][normalizedPage] = {};
+      }
+      translationsByLanguage[langCode][normalizedPage][section] = translationValue;
+    });
+  });
+
+  LANGUAGE_CODES.forEach((langCode) => {
+    const langDir = path.join(OUTPUT_DIR, langCode);
+    Object.entries(translationsByLanguage[langCode]).forEach(([page, data]) => {
+      const jsonFilePath = path.join(langDir, `${page}.json`);
+      fs.writeFileSync(jsonFilePath, JSON.stringify(data, null, 2), 'utf8');
+    });
+  });
+
+  const typeDefinitions = generateTypeDefinitions(translationsByLanguage['ko']);
+  fs.writeFileSync(I18N_TYPES_PATH, typeDefinitions, 'utf8');
+};
+```
+
+- Google Sheets API를 통해 데이터를 가져온다.
+- 언어별 디렉토리(예: `public/i18n/ko`)와 페이지별 JSON 파일(예: `common.json`)을 생성한다.
+- 타입 정의 파일(`types.ts`)과 설정 파일(`config.ts`)을 자동 생성하고 업데이트한다.
+
+## **`getDictionary.ts`: 서버 사이드에서 다국어 데이터 가져오기**
+
+`getDictionary.ts`는 서버에서 다국어 데이터를 비동기적으로 가져오는 함수를 제공한다.
+
+```tsx
+// getDictionary.ts
+
+'use server';
+
+import { DICTIONARY_MAP, EDictionary, i18nConfig } from './config';
+import type { TDictionaries, TLanguage } from './types';
+
+type DictionaryReturnType = {
+  [K in keyof TDictionaries]: TDictionaries[K] extends () => Promise<infer R> ? R : never;
+};
+
+export const getDictionary = async <T extends EDictionary>(
+  page: T,
+  language: TLanguage,
+): Promise<DictionaryReturnType[T]> => {
+  if (!i18nConfig.locales.includes(language)) {
+    throw new Error(`${language}는 지원하지 않는 언어입니다.`);
+  }
+
+  const dictionary = DICTIONARY_MAP[language][page];
+  const translation = await dictionary();
+
+  if (!translation) throw new Error(`${language}의 ${page}이 없습니다.`);
+
+  return translation as DictionaryReturnType[T];
+};
+```
+
+```tsx
+const COMMON_T = await getDictionary(EDictionary.COMMON, locale);
+const BUTTONS_T = await getDictionary(EDictionary.BUTTONS, locale);
+```
+
+- 페이지와 언어에 맞는 데이터를 동적으로 가져온다.
+- 지원되지 않는 언어나 페이지에 대한 오류 처리를 제공한다.
+
+## **`useTranslation`: 클라이언트 사이드에서 다국어 데이터 사용하기**
+
+React Context API와 useTranslation 커스텀 훅을 활용해 클라이언트에서 다국어 데이터를 쉽게 사용할 수 있도록 했다.
+
+```tsx
+// TranslationContext와 useTranslation
+
+'use client';
+
+import { createContext, useContext } from 'react';
+import { EDictionary } from './config';
+import { getDictionary } from './getDictionary';
+
+type Dictionary = Awaited<ReturnType<typeof getDictionary>>;
+const TranslationContext = createContext<Partial<Record<`${EDictionary}_T`, Dictionary>>>({});
+
+export const useTranslation = <T,>() => {
+  return useContext(TranslationContext) as T;
+};
+
+type TranslationProviderProps<T> = {
+  children: React.ReactNode;
+  dictionaries: T;
+};
+
+export const TranslationProvider = <T extends Partial<Record<`${EDictionary}_T`, Dictionary>>>({
+  children,
+  dictionaries,
+}: TranslationProviderProps<T>) => {
+  return <TranslationContext.Provider value={dictionaries}>{children}</TranslationContext.Provider>;
+};
+```
+
+```tsx
+const { COMMON_T } = useTranslation<{ COMMON_T: TCommonTranslation }>();
+```
+
+- `TranslationProvider`로 다국어 데이터를 제공하고, `useTranslation` 훅으로 컴포넌트에서 접근한다.
+
+## **자동화 시스템의 이점**
+
+- **데이터 변환 시간 감소**
+    
+    수동으로 데이터를 변환하는 데 걸리던 10분이 1초로 단축.
+    
+- **타입 안정성**
+    
+    자동 생성된 타입 정의로 다국어 데이터 사용 시 타입 오류를 방지.
+    
+- **효율적인 데이터 관리**
+    
+    페이지별 데이터 분리로 필요한 데이터만 로드하여 성능을 최적화.
+    
+- **중앙 집중화된 데이터 관리**
+    
+    Google Spreadsheet를 통해 데이터가 중앙에서 관리되며, 실시간 업데이트가 가능.
+    
+
+# **결론**
+
+자동화된 다국어 지원 시스템은 QA 단계에서 발생하던 데이터 이슈를 효과적으로 해결했다. 데이터 변환 시간을 획기적으로 줄이고, 타입 안정성과 성능 최적화를 통해 개발 효율성과 사용자 경험을 개선했다. 또한, 중앙 집중화된 데이터 관리로 유지보수성이 크게 향상됐다. 이 시스템은 다국어 지원 프로젝트에서 반복적인 문제를 "제로"로 만드는 데 성공했으며, 지속 가능한 개발 환경을 제공하고 있다.
