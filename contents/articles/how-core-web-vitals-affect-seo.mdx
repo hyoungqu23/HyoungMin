@@ -1,0 +1,170 @@
+---
+title: "[번역] Core Web Vitals가 SEO에 미치는 영향"
+description: Core Web Vitals가 SEO에 미치는 영향과 실제 데이터와 실험실 데이터의 차이점을 이해하기
+createdAt: 2024-10-21
+category: SEO
+tags:
+  - Core Web Vitals
+  - SEO
+  - Google Search Console
+  - PageSpeed Insights
+  - Lighthouse
+  - Field Data
+  - Lab Data
+  - Web Performance
+  - Web Analytics
+  - Google Search Ranking
+---
+
+[원문 보기](https://vercel.com/blog/how-core-web-vitals-affect-seo)
+
+[Malte UblCTO, Vercel](https://twitter.com/cramforce)와 [Alice Alexandra MooreSr. Content Engineer, Vercel](https://twitter.com/tempoimmaterial)가 작성한 Vercel Blog 글로, Core Web Vitals가 SEO에 미치는 영향에 대해 이해하는 데 도움이 될 것으로 보여 번역했다. 특히, 이전 홈페이지 프로젝트를 진행할 때, SEO를 향상시키기 위해 나름 스터디를 진행했는데, 당시에는 실제 데이터와 실험실 데이터가 어떻게 다른지 명확히 이해하지 않고 넘어간 감이 없지 않아 있었는데, 이번 아티클 번역을 통해 각 데이터가 어떻게 영향을 미치는 지에 대해 조금 더 이해할 수 있었다.
+
+# Core Web Vitals가 SEO에 미치는 영향
+
+💡 당신의 애플리케이션의 Google 페이지 경험 랭킹과 Lighthouse 점수에 대해 이해하기.
+
+Core Web Vitals은 당신의 애플리케이션이 Google에 순위가 매겨지는 방식에 영향을 미친다. 우리는 Core Web Vitals가 무엇인지, 어떻게 측정되는 지, 그리고 어떻게 사용자들과 검색 순위에 영향을 미치는 지에 대해 깊게 알아보고자 한다.
+
+## Google이 페이지 속도에 따라 순위를 매기는 방식
+
+당신의 웹 사이트의 Google 검색 순위는 Google의 Core Web Vitals 매트릭을 기반으로 당신의 웹 사이트의 성능을 평가하는 Google의 페이지 경험 순위 시스템에 영향을 받는다.
+
+Google은 실제 사용자들이 얼마나 당신의 웹 사이트와 상호작용하는 방식을 관찰하고, 이를 다시 서버에 보고하는 방식으로 Core Web Vitals을 수집한다.
+
+우리는 당신의 사이트를 브라우징하는 실제 사용자로부터 수집한 데이터이기 때문에 이러한 타입의 데이터를 ‘현장 데이터(Field Data)’라고 부른다. ’실험실 데이터(Lab Data)‘라고 불리는 ’실험실 설정(Lab Setting)‘ 내에서 실행되는 당신의 웹 사이트가 얼마나 좋은 퍼포먼스를 가지고 있는지 결정하는 테스트의 결과와는 다르다. Google의 Lighthouse는 실험실 테스트의 하나의 예시이다.
+
+이번 아티클에서 가장 중요한 시사점은 다음과 같다:
+
+> ***“Google은 당신의 웹 사이트의 순위를 산정할 때, Core Web Vitals 현장 데이터만을 고려한다. Google은 당신의 웹 사이트의 Lighthouse 점수를 검색 순위를 위해 그 어떤 방법으로든 고려하지 않는다.”***
+
+### 검색 순위 요소의 맥락화
+
+페이지 경험은 Core Web Vitals를 활용해 당신의 웹 사이트가 다른 웹 사이트에 비해 어떻게 동작하는지를 결정하는 Google 검색 순위의 요소이다. 페이지 경험은 다양한 Google 검색 순위 요소 중 하나로, 이들은 모두 집계되어 검색 결과 페이지에서 당신의 웹 사이트의 순위를 결정하게 된다.
+
+검색어와의 연관성과 컨텐츠의 퀄리티는 실질적으로 페이지 경험보다 더 중요한 요소이다. 다만, 당신과 당신의 경쟁자가 매우 유사한 검색어와의 연관성을 가지고 있는 경우에 페이지 경험이 어떤 웹 사이트가 상단에 나타날 지 결정할 것이다.
+
+페이지 경험과 Core Web Vitals가 독특한 점은 다음과 같다:
+
+- 당신은 이러한 매트릭을 직접 향상시킬 수 있다.
+- Google은 당신이 얼마나 잘하고 있는지에 대해 투명하다.
+
+Core Web Vitals는 다른 순위 결정 요소에 비해 잘 알려진 편이다. Core Web Vitals를 최적화하는 것은 검색어와의 연관성을 개선하는 것보다 더 명확하며 컨텐츠의 퀄리티보다 더 측정하기 쉽다.
+
+나아가, Core Web Vitals를 개선하면 사용자 경험이 향상되어 전환을 유도할 수 있다.
+
+### 애플리케이션의 Core Web Vitals을 확인하는 방법
+
+Google Search Console은 당신의 앱이 페이지 경험 순위를 위해 얼마나 잘 동작하는지에 대한 권위 있는 데이터 원천이다.
+
+![Core Web Vitals, Google Search Console](https://vercel.com/_next/image?url=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Fcontentful%2Fimage%2Fe5382hct74si%2F6DSsIMSGVUi6xtL6hvIFx4%2Fe9f54eae5dcc0e7c3f5aaf6e734bea6d%2FScreenshot-2024-01-18-at-7.45.50-AM.png&w=1080&q=75)
+
+페이지별 데이터에 접근하는 가장 간단한 방법은 Core Web Vitals와 Lighthouse, 두 가지 주요 섹션으로 그룹화되어 있는 Google PageSpeed Insights를 활용하는 것이다.
+
+## Field Data: Core Web Vitals
+
+‘실제 사용자가 경험하는 것을 발견하세요.’라고 표기된 PageSpeed Insights의 상단에서 Google은 최근 28일 동안의 Chrome 브라우저(Android 모바일 기기와 데스크탑)에서 당신의 애플리케이션에 접근한 실제 사용자의 75번째 백분위수의 글로벌 현장 데이터(Field Data)를 수집한다.
+
+Google은 이러한 실제 데이터의 처음 세 가지 지표인 LCP(Largest Contentfull Paint), INP(Interaction to Next Paint), CLS(Cumulative Layout Shift)를 활용하여 그 점수에 따라 애플리케이션의 순위를 변경한다.(* 2024년 5월 12일 기준으로 INP는 FID(First Input Delay)로 대체됐다.)
+
+이러한 세 가지 Core Web Vitals(LCP, FID, CLS)는 Google이 퍼포먼스에 따라 앱의 순위에 영향을 미치기 위해 활용하는 유일한 데이터로, 해당 점수는 당신의 애플리케이션에서 비슷한 퍼포먼스를 가진 그룹으로 평균화되어 있다고 할지라도, 정확히 Google이 활용하는 숫자이다.
+
+또한, 당신은 PageSpeed Insights에 데스크탑과 모바일 각각의 탭이 있다는 것을 인지하게 될 것이다. 이는 Google이 당신의 애플리케이션의 순위를 모바일 사용자와 데스크탑 사용자에 대해 각각 버전에 기반하여 별도의 순위를 매기고 있기 때문이다.
+
+![`www.google.com`의 모바일 Core Web Vitals](https://vercel.com/_next/image?url=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Fcontentful%2Fimage%2Fe5382hct74si%2F2MQEt0ITfq0LZYh6IwHtOW%2F32cbdf0b87c629f0b605c9ac67f6eead%2F1920xVariable-1.png&w=1080&q=75)
+
+Core Web Vitals의 세 지표는 사용자 경험에 대한 추가적인 인사이트를 제공할 수는 있지만, 당신의 애플리케이션의 검색 순위에 영향을 미치지는 않는다.
+
+### 어떤 사용자가 Core Web Vitals Field Data에 포함되는가?
+
+Chrome 사용자 경험 보고서(Chrome User Experience Report, CrUX)는 Google의 Core Web Vitals 프로그램의 공식적인 데이터셋이고, 그 수집 방법론은 공개적으로 문서화되어 있다.
+
+특히, CrUX 보고서에 포함되기 위해서는:
+
+- 페이지는 반드시 “충분히 인기 있고”, “공개적으로 검색할 수 있는” 상태여야 한다. 당신의 페이지가 인기도 임계값을 충족하는지 여부는 Search Console의 CWV 보고서에서 확인할 수 있다.
+- 사용자는 사용 통계 보고를 활성화하고, 브라우저 기록을 동기화(Chrome에 로그인한 상태를 의미)해야 하고, 동기화 비밀번호를 설정하지 않아야 한다.
+- 사용자는 데스크탑 혹은 안드로이드 기기에서 Chrome 브라우저를 반드시 활용해야 한다.
+
+마지막 조건은 아이폰 사용자의 경우 집계되지 않는다는 것을 의미한다. 이러한 사실은 일부 시장에서 안드로이드가 아이폰보다 느리게 왜곡되어 당신의 웹사이트 방문 속도가 느려진 비율이 더 많이 집계될 수 있다는 사실과 연관성이 있을 수 있다.
+
+당신의 애플리케이션이 실제 사용자의 데이터를 충분히 가지고 있지 않은 경우, Core Web Vitals은 측정될 수 없고, 순위를 결정하는 데 고려되지 않을 것이다.
+
+### 사용자가 어디에서 오는 지가 중요한가?
+
+자주 묻는 질문 중 또다른 하나는 다음과 같다: 사용자의 출신 국가가 중요한가? 인터넷 연결 속도가 느린 국가에 사용자가 많은 경우 패널티가 있는가?
+
+사용자의 출신 국가, 즉 사용자가 어디에서 오는 지는 중요하다. Field Data의 핵심은 해당 데이터가 실제 사용자를 반영하고 전 세계의 모든 사용자는 동등하게 집계된다는 사실이다.
+
+좋은 소식은 인터넷 연결 상태나 기기 성능이 전세계적으로 향상되고 있으며, Vercel과 같은 Edge 네트워크와 함께라면 지구 상 모든 사용자에서 뛰어난 성능을 전달할 수 있다는 점이다.(ㅋㅋㅋ)
+
+### (주의) 슬라이딩 기간, 28일
+
+Google은 28일 단위로 Core Web Vitals를 수집하고, 당신의 점수는 기본적으로 지난 28일간의 평균이다. 즉, 당신의 애플리케이션에 개선이나 악화가 존재하더라도 그 전체 영향을 파악하기까지는 1개월이 걸린다는 이야기이다.
+
+## Lab Data: Lighthouse
+
+Google PageSpeed Insights의 두 번째 섹션인 “성능 이슈 진단”에서는 Google이 당신의 애플리케이션을 Chrome의 개발자도구에 존재하는 것과 동일한 Lighthouse 내에서 시뮬레이션한다.
+
+이는 위에서 본 Field Data 기반 섹션과 완전히 구분되며, 실제 사용자에 대한 Google의 기준을 아직 충족하지 못한 경우에 대한 개선을 위한 제안을 의미한다.
+
+다시 한 번 강조하지만, **Lighthouse의 그 어던 점수도 당신의 사이트의 검색 순위에 반영되지 않는다.** 단지 웹 앱 개발의 일반적인 함정을 피하는 데 도움이 되는 선택적인 지침을 제공할 뿐이다.
+
+![`www.google.com`의 모바일 Lighthouse 결과](https://vercel.com/_next/image?url=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Fcontentful%2Fimage%2Fe5382hct74si%2F56HjW2PLkBuDplFL4bF51R%2F82d5b9a87f43f90fa2a5bf6334e5998d%2F1920xVariable-3.png&w=1080&q=75)
+
+
+Lighthouse의 성능 점수는 해당 페이지에서 가장 눈에 띄는 숫자 중 하나로, FCP(First Contentful Paint), Speed Index, LCP(Largest Contentful Paint), TBT(Total Blocking Time), 그리고 CLS(Cumulative Layout Shift) 지표를 가중치에 따라 합산해 계산된다. 이때 Core Web Vitals는 가중치 적용 후 전체 점수의 50%만 차지하며, INP(Interaction to Next Paint)는 포함되지 않는다.
+
+Lighthouse 결과는 Moto G Power를 모방한 기기와 제한된 네트워크 연결에서 수집된 Lab Data를 기반으로 하며, 실제 사용자의 기기 사양과 큰 차이가 있을 수 있다.
+
+또한, 실험실 데이터는 사용자가 페이지로 이동하기 전 어떤 경로를 거쳤는지 등을 고려하지 않아, Lighthouse 점수만으로 UX(사용자 경험) 지표를 평가하기에는 부적절할 수 있다.
+
+예를 들어, TBT 지표는 실제 사용자 경험을 충분히 반영하지 못하는 경우가 많다. React와 같은 최신 프레임워크는 사용자 이벤트가 발생할 때 실행을 중단하여 INP 측면에서 좋은 성능을 보여주지만, Lab 테스트는 실제 사용자 상호작용 없이 CPU 사용량만 관찰하기 때문에 이를 알 수 없다.
+
+### Lighthouse 점수 해석하기
+
+Lab Data의 한계에도 불구하고 Lighthouse는 유용한 정보를 제공하고 있다. 특히 애플리케이션의 어떤 부분이 사용자에게 문제를 일으킬 가능성이 있는지를 좁혀 나가는 데 도움을 줄 수 있다. 예를 들어:
+
+- **성능**
+    
+    Core Web Vitals가 적정 범위에 들어 있지 않다면, Lighthouse는 가능한 이슈를 지적할 수 있다. 예를 들어 메인 스레드를 장시간 차단하는 스크립트 연결 등이 있다. 또한, LCP 문제를 유발하는 정확한 요소도 표시해준다.
+    
+- **접근성**
+    
+    Lighthouse는 이름이 없는 링크나 레이블이 없는 폼 필드와 같은 일반적인 오류를 감지한다. 또한, 대비 비율이 충분하지 않은 요소나 클릭하기에 간격이 좁은 링크도 스크린샷으로 보여준다.
+    
+- Best Practices
+    
+    이 카테고리는 애플리케이션의 보안과 사용성을 개선하는 다양한 제안을 포함하고 있다. 이러한 정보를 통해 브라우저가 코드를 보다 쉽게 해석할 수 있고, XSS와 같은 취약점을 방지하는 데 도움을 준다.
+    
+- **SEO**
+    
+    기술적인 SEO에 대한 조언을 제공해, 검색 엔진이 사이트를 크롤링하는 데 도움을 준다. 사이트의 예상 검색 순위가 떨어진다면 이를 디버깅하는 데 유용하지만, SEO에 영향을 미치는 모든 요소를 해결할 수 있는 것은 아니다.
+    
+
+### Core Web Vitals에 빠르게 반복 접근하기: Vercel Speed Insights
+
+Google은 검색 및 실제 사용자 경험에서 애플리케이션의 순위를 매기는 데 권위 있는 데이터를 제공하지만, Google 데이터는 최근 28일 간으로 표시되기 때문에 개선 사항이나 성능 저하를 반영하려면 최대 한 달이 걸릴 수 있다. 심지어 개선이 필요할 경우 다시 반영되는 데 또 한 달이 걸릴 수 있다.
+
+Vercel은 반복 속도를 극대화하기 위해 Speed Insights를 제공하며, Chromium 브라우저는 사용자들이 사이트에 접속할 때 Core Web Vital 데이터를 노출하므로, 설치된 Speed Insights 패키지가 이를 실시간으로 보고한다. 이를 통해 문제가 발생하면 즉시 발견하고 해결할 수 있다.
+
+![Vercel Speed Insights 탭](https://vercel.com/_next/image?url=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Fcontentful%2Fimage%2Fe5382hct74si%2F4Ll4chYpMzSQcnFxZjMs7U%2F21a1b35566eae7b0de55a16204cee9bb%2Fres-chart-dark.png&w=1080&q=75)
+
+Vercel의 무제한 불변 배포 기능과 마찬가지로, Speed Insights는 배포별 혹은 브랜치별로 성능을 확인할 수 있어, 각 `git push`가 애플리케이션 성능에 미치는 영향을 쉽게 파악할 수 있다.
+
+Google PageSpeed Insights와 달리, 데이터 필터링이 28일보다 작은 기간으로도 가능하므로 변경 사항의 즉각적인 효과를 확인하거나 대규모 코드베이스 변경과 연관된 임의의 기간을 측정할 수도 있다. 또한, 애플리케이션의 개별 경로를 확인하고 사용자 상위 75%의 성능뿐만 아니라 90%, 95%, 99%의 성능도 확인할 수 있다. 나아가 글로벌 지역별로 결과를 필터링할 수 있어, 실제 사용자들이 위치한 지역에 리소스를 더 잘 할당할 수 있다.
+
+![Vercel Speed Insights의 상위 75% 점수 기반 지도](https://vercel.com/_next/image?url=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Fcontentful%2Fimage%2Fe5382hct74si%2F4txoehjjKXtgVNdJAaBfcI%2F12c800f7d61b137d7f7efe855caa408f%2Fcountry-map-dark.png&w=1080&q=75)
+
+Vercel의 Speed Insights 기능은 전 세계적으로 다양한 규제 조건에서도 사용이 가능하도록 설계되어, 개별 방문자나 IP 주소와 연관되거나 연결되지 않도록 정보를 제공한다.
+
+## 추가 읽기 자료: Core Web Vitals 최적화하기
+
+Core Web Vitals의 개요, 측정 방법, 애플리케이션에 미치는 영향에 대해 확인했으니, 이제 ‘어떻게 하면 내가 각각의 매트릭을 최적화할 수 있지?’라는 의문을 가질 수 있다.
+
+Vercel은 JavaScript 프레임워크와 Vercel 도구를 중심으로 한 [Deep Dive](https://vercel.com/resources/how-vercel-improves-your-websites-search-engine-ranking)를 작성해 두었으며, 추가적으로 Google의 기술 가이드도 [LCP](https://web.dev/articles/optimize-lcp?hl=ko), [CLS](https://web.dev/articles/optimize-cls), [INP](https://web.dev/articles/optimize-inp)와 같은 개별 지표 최적화에 유용하게 활용할 수 있으니 읽어보는 것을 추천한다.
+
+## 요점
+
+- Core Web Vitals는 Google 검색에서 투명하게 공개되는 순위 결정 요소로, Google이 사이트 순위를 매기는 데 사용하는 기본 데이터를 직접 확인할 수 있다.
+- Google 검색 순위에서는 오직 Field Data인 Core Web Vitals만 고려되며, Lab Data인 Lighthouse 점수는 고려되지 않는다.
+- Google 데이터는 28일 간의 슬라이딩 윈도우를 사용하므로, 더 빠르고, 반복해서 사이트 속도를 개선하기 위해 실시간 필터링 가능한 Core Web Vitals 데이터를 제공하는 Vercel Speed Insights를 활용하는 것을 고려할 만 하다.
