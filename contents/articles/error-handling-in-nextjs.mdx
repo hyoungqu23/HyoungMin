@@ -1,0 +1,508 @@
+---
+title: Frontend Error w. Next.js App Router
+description: Next.js App Router에서 발생하는 에러를 처리하는 방법
+createdAt: 2025-02-21
+category: Next.js
+tags:
+  - Next.js
+  - Error Handling
+  - Error Boundary
+  - Error Boundary in Next.js
+  - Frontend Error Handling
+  - Error Handling in Next.js
+---
+
+# 들어가며
+
+릴리즈 후에 사용자들이 특정 기능을 사용할 때마다 에러가 발생한다고 이야기한다면, 개발자는 그 원인을 빠르게 찾아 해결해야 한다. 근데 에러가 언제, 어디서, 어떻게 발생했고, 어떤 종류인지, 왜 발생했는지를 알 수 없다면 디버깅하는 것은 사실상 불가능에 가까워진다. 따라서 MVP 개발 이후에는 에러를 체계적으로 관리하고 모니터링할 수 있는 시스템이 반드시 필요해진다.
+
+지금 현재 사내 프로젝트나 개인 프로젝트에는 에러 핸들링 시스템 자체가 없고, 필요에 따라 추가하고 있었기에 이를 하나의 시스템으로 만들어서 컨벤션화하면 개발 생산성도 높아지고, 유연하고 쉽게 유지보수하면서 활용할 수 있다고 생각했다. 결국 이러한 시스템은 사용자 경험 향상으로도 이어질 수 있다.
+
+기본적으로 Next.js App Router 프로젝트를 기본 스택으로 활용하고 있기 때문에 먼저 그에 맞는 에러 핸들링 시스템을 구축하고, 이후 React(Vite), Remix, Vanilla TypeScript 프로젝트에서 활용할 수 있도록 확장하는 것으로 한다.
+
+# 에러를 구분하기
+
+에러는 발생 시점이나 특성에 따라 크게 네 가지로 나눌 수 있다.
+
+- **논리 에러**
+    
+    코드가 실행은 되는데 결과가 원하는 결과가 아닌 에러를 의미한다. 계산 로직을 잘못 짜서 잘못된 결과값이 나오는 경우가 대표적인 예시이다.
+    
+- **컴파일 타임 에러**
+    
+    코드를 작성하거나 빌드할 때 발견되는 에러로, 문법 틀리거나 타입이 안 맞는 경우의 에러를 의미한다.
+    
+- **생성 에러**
+    
+    개발자가 의도적으로 throw로 발생시키는 에러를 의미한다.
+    
+- **런타임 에러**
+    
+    프로그램이 실행되는 도중 발생하는 에러를 의미한다.
+    
+
+지금 이 글에서 작성하는 Error Handling System은이 중에서 런타임 에러에 집중하고 있다. 런타임 에러는 실제 사용자 경험과 직결되는 문제이기 때문이다. 내가 작성한 코드가 돌아가는 중에 발생하는 에러를 체계적으로 잡아내고 처리하면, 사용자에게 향상된 사용자 경험을 줄 수 있고, 이슈를 빠르게 파악해서 고칠 수 있다는 장점이 있다. 따라서 런타임 에러를 처리하는 시스템을 제대로 구축해야 한다고 생각했다.
+
+그럼 우선적으로 Next.js App Router를 기본으로 하기 때문에 서버 사이드와 클라이언트 사이드의 에러를 분리해야 한다. 서버 사이드에서 발생하는 에러의 경우, 모니터링을 위해 로깅이 필요하며, 클라이언트 사용자에게는 리포트되지 않아도 된다. 이와 반대로 클라이언트 사이드에서 발생하는 에러의 경우, 더 나은 사용자 경험을 위해 다양한 방식으로 사용자에게 전달되어야 한다. 따라서 코드가 동작하는 위치에 따라 에러를 두 가지로 구분해 처리하는 시스템을 구축해야 한다.
+
+## 에러 발생 위치에 따른 에러 구분
+
+### Server Error
+
+서버에서 발생하는 에러는 데이터베이스 연결 실패, API 호출 실패, 파일 시스템 접근 에러 등 다양하게 발생한다. 각 도메인에서 발생하는 에러는 그 도메인에 맞는 에러 객체로 관리할 수 있도록 분리해야 한다.
+
+```tsx
+// UserError: 사용자 관련 에러 (예: 사용자 없음, 권한 부족)
+export class UserError extends Error {
+  constructor(
+    message: string = "사용자 관련 에러가 발생했습니다.",
+    public code: string = "USER_ERROR",
+    public status: number = 400,
+    public details?: Record<string, any> // 추가적인 에러 세부 정보 (선택적)
+  ) {
+    super(message);
+    this.name = "UserError";
+  }
+}
+
+// DatabaseError: 데이터베이스 관련 에러 (예: 쿼리 실패, 연결 끊김)
+export class DatabaseError extends Error {
+  constructor(
+    message: string = "데이터베이스 에러가 발생했습니다.",
+    public code: string = "DB_ERROR",
+    public status: number = 500,
+    public query?: string // 실패한 쿼리 (선택적)
+  ) {
+    super(message);
+    this.name = "DatabaseError";
+  }
+}
+
+// LogError: 로깅 시스템 관련 에러 (예: 로그 기록 실패)
+export class LogError extends Error {
+  constructor(
+    message: string = "로깅 에러가 발생했습니다.",
+    public code: string = "LOG_ERROR",
+    public status: number = 500,
+    public logData?: any // 기록하려던 로그 데이터 (선택적)
+  ) {
+    super(message);
+    this.name = "LogError";
+  }
+}
+
+```
+
+### Client Error
+
+클라이언트에서 발생하는 에러는 렌더링 중 발생하는 에러, 사용자 인터렉션 중 발생하는 에러로 구분할 수 있다.
+
+- **Render Error**
+    
+    해당 에러는 주로 컴포넌트나 커스텀 훅에서 발생하는 에러로, 잘못된 데이터 접근 에러, 외부 라이브러리 관련 에러, 비동기 작업의 응답 처리 중 발생한 에러, 잘못된 컴포넌트 구성 및 로직 에러 등이 있다.
+    
+- **Interaction Error**
+    
+    해당 에러는 사용자의 인터렉션 과정에서 발생하는 에러로, 유효성 검사 에러, 네트워크 에러 등이 있다.
+    
+
+## 에러 처리 방식에 따른 에러 구분
+
+### Server Error
+
+Next.js App Router의 Route Handler나 Server Action에서 발생하는 에러 모두는 다시 두 가지로 구분할 수 있다.
+
+- **Visible Server Error**
+    
+    **Visible Server Error**는 서버에서 발생한 에러로 인해 클라이언트 사용자에게 영향을 미치는 에러로 권한 에러, 인증 에러 등이 있다.
+    
+    해당 에러는 그 에러 객체에 맞는 데이터를 Response로 전달한다.
+    
+    ```tsx
+    if (!user) {
+      return NextResponse.json({ ok: false, status: 404, code: 'USER_NOT_FOUND' });
+    }
+    ```
+    
+- **Server Only Error**
+    
+    해당 에러는 서버에서 발생한 에러이나 클라이언트 사용자에게는 영향을 미치지 않고, 로깅이나 모니터링을 통해 서비스 개발자가 인지해야 하는 에러를 의미한다. 서버 로깅 에러, 백그라운드 에러, 서버 성능 에러 등이 **Server Only Error**에 해당한다.
+    
+    해당 에러는 Response로 데이터를 전달하지 않고, 아래 인터페이스 데이터만 전달하게 된다.
+    
+    ```tsx
+    try {
+      await db.query(...);
+    } catch (error) {
+      logService.error(error);
+      return NextResponse.json({ ok: false, status: 500, code: 'INTERNAL_SERVER_ERROR' });
+    }
+    ```
+    
+
+### Client Error
+
+- **ErrorBoundary Error**
+    
+    주로 **Render Error**이며, `ErrorBoundary`를 활용해 처리하는 에러를 의미한다.
+    
+    ```tsx
+    import React from 'react';
+    
+    class ErrorBoundary extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { hasError: false };
+      }
+    
+      static getDerivedStateFromError(error) {
+        // 에러가 발생하면 상태를 업데이트하여 대체 UI를 렌더링
+        return { hasError: true };
+      }
+    
+      componentDidCatch(error, errorInfo) {
+        // 에러를 로깅하거나 외부 시스템에 보고
+        console.error("ErrorBoundary caught an error:", error, errorInfo);
+      }
+    
+      render() {
+        if (this.state.hasError) {
+          // 에러 발생 시 보여줄 대체 UI
+          return <h1>에러가 발생했습니다.</h1>;
+        }
+        // 정상적인 경우 자식 컴포넌트를 렌더링
+        return this.props.children;
+      }
+    }
+    ```
+    
+    ```tsx
+    'use client';
+    
+    const Component = () => {
+      return (
+        <ErrorBoundary>
+          <ProblematicComponent />
+        </ErrorBoundary>
+      );
+    }
+    ```
+    
+- **Error Routing Error**
+    
+    주로 **Render Error**이며, Next.js의 `error.tsx`를 활용해 처리하는 에러를 의미한다. 해당 방식은 보통 Server Side Rendering에서 발생한 에러를 처리하는 데 활용된다.
+    
+    Next.js의 `error.tsx`는 서버 사이드에서 발생한 에러를 클라이언트에 보여줄 때 사용하는데, 즉, SSR로 데이터를 가져와 렌더링하는 와중에 에러가 발생하면 `error.tsx`가 대신 렌더링되게 된다.
+    
+    ```tsx
+    'use client';
+    
+    import Link from 'next/link';
+    
+    const Error = ({
+      error,
+      reset,
+    }: {
+      error: Error;
+      reset: () => void;
+    }) => {
+      return (
+        <div>
+          <h2>에러가 발생했습니다.</h2>
+          <p>{error.message}</p>
+          <button onClick={() => reset()}>다시 시도</button>
+          <Link href="/">홈으로 돌아가기</Link>
+        </div>
+      );
+    };
+    ```
+    
+- **Try Catch Error**
+    
+    주로 **Interaction Error**이며, 해당 이벤트 핸들러, 모듈, 함수 등에서 `try catch`를 활용해 처리하는 에러를 의미한다.
+    
+    ```tsx
+    cosnt handleSubmit = async (event: React.FormEvent) => {
+      event.preventDefault();
+      try {
+        const response = await fetch('/api/submit', {
+          method: 'POST',
+          body: JSON.stringify({ data: 'example' }),
+        });
+        if (!response.ok) {
+          throw new Error('제출에 실패했습니다.');
+        }
+        console.log('제출 성공!');
+      } catch (error) {
+        console.error('제출 중 에러 발생:', error);
+        alert('제출에 실패했습니다. 다시 시도해주세요.');
+      }
+    }
+    ```
+    
+
+# 에러 Throw & Handle 원칙
+
+## Server Error: Module Throw & Top Level Handle
+
+> 서버의 각 모듈에서 예외는 에러를 Throw하며, 각 모듈에서 Throw한 에러는 서버 사이드의 최상위 모듈인 Next.js Route Handler와 Server Action에서 Catch한다.
+> 
+
+**서버 에러를 각 모듈에서 핸들링하는 방법**과 **최상단에서 한 번에 핸들링하는 방법**을 고려했다. 다만, 모든 모듈에서 에러를 핸들링하면 어떤 모듈에서 에러가 발생하는 지 디버깅하기 편하고 효과적이겠지만, 개발 생산성을 악화시킬 것으로 예상됐다. 추가적으로 만약 Visible Server Error의 경우, 핸들링한 에러임에도 불구하고 계속해서 상단으로 다시 에러를 Throw해야 한다는 문제가 있어 서버 에러를 최상단에서 한 번에 핸들링하는 방법으로 처리하기로 한다.
+
+특히, 서버에서 발생한 에러를 단지 Throw만 하고 Handling하지 않는다면 배포 이후 디버깅하기 어려워지고, 모니터링하는 의미가 없어진다.
+
+따라서 서버 에러의 경우 Next.js의 Route Handler, Server Action과 같이 클라이언트에 가장 근접한 최상위 모듈에서 Handling하는 것을 원칙으로 한다. 즉, 클라이언트에 근접한 위치에서 합의된 status, code, message 등을 클라이언트에게 응답하여 사용자 경험을 해치지 않고 깔끔하고 일관성 있게 서버에서 발생하는 에러를 처리할 수 있게 하는 것을 원칙으로 한다.
+
+```tsx
+export const getUser = async (id: string) => {
+  try {
+    const user = await db.findById(id);
+    if (!user) {
+      throw new NotFoundError('USER_NOT_FOUND');
+    }
+    return user;
+  } catch (error) {
+    throw error; // 에러를 상위로 전달
+  }
+};
+
+// Route Handler
+export const GET = async (request: NextRequest) => {
+  try {
+    const userId = request.query.id;
+    const user = await getUser(userId);
+    
+    return NextResponse.json({ ok: true, data: user });
+  } catch (error) {
+    logService.error(error);
+
+    if (error instanceof NotFoundError) {
+      return NextResponse.json({ ok: false, status: 404, code: error.code });
+    }
+    
+    return NextResponse.json({ ok: false, status: 500, code: 'INTERNAL_SERVER_ERROR' });
+  }
+};
+
+// Server Action
+export const getDataById = () => {
+	try {
+    const userId = request.query.id;
+    const user = await getUser(userId);
+    
+    return { ok: true, data: user };
+	} catch (error) {
+		logService.error(error);
+
+		if (error instanceof DatabaseError) {
+			return { ok: false, error };
+		}
+		
+		if (error instanceof LoggingError) {
+			return { ok: false, error };
+		}
+		
+		// ...
+	}
+}
+```
+
+## Client Error: Separate Throw & Separate Handle
+
+> 클라이언트는 서버에서 발생한 에러는 응답받은 code와 status, message를 기반으로 Handling한다.
+클라이언트에서 발생하는 에러는 구분된 에러에 맞게 Handling한다.
+> 
+
+클라이언트에서 발생하는 에러는 Error Boundary, Try Catch를 통해 컴포넌트를 Fallback UI로 대체하거나, Catch 시 Error 관련 메시지를 Toast나 Alert 등을 통해 사용자에게 알려줄 수 있다. 또한 서버에서 발생한 에러를 응답으로 전달받는 경우, Next.js의 error.tsx 혹은 Try Catch를 통해 해당 에러를 핸들링할 수 있다.
+
+### Handling Error w. Error Boundary
+
+```tsx
+"use client";
+
+import React, { useState } from "react";
+
+const ProblematicComponent = () => {
+  throw new Error("의도적인 렌더링 에러");
+
+  return <div>렌더링되지 않음</div>;
+};
+
+const ComponentWithError = () => {
+  return (
+    <ErrorBoundary>
+        <ProblematicComponent />
+    </ErrorBoundary>
+  );
+}
+```
+
+### Handling Error w. Try Catch
+
+```tsx
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+const UserDashboard = () => {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch("/api/user");
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw {
+            message: data.message || "알 수 없는 에러",
+            code: data.code,
+            status: response.status,
+          };
+        }
+      } catch (error: any) {
+        switch (error.code) {
+          case "USER_NOT_FOUND":
+            setErrorMessage("사용자를 찾을 수 없습니다.");
+            router.push("/login");
+            break;
+          case "FORBIDDEN":
+            setErrorMessage("접근 권한이 없습니다.");
+            break;
+          default:
+            setErrorMessage("서버 에러가 발생했습니다. 다시 시도해주세요.");
+        }
+      }
+    };
+    
+    fetchUserData();
+  }, [router]);
+
+  return (
+    <div>
+      {errorMessage ? (
+        <div className="alert">{errorMessage}</div>
+      ) : (
+        <h1>사용자 대시보드</h1>
+      )}
+    </div>
+  );
+}
+```
+
+# **에러 코드와 메시지 관리**
+
+에러 코드를 일관되게 관리하면 클라이언트에서 에러에 따라 다른 UI를 보여줄 수 있다. 즉, `USER_NOT_FOUND`면 로그인 페이지로 리다이렉트하거나, `FORBIDDEN`이면 권한 없음 메시지를 표시하는 식으로 활용할 수 있다.
+
+## **에러 코드와 메시지 관리**
+
+```tsx
+export const ERROR_CODES = {
+  USER_NOT_FOUND: 'USER_NOT_FOUND',
+  FORBIDDEN: 'FORBIDDEN',
+  INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
+} as const;
+
+export const ERROR_MESSAGES = {
+  [ERROR_CODES.USER_NOT_FOUND]: '사용자를 찾을 수 없습니다.',
+  [ERROR_CODES.FORBIDDEN]: '접근 권한이 없습니다.',
+  [ERROR_CODES.INTERNAL_SERVER_ERROR]: '서버에서 에러가 발생했습니다.',
+};
+```
+
+## **에러 코드와 메시지 활용**
+
+서버에서 에러를 응답할 때, 에러 코드와 메시지를 함께 전달해야 한다.
+
+```tsx
+if (!user) {
+  return NextResponse.json({
+    ok: false,
+    status: 404,
+    code: ERROR_CODES.USER_NOT_FOUND,
+    message: ERROR_MESSAGES[ERROR_CODES.USER_NOT_FOUND],
+  });
+}
+```
+
+이렇게 서버가 응답한다면 클라이언트에서는 에러 코드에 따라 다른 UI를 렌더링할 수 있게 된다.
+
+```tsx
+if (error.code === ERROR_CODES.USER_NOT_FOUND) {
+  router.push('/login');
+} else if (error.code === ERROR_CODES.FORBIDDEN) {
+  alert('접근 권한이 없습니다.');
+} else {
+  alert('서버에서 에러가 발생했습니다.');
+}
+```
+
+# **에러 핸들링 로직 테스트**
+
+에러 핸들링 로직도 철저히 테스트해야 한다. 이를 통해 특정 에러 발생 시 올바른 응답이 반환되는지, 클라이언트에서 UI가 제대로 렌더링되는지 확인할 수 있다.
+
+## **서버 에러 핸들링 테스트**
+
+```tsx
+import { describe, it, expect, vi } from 'vitest';
+import { GET } from './route';
+import { NextRequest } from 'next/server';
+
+describe('GET /api/user', () => {
+  it('should return 404 when user not found', async () => {
+    const request = new NextRequest('http://localhost:3000/api/user?id=1');
+    vi.mock('./db', () => ({ findById: vi.fn().mockResolvedValue(null) }));
+    const response = await GET(request);
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({
+      ok: false,
+      status: 404,
+      code: 'USER_NOT_FOUND',
+    });
+  });
+
+  it('should return 500 when internal server error', async () => {
+    const request = new NextRequest('http://localhost:3000/api/user?id=1');
+    vi.mock('./db', () => ({
+      findById: vi.fn().mockRejectedValue(new Error('DB Error')),
+    }));
+    const response = await GET(request);
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({
+      ok: false,
+      status: 500,
+      code: 'INTERNAL_SERVER_ERROR',
+    });
+  });
+});
+```
+
+## **클라이언트 에러 핸들링 테스트**
+
+```tsx
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { ErrorBoundary } from './ErrorBoundary';
+import { ProblematicComponent } from './ProblematicComponent';
+
+describe('ErrorBoundary', () => {
+  it('should render fallback UI when error occurs', () => {
+    const ProblematicComponent = () => {
+      throw new Error('Test Error');
+    };
+    render(
+      <ErrorBoundary>
+        <ProblematicComponent />
+      </ErrorBoundary>
+    );
+    expect(screen.getByText('에러가 발생했습니다.')).toBeInTheDocument();
+  });
+});
+```
+
+# 결론
+
+에러 핸들링 시스템은 개발 생산성과 사용자 경험을 동시에 높이는 중요한 요소이다. 서버와 클라이언트에서 발생하는 에러를 구분하고, 각각에 맞는 처리 방식을 적용하면, 프로덕트의 안정성을 높이고 유지보수도 쉬워질 것이라고 생각한다.
