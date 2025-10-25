@@ -1,0 +1,542 @@
+---
+title: Next.js Error Handling Strategy 3 - 경계 구현과 적용
+description: safeServerAction, networkBoundary 등 각 경계에서 필요한 래퍼 함수를 완성해 아키텍처를 실전에 적용하기
+createdAt: 2025-10-21
+category: Next.js
+tags:
+  - Next.js
+  - Error Handling
+  - Error Boundary
+  - Error Boundary in Next.js
+  - Frontend Error Handling
+  - Error Handling in Next.js
+  - Error
+  - Error Handling Strategy
+  - Error Boundary Strategy
+---
+
+> TL;DR
+> 
+> - 1편의 ‘전략’과 2편의 ‘핵심 도구’를 활용해 5개의 경계에 필요한 래퍼 함수와 컴포넌트를 완성해요.
+> - 서버 경계에서는 `safeServerAction`과 `safeRouteHandler`를 만들어 `DomainError`를 `Result` 객체나 `Problem Details` JSON으로 안전하게 변환해요.
+> - 클라이언트 경계에서는 `networkBoundary`, `interactionBoundary`, `RenderingBoundary`, `BrowserBoundary`를 구현하여 어떤 종류의 에러든 최종적으로 `handleError`를 통해 일관되게 처리될 수 있게 파이프라인을 완성해요.
+
+[예제 코드 보기](https://github.com/hyoungqu23/examples-nextjs)
+
+## 0. 시작하기 전에: 조립의 시간
+
+1편에서 전략의 청사진을 그렸고, 2편에서 핵심 도구인 `DomainError`, `handleError`를 구현했어요. 이제 두 가지를 바탕으로 각 경계를 지키는 견고한 방어선을 실제로 구축해야 해요.
+
+## 1. Step 1: 서버 경계 구축하기
+
+서버 경계의 역할은 서버 내부의 혼돈을 정리하고 클라이언트에게 예측 가능한 신호만을 전달하는 것이에요.
+
+### 1.1 `Result` 타입 정의하기
+
+Server Action의 공통 래퍼 함수로 활용할 때, 성공과 실패를 명확히 구분하는 `Result` Union 타입을 정의해 클라이언트에 예측 가능한 표준화된 정보를 전달하게 돼요.
+
+```tsx
+// error/result.ts
+import { DomainError } from './domain-error';
+
+export type Success<T> = { ok: true; data: T };
+export type Failure = { ok: false; error: DomainError };
+export type Result<T> = Success<T> | Failure;
+
+export const actionFailure = (error: DomainError): Failure => ({ ok: false, error});
+export const actionSuccess = <T>(data: T): Success<T> => ({ ok: true, data });
+```
+
+### 1.2 `safeServerAction`으로 Server Action 래퍼 함수 만들기
+
+`safeServerAction` 모든 Server Action을 감싸 에러를 안전하게 Result 객체로 반환하게 해요.
+
+```tsx
+// error/safe-action.ts
+'use server';
+
+import { z } from 'zod';
+import { ERROR_CODE } from './code';
+import { isDomainError } from './domain-error';
+import { makeError } from './make-error';
+import { actionFailure, actionSuccess, type Result } from './result';
+
+export const safeServerAction = <S extends z.ZodSchema, R>(
+	schema: S,
+	action: (data: z.infer<S>) => Promise<R>
+): ((data:z.infer<S>) => Promise<Result<R>) => {
+	return async (data) => {
+		try {
+			const validation = schema.safeParse(data);
+			
+			if (!validation.success) {
+				throw makeError({
+					code: ERROR_CODE.VALIDATION,
+					details: { fieldErrors: validation.error.flatten().fieldErrors },
+					message: '입력 값이 올바르지 않습니다.'
+				});
+			}
+			
+			const result = await action(validation.data);
+			return actionSuccess(result);
+		} catch (error) {
+			if (isDomainError(error)) {
+				return actionFailure(error);
+			}
+			
+			console.error('Unhandled error in safeServerAction', error);
+			const unknownError = makeError({
+				code: ERROR_CODE.INTERNAL_SERVER_ERROR,
+				details: undefined,
+				message: '서버에서 알 수 없는 에러가 발생했습니다.',
+				cause: error
+			});
+			
+			return unknownError;
+		}
+	}
+};
+```
+
+### 1.3 `safeRouteHandler`로 Route Handler 래퍼 함수 만들기
+
+Route Handler에서도 반복되는 `try … catch`를 줄이고 타입 안정성을 확보하기 위해 `safeServerAction`과 유사한 래퍼 함수를 만들어요. 대신 HTTP 상태 코드를 에러 코드와 매칭시키는 작업이 필요해요. 해당 코드는 Route Handler와 밀접한 관련이 있으므로 응집도를 고려해 함께 위치시키는 것이 좋아요.
+
+```tsx
+// error/route-handler.ts
+import { NextResponse } from 'next/server';
+import { ERROR_CODE, type ErrorCode } from './code';
+import { isDomainError } from './domain-error';
+import { makeError } from './make-error';
+
+const getHTTPStatusCodeFromErrorCode = (code: ErrorCode): number => {
+	switch (code) {
+		case 'NOT_FOUND': return 404;
+		case 'AUTH_REQUIRED': return 401;
+		// ... (추가 가능)
+		default: return 500;
+	};
+}
+
+export const safeRouteHandler = <T extends Record<string, unknown>>(
+	handler: (request: Request, context: { params: T }) => Promise<NextResponse>
+) => {
+	return async (request: Request, context: { params: T }): Promise<NextResponse> => {
+		try {
+			return await handler(request, context);
+		} catch (error) {
+			const domainError = isDomainError(error)
+				? error
+				: makeError({
+					code: ERROR_CODE.INTERNAL_SERVER_ERROR,
+					details: undefined,
+					message: 'Route Handler의 API에서 에러가 발생했습니다.',
+					cause: error
+				});
+			
+			if (domainError.code === ERROR_CODE.INTERNAL_SERVER_ERROR) {
+				console.error('API Error: ', domainError.cause);
+				Sentry.captureException(domainError);
+			}
+			
+			const status = getHTTPStatusCodeFromErrorCode(domainError.code);
+			return NextResponse.json(
+				{ code: domainError.code, message: domainError.message, details: domainError.details },
+				{ status }
+			);
+		}
+	}
+};
+```
+
+## 2. Step 2: 클라이언트 경계 구축하기
+
+### 2.1 `fetch` 함수 래퍼인 `networkBoundary`로 네트워크 경계 구축하기
+
+`networkBoundary`는 외부 통신의 최전선이므로 서버가 보낸 에러 응답조차 신뢰하지 않고 Zod 스키마로 검증해 타입 안정성을 극대화해요.
+
+```tsx
+// error/network-boundary.ts
+import { z } from 'zod';
+import { ERROR_CODE, type ErrorCode } from './code';
+import { isDomainError } from './domain-error';
+import { makeError } from './make-error';
+
+const ProblemDetailsSchema = z.object({
+	code: z.nativeEnum(ERROR_CODE),
+	message: z.string().optional(),
+	details: z.unknown()
+});
+
+export const networkBoundary = async <T>(
+	input: RequestInfo | URL,
+	init?: RequestInit
+): Promise<T>. => {
+	try {
+		const response = await fetch(input, init);
+		
+		if (!response.ok) {
+			const body = await response.json().catch(() => ({});
+			const validation = ProblemDetailsSchema.safeParse(body);
+			
+			if (validation.success) {
+				// 서버가 약속된 형식의 에러를 보낸 경우
+				throw makeError({
+					code: validation.data.code,
+					details: validation.data.details,
+					message: validation.data.message
+				} as never);
+			} else {
+				// 서버가 약속된 형식의 에러를 보내지 않은 경우
+				throw makeError({
+					code: ERROR_CODE.UNKNOWN_CLIENT_ERROR,
+					details: undefined,
+					message: `서버로부터 잘못된 형식의 에러 응답을 받았습니다. (status: ${response.status})`
+				});
+			}
+		}
+		
+		return response.json() as T;
+	} catch (error) {
+		if (isDomainError(error)) throw error;
+		
+		// 네트워크 에러
+		throw makeError({
+			code: ERROR_CODE.NETWORK_ERROR,
+			details: undefined,
+			message: '네트워크 연결을 확인해주세요.',
+			cause: error
+		});
+	}
+};
+```
+
+`ProblemDetailsSchema`의 `details`가 `unknown`으로 설정되어 있는 이유는 네트워크 경계의 책임과 맞닿아있어요. 서버가 약속된 에러 형태를 전달했는지를 검증하는 것이 네트워크 경계의 책임이지 `details` 내부의 데이터가 `code`에 맞게 올바른지 검증하는 것은 `makeError` 팩토리 함수의 책임이므로 이 단계에서는 `details` 정보에 대해 존재 여부만 검증하도록 해요.
+
+또한, 이 방식은 `return response.json() as T`와 같이 타입 단언을 사용해요. 이는 제네릭 타입을 적용한 `fetch` 래퍼 함수의 본질적인 한계로, 호출하는 쪽에서 명시하는 타입을 신뢰해 응답값에 타입을 단언하는 의도된 설계 방식이에요.
+
+이 방식보다 타입 안정성을 높이기 위해서는 `schema`를 호출하는 쪽에서 주입하는 방법이 있어요.
+
+```tsx
+// error/network-boundary.ts
+import { z } from 'zod';
+import { ERROR_CODE, type ErrorCode } from './code';
+import { isDomainError } from './domain-error';
+import { makeError } from './make-error';
+
+const ProblemDetailsSchema = z.object({
+	code: z.nativeEnum(ERROR_CODE),
+	message: z.string().optional(),
+	details: z.unknown()
+});
+
+type Params<S extends z.ZodSchema> = {
+	schema: S;
+	input: RequestInfo | URL;
+	init?: RequestInit;
+}
+
+export const networkBoundary = async <S extends z.ZodSchema>({ schema, input, init }: Params): Promise<z.infer<S>> => {
+	try {
+		const response = await fetch(input, init);
+		
+		if (!response.ok) {
+			const body = await response.json().catch(() => ({});
+			const validation = ProblemDetailsSchema.safeParse(body);
+			
+			if (validation.success) {
+				// 서버가 약속된 형식의 에러를 보낸 경우
+				throw makeError({
+					code: validation.data.code,
+					details: validation.data.details,
+					message: validation.data.message
+				} as never);
+			} else {
+				// 서버가 약속된 형식의 에러를 보내지 않은 경우
+				throw makeError({
+					code: ERROR_CODE.UNKNOWN_CLIENT_ERROR,
+					details: undefined,
+					message: `서버로부터 잘못된 형식의 에러 응답을 받았습니다. (status: ${response.status})`
+				});
+			}
+		}
+		
+		const body = await response.json();
+		const validation = schema.safeParse(body);
+		
+		if (!validation.success) {
+			throw makeError({
+				code: ERROR_CODE.UNKNOWN_CLIENT_ERROR,
+				details: undefined,
+				message: '서버로부터 잘못된 형식의 데이터를 받았습니다.',
+				cause: { validationError: validation.error }
+			});
+		}
+		
+		return validation.data;
+	} catch (error) {
+		if (isDomainError(error)) throw error;
+		
+		// 네트워크 에러
+		throw makeError({
+			code: ERROR_CODE.NETWORK_ERROR,
+			details: undefined,
+			message: '네트워크 연결을 확인해주세요.',
+			cause: error
+		});
+	}
+};
+```
+
+서버가 약속된 형식의 에러를 보낸 경우에 사용되는 `as never`는 약속된 타입 단언이에요. `details` 타입이 `unknown`으로 설정되어 있는 것과 맞닿아있어요. 즉, `networkBoundary`의 책임이 아닌 `code`에 맞는 `details` 검증을 해당 책임을 가진 `makeError` 함수로 위임하기 위해서에요.
+
+### 2.2 인터렉션 경계, 렌더링 경계, 브라우저 경계
+
+인터렉션 경계, 렌더링 경계, 브라우저 경계는 에러를 ‘변환’하는 것이 아니라 ‘포착’한 에러를 중앙 에러 처리기인 `handleError`에 ‘전달’하는 역할을 해요.
+
+즉, 다음과 같이 구현될 거에요.
+
+- 인터렉션 경계
+    
+    사용자의 모든 인터렉션에서 발생하는 에러를 포착해서 중앙 에러기에 전달해요. 이벤트 핸들러 함수 내부에서 `if … else` 또는 `try … catch`를 활용해 에러를 포착하고, `handleError`를 직접 호출해요.
+    
+    - 의도한 에러 처리
+        
+        ```tsx
+        // components/SomeForm.tsx
+        export const SomeForm = () => {
+        	const onSubmit = async (data) => {
+        		const result = await someServerActionWithSafeServerAction(data);
+        		
+        		if (!result.ok) {
+        			handleError(result.error);
+        		}	
+        		
+        		// ...
+        	};
+        	
+        	return <form onSubmit={onSubmit}></form>
+        };
+        ```
+        
+    - 의도하지 않은 에러 처리
+        
+        반복척인 `try … catch`를 줄이기 위해 `guarded` 헬퍼 함수를 활용해요.
+        
+        ```tsx
+        // error/interaction-boundary-helper.ts
+        import { handleError } from './handler.ts';
+        
+        export const guarded = <T extends unknown[]>(fn: (...args: T) => Promise<unknown> => {
+        	return async (...args: T): Promise<void> => {
+        		try {
+        			await fn(...args);
+        		} catch (error) {
+        			handleError(error);
+        		}
+        	};
+        };
+        ```
+        
+        ```tsx
+        // components/SomeButton.tsx
+        export const SomeButton = () => {
+        	const onClick = guarded(async () => {
+        		await someAsyncTask();
+        	});
+        	
+        	return <button onClick={onClick}>...</button>
+        };
+        ```
+        
+- 렌더링 경계
+    
+    Next.js의 `error.tsx`의 `useEffect` 내부에서 `handleError(props.error)`를 직접 호출하거나, React의 Error Boundary를 활용해요.
+    
+    ```tsx
+    // app/some-route/error.tsx
+    'use client';
+    import { useEffect } from 'react';
+    import { handleError } from '@/error/handler';
+    
+    const SomeRouteError = ({ error, reset }: error: Error & { digest?: string }; reset: () => void; }) => {
+    	useEffect(() => {
+    		handleError(error, { ux: 'none' });
+    	}, [error]);
+    	
+    	return (
+    		<div>
+    			<h2>오류가 발생했습니다.</h2>
+    			<p>{error.message}</p>
+    			<button onClick={reset}>다시 시도</button>
+    		</div>
+    	);
+    };
+    
+    export default SomeRouteError;
+    ```
+    
+    ```tsx
+    // components/FallbackComponent.tsx
+    'use client';
+    import { useEffect } from 'react';
+    import { FallbackProps } from 'react-error-boundary';
+    import { handleError } from '@/error/handler';
+    
+    export const FallbackComponent = ({ error, resetErrorBoundary }: FallbackProps) => {
+    	useEffect(() => {
+    		handleError(error, { ux: 'none' });
+    	}, [error]);
+    	
+    	return (
+    		<div>
+    			<h4>문제가 발생했습니다.</h4>
+    			<button onClick={resetErrorBoundary}>다시 시도</button>
+    		</div>
+    	);
+    };
+    
+    // usage.tsx
+    import { ErrorBoundary } from 'react-error-boundary';
+    import { FallbackComponent } from './FallbackComponent';
+    
+    export const Usage = () => {
+    	return (
+    		<ErrorBoundary FallbackComponent={FallbackComponent}>
+    			<SomeRiskyComponent />
+    		</ErrorBoundary>
+    	); 
+    };
+    ```
+    
+- 브라우저 경계
+    
+    `window.onerror` 이벤트 리스너 내부에서 `handleError(event.error)`를 직접 호출해요.
+    
+    ```tsx
+    // components/browser-boundary,tsx
+    'use client';
+    
+    import { useEffect } from 'react';
+    import { handleError } from '@/error/handler';
+    
+    export const BrowserBoundary = () => {
+    	useEffect(() => {
+    		const errorHandler = (event: ErrorEvent) => handleError(event.error, { ux: 'none' });
+    		const rejectionHandler = (event: PromiseRejectionEvent) => handler(event.reason, { ux: 'none' });
+    		
+    		window.addEventListener('error', errorHandler);
+    		window.addEventListener('unhandledrejection', rejectionHandler);
+    		
+    		return () => {
+    			window.removeEventListener('error', errorHandler);
+    			window.removeEventListener('unhandledrejection', rejectionHandler);		
+    		};
+    	}, []);
+    	
+    	return null;
+    };
+    ```
+    
+
+## 3. Step 3: 실전 시나리오 - 인터렉션 에러 처리
+
+### 3.1 `safeServerAction`으로 감싸진 Server Action
+
+`signIn` 서버 액션은 유효성 검사 실패 시 `VALIDATION` 에러를, 인증 실패 시 `AUTH_REQUIRED` 에러를 throw해요. `safeServerAction`이 이를 포착해 `Result.Failure` 객체로 변환해 반환해요.
+
+```tsx
+// actions/user.ts
+export const signIn = safeServerAction(signInSchema, async (data) => {
+	const user = await db.users.findByEmail(data.email);
+	if (!user || !isPasswordValid(data.password, user.password) {
+		throw makeError({
+			code: 'AUTH_REQUIRED',
+			details: undefined,
+			message: '이메일 또는 비밀번호가 일치하지 않습니다.'
+		});
+	}
+	return { userId: user.id };
+});
+```
+
+### 3.2 중앙 에러 처리기 `handleError`를 호출하는 이벤트 핸들러
+
+`onSubmit` 함수는 `signIn`의 결과를 받아 실패 시 중앙 에러 처리기 `handleError`에게 모든 책임을 위임해요. 다만 Form의 유효성 검사 실패 시에는 필드에 직접 에러를 표시하기 위해 UX 에러 처리를 커스터마이징해요.
+
+```tsx
+// components/SignInForm.tsx
+'use client';
+import { useForm } from 'react-hook-form';
+import { signIn } from '@/actions/user';
+import { handleError } from '@/error/handler';
+import { isDomainError } from '@/error/domain-error';
+
+export const SignInForm = () => {
+	const form = useForm();
+	
+	const onSubmit = form.handleSubmit(async (data) => {
+		const result = await signIn(data);
+		
+		if (!result.ok) {
+			handleError(result.error, {
+				ux: (error) => {
+					if (isDomainError(error, 'VALIDATION') && error.details?.fieldErrors) {
+						for (const [field, messages] of Object.entries(error.details.fieldErrors)) {
+							form.setError(field, { message: messages[0] });
+						}
+					} else {
+						toast.error(error.message);
+					}
+				}
+				log: 'none'
+			});
+		}
+	});
+	
+	return <form onSubmit={onSubmit}></form>;
+};
+```
+
+## 4. 결론: 예측 가능한 에러, 안정적인 애플리케이션
+
+3개의 아티클에 걸쳐 혼돈스러운 에러 처리에 ‘경계’를 나누고 각각 ‘책임’을 부여했어요.
+
+- 1편에서 우리는 ‘왜’ 이 아키텍쳐가 필요한지에 대해 청사진을 그렸고,
+- 2편에서 아키텍처의 핵심인 `DomainError`와 `handleError`를 만들었고,
+- 3편에서 모든 ‘경계’를 실제로 조립해 아키텍처를 완성했어요.
+
+이 아키텍처의 핵심은 ‘변환’과 ‘처리’의 완벽한 분리에요. 각 경계는 자신의 위치에서 에러를 표준화된 `DomainError`로 ‘변환’하는 책임만 다하면 되고, 최종 ‘처리’는 모두 `handleError`라는 단일 창구에 위임합니다. 이러한 접근 방식은 애플리케이션에 예측 가능성, 일관성, 그리고 뛰어난 유지보수성을 선물할 거에요!
+
+## FAQ
+
+### Q1. 이 아키텍처는 너무 복잡해 보여요. 작은 프로젝트에도 꼭 이렇게 해야 하나요?
+
+꼭 그렇지는 않아요. 이 아키텍처는 팀 단위로 운영되는 중/대규모 프로덕션 애플리케이션을 기준으로 설계되었어요. 작은 프로젝트의 경우, `DomainError`와 `handleError`만 도입하여 에러 처리 로직을 중앙화하는 것만으로도 큰 효과를 볼 수 있어요. 각 경계의 래퍼(`safeServerAction` 등)은 필요에 따라 점진적으로 도입하는 것을 추천해요. 핵심은 중앙화된 에러 처리 정책과 단일 에러 모델이에요.
+
+### Q2. ErrorBoundary가 모든 에러를 잡지 못하는 이유는 무엇인가요?
+
+ErrorBoundary는 React의 렌더링 과정에서 발생하는 동기적인 에러만을 위해 설계되었어요. 이벤트 핸들러(`onClick`, `onSubmit` 등)나 비동기 코드(`setTimeout`, `fetch` 콜백 등)는 React의 렌더링 사이클과 별개로 동작해요. 따라서 이들 내부에서 발생한 에러는 렌더링 트리를 따라 전파되지 않아 ErrorBoundary가 포착할 수 없어요. 이 부분이 바로 인터렉션, 네트워크, 브라우저 경계가 별도로 필요한 이유에요.
+
+### Q3. Server Action은 `throw` 대신 `Result` 객체를 반환하는데, Route Handler는 왜 `throw`하고 `try … catch`로 잡나요?
+
+두 가지 서버 경계의 목적이 다르기 때문이에요.
+
+- Server Action
+    
+    주로 Form과 상호작용하며 클라이언트의 분기 처리를 통해 직관적인 UX 처리를 하는 것이 중요해요. `Result` 객체를 통해 `try … catch` 없이도 이를 가능케 해요.
+    
+- Route Handler
+    
+    범용적인 HTTP API 엔드포인트로 `throw`를 사용해 여러 단계에서 발생하는 실패를 단 하나의 `catch`에서 일관되게 처리하고 표준화된 HTTP 에러 응답으로 생성하여 클라이언트에 전달하기 위해서에요.
+    
+
+### Q4. `handleError`에 모든 로직이 집중되면 너무 비대해지지 않을까요?
+
+`handleError`의 역할은 정책 결정자이지, 모든 로직을 수행하는 실행자는 아니에요.
+
+- `handleError`는 `code`를 보고 `ERROR_POLICIES`를 참고해 토스트를 띄울지, 로깅을 할지 등을 결정해요.
+- 실제 토스트를 띄우는 것은 sooner 라이브러리, 로깅은 Sentry SDK 등이 담당해요.
+- 만약 `AUTH_REQUIRED` 에러 발생 시 로그인 페이지로 이동하는 로직이 필요하다면, 별도의 `authService.redirectToLogin()`과 같은 함수를 만들어 `handleError`가 호출하도록 만들 수 있어요.
+
+즉, `handleError`는 적절한 서비스에 작업은 위임하고, 자신은 지휘자로서 간결함을 유지할 수 있어요.
