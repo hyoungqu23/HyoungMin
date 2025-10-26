@@ -1,15 +1,17 @@
 import { getArticles, getContent, getPreviewOfArticle } from '@entities/articles';
-import { formatDate } from '@shared/lib';
-import { BASE_URL, NAVIGATION_ITEMS } from '@shared/routes';
+import { BASE_URL } from '@shared/routes';
 import { ClientTimestamp } from '@shared/ui';
+import { Metadata } from 'next';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { notFound } from 'next/navigation';
 
 interface IArticlePageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
-export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
+export const generateMetadata = async (props: IArticlePageProps):Promise<Metadata> => {
+  const { slug } = await props.params;
+
   const previewOfArticle = getPreviewOfArticle(slug);
   const contentOfArticle = getContent(slug);
 
@@ -36,7 +38,6 @@ export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
     twitter: {
       title: previewOfArticle.title,
       description: contentOfArticle.slice(0, 100),
-      url: new URL(`${BASE_URL}/${slug}`),
       images: {
         url: previewOfArticle.thumbnail.src ?? '/images/web/hero_background.png',
         alt: `${previewOfArticle.title} Thumbnail`,
@@ -45,7 +46,13 @@ export const generateMetadata = ({ params: { slug } }: IArticlePageProps) => {
   };
 };
 
-const Article = ({ params: { slug } }: IArticlePageProps) => {
+const Article = async (props: IArticlePageProps) => {
+  const params = await props.params;
+
+  const {
+    slug
+  } = params;
+
   const previewOfArticle = getPreviewOfArticle(slug);
   const contentOfArticle = getContent(slug);
 
