@@ -2,8 +2,8 @@ import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
-import reactHooks from 'eslint-plugin-react-hooks';
 import importPlugin from 'eslint-plugin-import';
+import reactHooks from 'eslint-plugin-react-hooks';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -53,4 +53,3 @@ export default [
     },
   },
 ];
-
