@@ -9,17 +9,7 @@ import type { Element, Root } from 'hast';
 const prettyCodeOptions: Options = {
   theme: { light: 'github-light', dark: 'one-dark-pro' },
   keepBackground: false,
-  filterMetaString: (meta) => {
-    // title="filename" 형식에서 파일명 추출
-    const titleMatch = meta.match(/title="([^"]+)"/);
-    if (titleMatch && titleMatch[1]) {
-      // 파일명을 반환 (rehype-pretty-code가 이를 title로 사용)
-      return titleMatch[1];
-    }
-    // title="filename"을 제거하고 나머지 메타데이터 반환
-    const cleaned = meta.replace(/title="[^"]+"/, '').trim();
-    return cleaned.length > 0 ? cleaned : meta;
-  },
+  filterMetaString: (meta) => meta,
   onVisitLine: (node) => {
     // 빈 줄 렌더 유지
     if (node.children.length === 0) {
