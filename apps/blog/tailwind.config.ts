@@ -1,11 +1,11 @@
-import type { Config } from 'tailwindcss';
+import typography from "@tailwindcss/typography";
+import type { Config } from "tailwindcss";
 
 export default {
   content: [
-    './src/**/*.{ts,tsx,mdx}',
-    './contents/**/*.mdx',
-    '../../packages/ui/src/**/*.{ts,tsx}',
+    "./src/**/*.{ts,tsx,mdx}",
+    "./contents/**/*.mdx",
+    "../../packages/ui/src/**/*.{ts,tsx}",
   ],
-  plugins: [require('@tailwindcss/typography')],
+  plugins: [typography],
 } satisfies Config;
-

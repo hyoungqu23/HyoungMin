@@ -46,7 +46,6 @@ code[data-highlighted-chars] {
   background-color: rgba(59, 130, 246, 0.2);
 }
 
-
 /* 테이블 스타일 (Tailwind Typography 기본 스타일 보완) */
 .prose table {
   @apply w-full border-collapse;
@@ -68,3 +67,15 @@ code[data-highlighted-chars] {
   @apply bg-gray-50 dark:bg-gray-900/50;
 }
 
+@theme {
+  /* Footer infinite scroll animation */
+  --animate-infinite-carousel: infinite-carousel 60s linear infinite;
+  @keyframes infinite-carousel {
+    0% {
+      left: 0;
+    }
+    100% {
+      left: -100%;
+    }
+  }
+}

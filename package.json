@@ -13,8 +13,14 @@
     "prepare": "husky install"
   },
   "lint-staged": {
+    "apps/blog/**/*.{ts,tsx,mdx}": [
+      "cd apps/blog && eslint --fix",
+      "prettier --write"
+    ],
+    "packages/**/*.{ts,tsx,mdx}": [
+      "prettier --write"
+    ],
     "*.{ts,tsx,mdx}": [
-      "eslint --fix",
       "prettier --write"
     ]
   },
