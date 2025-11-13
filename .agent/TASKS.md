@@ -632,28 +632,47 @@
 
 ## 10) SEO 최적화 및 추가 기능
 
-### 10.1 SEO 최적화 강화
+### 10.1 SEO + GEO 최적화 강화
 
 - **작업**
   - `apps/blog/src/app/[slug]/page.tsx`: 동적 메타데이터 생성
     - `generateMetadata` 함수 구현
     - `title`, `description`, `keywords` (frontmatter 기반)
-    - Open Graph 메타 태그 (`og:title`, `og:description`, `og:image`, `og:type`, `og:url`)
-    - Twitter Cards 메타 태그 (`twitter:card`, `twitter:title`, `twitter:description`, `twitter:image`)
-  - `apps/blog/src/app/[slug]/page.tsx`: JSON-LD 구조화 데이터
+    - Open Graph 메타 태그 (`og:title`, `og:description`, `og:image`, `og:type`, `og:url`, `og:site_name`)
+    - Twitter Cards 메타 태그 (`twitter:card`, `twitter:title`, `twitter:description`, `twitter:image`, `twitter:creator`)
+    - Canonical URL 설정
+  - `apps/blog/src/app/[slug]/page.tsx`: JSON-LD 구조화 데이터 (SEO + GEO)
     - Article/BlogPosting 스키마 생성
+      - `@type: "Article"` 또는 `"BlogPosting"`
+      - `headline`, `datePublished`, `dateModified`, `author`, `description`
+      - `image`, `publisher` (Organization 스키마)
+      - `mainEntityOfPage` (Canonical URL)
+      - `keywords` (태그 배열)
     - `<script type="application/ld+json">` 태그로 삽입
+  - `apps/blog/src/app/[slug]/page.tsx`: GEO 최적화를 위한 콘텐츠 구조
+    - 핵심 정보를 문서 상단에 배치 (요약, 주요 포인트)
+    - 명확한 헤딩 구조 (`h1` → `h2` → `h3` 계층)
+    - 본문에 `id="main"` 추가 (Skip link 대상)
+    - 요약/요점 섹션 (선택, 추천)
   - `apps/blog/src/app/sitemap.ts`: Sitemap.xml 자동 생성
-    - 모든 포스트 URL 포함
+    - 모든 포스트 URL 포함 (드래프트 제외)
     - `lastModified`, `changeFrequency`, `priority` 설정
+    - GEO: 최신 포스트 우선순위 높게 설정
   - `apps/blog/src/app/robots.ts`: Robots.txt 생성
-    - `User-agent: *`, `Allow: /`, `Sitemap: ${siteUrl}/sitemap.xml`
+    - `User-agent: *`, `Allow: /`
+    - `Sitemap: ${siteUrl}/sitemap.xml`
+    - 생성형 AI 크롤러 허용 (선택): `User-agent: GPTBot`, `User-agent: ChatGPT-User`, `User-agent: CCBot`
+  - `apps/blog/src/app/layout.tsx`: 루트 메타데이터
+    - 기본 `title`, `description`, `metadataBase` 설정
+    - Open Graph 기본값 설정
 
 - **DoD**:
   - 각 포스트 페이지에 메타 태그, Open Graph, Twitter Cards 적용 확인.
-  - JSON-LD 구조화 데이터 검증 (Google Rich Results Test).
-  - `/sitemap.xml` 접근 가능.
+  - JSON-LD 구조화 데이터 검증 (Google Rich Results Test, Schema.org Validator).
+  - `/sitemap.xml` 접근 가능 및 모든 포스트 URL 포함 확인.
   - `/robots.txt` 접근 가능.
+  - GEO: 핵심 정보가 문서 상단에 배치됨.
+  - GEO: 명확한 헤딩 구조 (`h1` → `h2` → `h3`).
 
 - **Verify**
 
@@ -661,9 +680,14 @@
   # 개발 서버에서 확인
   curl http://localhost:3000/sitemap.xml
   curl http://localhost:3000/robots.txt
+  # 메타 태그 확인
+  curl -s http://localhost:3000/sample | grep -E '<meta|<title'
   ```
 
-- **Pitfalls**: Open Graph 이미지는 절대 URL 필요 (`https://example.com/image.png`).
+- **Pitfalls**: 
+  - Open Graph 이미지는 절대 URL 필요 (`https://example.com/image.png`).
+  - `metadataBase` 설정 필수 (Next.js 13+).
+  - GEO: 생성형 AI는 문서 상단의 정보를 우선적으로 읽으므로 핵심 내용을 앞에 배치.
 
 ### 10.2 RSS 피드 생성
 
@@ -770,16 +794,16 @@
     - 다크모드 스타일 정의 (`@media (prefers-color-scheme: dark)` 또는 `.dark` 클래스)
     - Tailwind `dark:` 변형 사용
 
-- **DoD**: 
+- **DoD**:
   - 헤더의 테마 토글 버튼 클릭 시 라이트/다크 모드 전환.
   - 페이지 새로고침 시 선택한 테마 유지.
   - 시스템 설정 따라가기 옵션 (선택).
 
-- **Verify**: 
+- **Verify**:
   - 개발자 도구에서 `html` 요소의 `class` 속성 확인.
   - `localStorage`에 테마 값 저장 확인.
 
-- **Pitfalls**: 
+- **Pitfalls**:
   - FOUC(Flash of Unstyled Content) 방지를 위해 스크립트를 `<head>`에 삽입.
   - `next-themes` 라이브러리 사용 고려 (선택).
 
@@ -797,16 +821,16 @@
     - `TableOfContents` 컴포넌트 import 및 렌더링
     - 사이드바 또는 본문 옆에 배치
 
-- **DoD**: 
+- **DoD**:
   - 포스트 페이지에 목차 표시.
   - 목차 항목 클릭 시 해당 섹션으로 스크롤 이동.
   - 현재 읽는 섹션이 목차에서 하이라이트됨.
 
-- **Verify**: 
+- **Verify**:
   - 헤딩이 3개 이상인 포스트에서 목차 생성 확인.
   - 목차 클릭 시 부드러운 스크롤 동작 확인.
 
-- **Pitfalls**: 
+- **Pitfalls**:
   - 헤딩이 없는 포스트는 목차 숨김 처리.
   - 모바일에서는 목차를 접을 수 있는 토글 버튼 제공 권장.
 
@@ -849,16 +873,16 @@
     - `ShareButton` 컴포넌트 import 및 렌더링
     - 헤더 또는 포스트 상단/하단에 배치
 
-- **DoD**: 
+- **DoD**:
   - 링크 복사 버튼 클릭 시 현재 페이지 URL 복사.
   - LinkedIn 공유 버튼 클릭 시 LinkedIn 공유 페이지 열림.
   - 복사 성공 시 피드백 표시.
 
-- **Verify**: 
+- **Verify**:
   - 복사한 링크를 다른 탭에 붙여넣기 테스트.
   - LinkedIn 공유 버튼 클릭 시 올바른 URL로 이동 확인.
 
-- **Pitfalls**: 
+- **Pitfalls**:
   - `navigator.clipboard`는 HTTPS 또는 localhost에서만 동작.
   - Fallback으로 `document.execCommand('copy')` 고려 (구형 브라우저).
 
@@ -875,11 +899,11 @@
 
 - **DoD**: 상세 페이지에 모든 컴포넌트가 올바르게 통합되어 표시됨.
 
-- **Verify**: 
+- **Verify**:
   - 모바일/데스크톱에서 레이아웃 확인.
   - 모든 인터랙티브 요소 동작 확인.
 
-- **Pitfalls**: 
+- **Pitfalls**:
   - 모바일에서는 목차를 접을 수 있도록 처리.
   - 본문 너비는 가독성을 위해 제한 (예: `max-w-3xl`).
 
@@ -904,18 +928,18 @@
     - `apps/blog/src/app/layout.tsx`:
       - `useKeyboardShortcuts` 훅 사용
 
-- **DoD**: 
+- **DoD**:
   - Skip link가 키보드로 접근 가능.
   - 모든 인터랙티브 요소가 키보드로 접근 가능.
   - 스크린 리더로 테스트 시 모든 요소가 올바르게 읽힘.
   - (선택) 키보드 단축키 동작 확인.
 
-- **Verify**: 
+- **Verify**:
   - 키보드만으로 모든 기능 사용 가능.
   - 스크린 리더 (NVDA, VoiceOver 등)로 테스트.
   - WAVE 또는 axe DevTools로 접근성 검사.
 
-- **Pitfalls**: 
+- **Pitfalls**:
   - 포커스 관리 중요 (모달, 드롭다운 등).
   - 키보드 단축키는 충돌하지 않도록 주의 (브라우저 기본 단축키).
 
