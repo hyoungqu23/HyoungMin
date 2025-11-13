@@ -42,18 +42,24 @@ const TableOfContents = () => {
       // 현재 뷰포트에 있는 헤딩 찾기
       let currentId = '';
       for (let i = tocItems.length - 1; i >= 0; i--) {
-        const element = document.getElementById(tocItems[i].id);
+        const item = tocItems[i];
+        if (!item) continue;
+        
+        const element = document.getElementById(item.id);
         if (element && element.offsetTop <= scrollPosition) {
-          currentId = tocItems[i].id;
+          currentId = item.id;
           break;
         }
       }
 
       // 첫 번째 헤딩보다 위에 있으면 첫 번째 헤딩 활성화
       if (!currentId && tocItems.length > 0) {
-        const firstElement = document.getElementById(tocItems[0].id);
-        if (firstElement && firstElement.offsetTop > scrollPosition) {
-          currentId = tocItems[0].id;
+        const firstItem = tocItems[0];
+        if (firstItem) {
+          const firstElement = document.getElementById(firstItem.id);
+          if (firstElement && firstElement.offsetTop > scrollPosition) {
+            currentId = firstItem.id;
+          }
         }
       }
 
