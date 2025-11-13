@@ -2,6 +2,7 @@ import { compilePostMDX } from '@/shared/lib/mdx';
 import { mdxComponents } from '@/shared/lib/mdx-components';
 import { readArticle, listSlugs } from '@/shared/lib/fs';
 import { getRelatedPosts } from '@/shared/lib/related-posts';
+import ReadingProgress from '@/widgets/reading-progress/ReadingProgress';
 import { Prose } from '@hyoungmin/ui';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -133,6 +134,7 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
 
   return (
     <>
+      <ReadingProgress />
       <script
         type='application/ld+json'
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
