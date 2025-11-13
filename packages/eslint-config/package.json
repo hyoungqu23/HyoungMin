@@ -1,5 +1,10 @@
 {
   "name": "@hyoungmin/eslint-config",
   "version": "0.0.0",
-  "main": "index.js"
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "echo no-op",
+    "build": "echo no-op"
+  }
 }

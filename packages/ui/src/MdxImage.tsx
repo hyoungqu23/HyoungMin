@@ -5,13 +5,13 @@ type ImageProps = ComponentProps<'img'>;
 
 export const MdxImage = (props: ImageProps) => {
   const { src, alt, width, height, ...rest } = props;
-  
+
   if (!src || typeof src !== 'string') {
     return null;
   }
 
   const imageAlt = typeof alt === 'string' ? alt : '';
-  
+
   const imageWidth = typeof width === 'number' ? width : 1600;
   const imageHeight = typeof height === 'number' ? height : 900;
 

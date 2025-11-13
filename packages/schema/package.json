@@ -3,6 +3,11 @@
   "version": "0.0.0",
   "type": "module",
   "main": "src/index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "echo no-op"
+  },
   "dependencies": {
     "zod": "^4.1.12"
   }

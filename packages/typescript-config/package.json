@@ -3,5 +3,10 @@
   "version": "0.0.0",
   "exports": {
     "./base": "./base.json"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "echo no-op",
+    "build": "echo no-op"
   }
 }

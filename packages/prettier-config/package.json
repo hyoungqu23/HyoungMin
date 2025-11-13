@@ -1,5 +1,10 @@
 {
   "name": "@hyoungmin/prettier-config",
   "version": "0.0.0",
-  "main": "index.cjs"
+  "main": "index.cjs",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "echo no-op",
+    "build": "echo no-op"
+  }
 }
