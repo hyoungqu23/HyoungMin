@@ -12,7 +12,7 @@ const prettyCodeOptions: Options = {
   filterMetaString: (meta) => {
     // title="filename" 형식에서 파일명 추출
     const titleMatch = meta.match(/title="([^"]+)"/);
-    if (titleMatch) {
+    if (titleMatch && titleMatch[1]) {
       // 파일명을 반환 (rehype-pretty-code가 이를 title로 사용)
       return titleMatch[1];
     }
