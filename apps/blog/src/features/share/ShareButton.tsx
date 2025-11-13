@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckIcon, LinkIcon } from '@heroicons/react/24/outline';
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 type ShareButtonProps = {
   url?: string;
@@ -11,17 +11,11 @@ type ShareButtonProps = {
 
 const ShareButton = ({ url }: ShareButtonProps) => {
   const [copied, setCopied] = useState(false);
-  const [currentUrl, setCurrentUrl] = useState('');
-
-  useEffect(() => {
-    // 클라이언트 사이드에서만 URL 설정
-    if (typeof window === 'undefined') return;
-
-    if (url) {
-      setCurrentUrl(url);
-    } else {
-      setCurrentUrl(window.location.href);
-    }
+  
+  // useMemo로 클라이언트 사이드에서만 URL 계산 (useEffect 대신)
+  const currentUrl = useMemo(() => {
+    if (typeof window === 'undefined') return '';
+    return url || window.location.href;
   }, [url]);
 
   const handleCopyLink = async () => {
