@@ -985,7 +985,7 @@
 - [x] SEO 최적화 및 추가 기능 (2025. 01. 13.)
   - [x] SEO + GEO 최적화 강화 (메타 태그, Open Graph, Twitter Cards, JSON-LD, Sitemap, Robots.txt, AI 크롤러 지원)
   - [x] RSS 피드 생성 (`/feed.xml`) (2025. 01. 13.)
-  - [ ] 관련 포스트 추천 (태그 기반)
+  - [x] 관련 포스트 추천 (태그 기반) (2025. 01. 13.)
   - [ ] 읽기 진행도 표시
 - [ ] UI/UX 컴포넌트 및 기능
   - [ ] 헤더 컴포넌트 (Skip link 포함)
