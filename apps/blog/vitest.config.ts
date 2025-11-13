@@ -7,12 +7,6 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'lcov'],
     },
-    pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
   },
 });
 
