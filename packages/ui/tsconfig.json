@@ -1,9 +1,10 @@
 {
-  "extends": "@acme/typescript-config/base",
+  "extends": "../typescript-config/base.json",
   "compilerOptions": {
     "declaration": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "types": ["react", "react-dom"]
   },
   "include": ["src"]
 }
-

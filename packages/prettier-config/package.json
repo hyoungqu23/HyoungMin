@@ -1,6 +1,5 @@
 {
-  "name": "@acme/prettier-config",
+  "name": "@hyoungmin/prettier-config",
   "version": "0.0.0",
   "main": "index.cjs"
 }
-

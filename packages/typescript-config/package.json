@@ -1,8 +1,7 @@
 {
-  "name": "@acme/typescript-config",
+  "name": "@hyoungmin/typescript-config",
   "version": "0.0.0",
   "exports": {
     "./base": "./base.json"
   }
 }
-

@@ -10,4 +10,3 @@ export const postMetaSchema = z.object({
 });
 
 export type PostMeta = z.infer<typeof postMetaSchema>;
-
