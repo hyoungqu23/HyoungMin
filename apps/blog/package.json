@@ -11,6 +11,8 @@
     "test:ci": "vitest run --coverage"
   },
   "dependencies": {
+    "@hyoungmin/schema": "workspace:*",
+    "@hyoungmin/ui": "workspace:*",
     "@tailwindcss/typography": "^0.5.19",
     "next": "^16.0.2",
     "next-mdx-remote": "^5.0.0",

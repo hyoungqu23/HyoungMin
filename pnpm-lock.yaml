@@ -63,6 +63,12 @@ importers:
 
   apps/blog:
     dependencies:
+      '@hyoungmin/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
+      '@hyoungmin/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@tailwindcss/typography':
         specifier: ^0.5.19
         version: 0.5.19(tailwindcss@4.1.17)
