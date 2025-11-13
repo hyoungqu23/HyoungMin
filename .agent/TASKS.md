@@ -503,8 +503,12 @@
 ### 6.3 배포 (Vercel)
 
 - **권장**: Git Integration에서 Root Directory=`apps/blog`
+  - Production Branch: `main`
+  - Preview Branches: 모든 브랜치 활성화
+  - Build Command: `cd ../.. && pnpm turbo run build --filter=blog`
 - **선택**: `.github/workflows/deploy-vercel.yml` + `VERCEL_*` 시크릿
 - **DoD**: PR → Preview URL, main → Production URL.
+- **참고**: 상세 전략은 `.agent/DEPLOYMENT.md` 참조
 
 ---
 
