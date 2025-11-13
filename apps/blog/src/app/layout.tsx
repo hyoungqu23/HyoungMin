@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Header from '@/widgets/header/Header';
 import '../root/globals.css';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com';
@@ -38,7 +39,11 @@ const RootLayout = ({
 }>) => {
   return (
     <html lang='ko'>
-      <body>{children}</body>
+      <body>
+        <Header />
+        {/* 헤더 높이만큼 패딩 추가 (h-16 = 64px) */}
+        <div className='pt-16'>{children}</div>
+      </body>
     </html>
   );
 };
