@@ -18,7 +18,7 @@ const prettyCodeOptions: Options = {
     }
     // title="filename"을 제거하고 나머지 메타데이터 반환
     const cleaned = meta.replace(/title="[^"]+"/, '').trim();
-    return cleaned || meta;
+    return cleaned.length > 0 ? cleaned : meta;
   },
   onVisitLine: (node) => {
     // 빈 줄 렌더 유지
