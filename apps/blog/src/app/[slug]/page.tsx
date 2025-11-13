@@ -3,6 +3,7 @@ import { mdxComponents } from '@/shared/lib/mdx-components';
 import { readArticle, listSlugs } from '@/shared/lib/fs';
 import { getRelatedPosts } from '@/shared/lib/related-posts';
 import ReadingProgress from '@/widgets/reading-progress/ReadingProgress';
+import TableOfContents from '@/widgets/toc/TableOfContents';
 import { Prose } from '@hyoungmin/ui';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -140,34 +141,44 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <main id='main'>
-        <Prose>
-          <h1>{meta.title}</h1>
-          <p className='text-lg text-gray-600 dark:text-gray-400'>{meta.summary}</p>
-          {meta.tags.length > 0 && (
-            <div className='flex flex-wrap gap-2 my-4'>
-              {meta.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className='px-2 py-1 text-sm bg-gray-100 dark:bg-gray-800 rounded'
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-          <time className='text-sm text-gray-500 dark:text-gray-500'>
-            {meta.date.toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </time>
-          {content}
-        </Prose>
+        <div className='container mx-auto px-4'>
+          <div className='flex gap-8'>
+            {/* TOC 사이드바 (데스크톱만 표시) */}
+            <TableOfContents />
+
+            {/* 본문 */}
+            <article className='flex-1 min-w-0'>
+              <Prose>
+                <h1>{meta.title}</h1>
+                <p className='text-lg text-gray-600 dark:text-gray-400'>{meta.summary}</p>
+                {meta.tags.length > 0 && (
+                  <div className='flex flex-wrap gap-2 my-4'>
+                    {meta.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className='px-2 py-1 text-sm bg-gray-100 dark:bg-gray-800 rounded'
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <time className='text-sm text-gray-500 dark:text-gray-500'>
+                  {meta.date.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </time>
+                {content}
+              </Prose>
+            </article>
+          </div>
+        </div>
 
         {/* 관련 포스트 섹션 */}
         {relatedPosts.length > 0 && (
-          <section className='mt-16 pt-8 border-t border-gray-200 dark:border-gray-800'>
+          <section className='container mx-auto px-4 mt-16 pt-8 border-t border-gray-200 dark:border-gray-800'>
             <h2 className='text-2xl font-bold mb-6'>관련 포스트</h2>
             <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
               {relatedPosts.map((relatedPost) => (
