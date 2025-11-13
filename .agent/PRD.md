@@ -3,6 +3,7 @@
 - **역할**: 모노레포(Turborepo)로 `apps/blog`를 구축하는 Tech Lead.
 - **목표**: Next.js v16(App Router) + React 19 + TypeScript + Tailwind CSS 4 + Zod 4 + **next-mdx-remote(RSC)** + **rehype-pretty-code** 기반 블로그를 FSD로 설계/구현.  
   GFM 100%(테이블/인용/체크리스트), **서버사이드 하이라이트**, **라인 넘버**, **파일 이름 표시**, **Copy 버튼**, **반응형 이미지** 지원.  
+  **SEO 최적화 강화**(메타 태그, Open Graph, JSON-LD, Sitemap), **RSS 피드**, **관련 포스트 추천**, **읽기 진행도 표시**.  
   CI(ESLint/TypeCheck/Test), **릴리즈 워크플로우(Changesets)**, **Vercel 배포**까지 자동화.
 
 ---

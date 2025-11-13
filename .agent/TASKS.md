@@ -649,13 +649,14 @@
   - `apps/blog/src/app/robots.ts`: Robots.txt 생성
     - `User-agent: *`, `Allow: /`, `Sitemap: ${siteUrl}/sitemap.xml`
 
-- **DoD**: 
+- **DoD**:
   - 각 포스트 페이지에 메타 태그, Open Graph, Twitter Cards 적용 확인.
   - JSON-LD 구조화 데이터 검증 (Google Rich Results Test).
   - `/sitemap.xml` 접근 가능.
   - `/robots.txt` 접근 가능.
 
 - **Verify**
+
   ```bash
   # 개발 서버에서 확인
   curl http://localhost:3000/sitemap.xml
@@ -676,6 +677,7 @@
 - **DoD**: `/feed.xml` 접근 시 RSS 피드 XML 반환.
 
 - **Verify**
+
   ```bash
   curl http://localhost:3000/feed.xml
   # RSS 리더에서 구독 테스트
