@@ -96,7 +96,7 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
     notFound();
   }
 
-  const { content, meta } = await compilePostMDX(source, mdxComponents);
+  const { content, meta, headings } = await compilePostMDX(source, mdxComponents);
 
   // 관련 포스트 가져오기
   const relatedPosts = await getRelatedPosts(slug, 5);
@@ -144,7 +144,7 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
         <div className='container mx-auto px-4'>
           <div className='flex gap-8'>
             {/* TOC 사이드바 (데스크톱만 표시) */}
-            <TableOfContents />
+            <TableOfContents headings={headings} />
 
             {/* 본문 */}
             <article className='flex-1 min-w-0'>

@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 type TocItem = {
   id: string;
@@ -41,8 +41,8 @@ const TableOfContents = () => {
 
       // 현재 뷰포트에 있는 헤딩 찾기
       let currentId = '';
-      for (let i = tocItems.length - 1; i >= 0; i--) {
-        const item = tocItems[i];
+      for (let i = headings.length - 1; i >= 0; i--) {
+        const item = headings[i];
         if (!item) continue;
         
         const element = document.getElementById(item.id);
@@ -53,8 +53,8 @@ const TableOfContents = () => {
       }
 
       // 첫 번째 헤딩보다 위에 있으면 첫 번째 헤딩 활성화
-      if (!currentId && tocItems.length > 0) {
-        const firstItem = tocItems[0];
+      if (!currentId && headings.length > 0) {
+        const firstItem = headings[0];
         if (firstItem) {
           const firstElement = document.getElementById(firstItem.id);
           if (firstElement && firstElement.offsetTop > scrollPosition) {
@@ -88,7 +88,7 @@ const TableOfContents = () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', updateActiveId);
     };
-  }, []);
+  }, [headings]);
 
   // 헤딩이 없으면 TOC 숨김
   if (headings.length === 0) {
@@ -96,19 +96,13 @@ const TableOfContents = () => {
   }
 
   return (
-    <nav
-      aria-label='Table of contents'
-      className='hidden lg:block lg:w-64 lg:flex-shrink-0'
-    >
+    <nav aria-label='Table of contents' className='hidden lg:block lg:w-64 lg:flex-shrink-0'>
       <div className='sticky top-20 space-y-2'>
-        <h2 className='text-sm font-semibold text-gray-900 dark:text-white mb-4'>
-          목차
-        </h2>
+        <h2 className='text-sm font-semibold text-gray-900 dark:text-white mb-4'>목차</h2>
         <ul className='space-y-1 text-sm'>
           {headings.map((heading) => {
             const isActive = activeId === heading.id;
-            const indentClass =
-              heading.level === 3 ? 'ml-4' : 'ml-0';
+            const indentClass = heading.level === 3 ? 'ml-4' : 'ml-0';
 
             return (
               <li key={heading.id}>
@@ -148,4 +142,3 @@ const TableOfContents = () => {
 };
 
 export default TableOfContents;
-

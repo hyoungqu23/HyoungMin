@@ -111,6 +111,9 @@ importers:
       tailwindcss:
         specifier: ^4.1.17
         version: 4.1.17
+      unist-util-visit:
+        specifier: ^5.0.0
+        version: 5.0.0
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.1.17

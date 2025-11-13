@@ -5,6 +5,8 @@ import rehypePrettyCode, { type Options } from 'rehype-pretty-code';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 import type { Element, Root } from 'hast';
+import { rehypeExtractHeadings } from './rehype-extract-headings';
+import type { TocItem } from './rehype-extract-headings';
 
 const prettyCodeOptions: Options = {
   theme: { light: 'github-light', dark: 'one-dark-pro' },
@@ -44,6 +46,8 @@ export const compilePostMDX = async (
   source: string,
   components: MDXRemoteProps['components']
 ) => {
+  const headings: TocItem[] = [];
+
   const { content, frontmatter } = await compileMDX({
     source,
     options: {
@@ -53,6 +57,7 @@ export const compilePostMDX = async (
         rehypePlugins: [
           rehypeSlug,
           [rehypeAutolinkHeadings, { behavior: 'wrap' }],
+          [rehypeExtractHeadings, { headings }],
           [rehypePrettyCode, prettyCodeOptions],
         ],
       },
@@ -61,5 +66,5 @@ export const compilePostMDX = async (
   });
 
   const meta = postMetaSchema.parse(frontmatter);
-  return { content, meta };
+  return { content, meta, headings };
 };
