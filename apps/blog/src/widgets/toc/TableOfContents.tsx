@@ -2,36 +2,18 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import type { TocItem } from '@/shared/lib/rehype-extract-headings';
 
-type TocItem = {
-  id: string;
-  text: string;
-  level: number;
+type TableOfContentsProps = {
+  headings: TocItem[];
 };
 
-const TableOfContents = () => {
-  const [headings, setHeadings] = useState<TocItem[]>([]);
+const TableOfContents = ({ headings }: TableOfContentsProps) => {
   const [activeId, setActiveId] = useState<string>('');
 
   useEffect(() => {
-    // 헤딩 요소 추출 (h2, h3)
-    const headingElements = Array.from(
-      document.querySelectorAll<HTMLHeadingElement>('main h2, main h3'),
-    );
-
-    const tocItems: TocItem[] = headingElements.map((heading) => {
-      const id = heading.id || heading.textContent?.toLowerCase().replace(/\s+/g, '-') || '';
-      return {
-        id,
-        text: heading.textContent || '',
-        level: parseInt(heading.tagName.charAt(1), 10), // h2 -> 2, h3 -> 3
-      };
-    });
-
-    setHeadings(tocItems);
-
     // 헤딩이 없으면 TOC 숨김
-    if (tocItems.length === 0) {
+    if (headings.length === 0) {
       return;
     }
 
