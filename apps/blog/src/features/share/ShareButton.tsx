@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { ShareIcon, LinkIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { LinkIcon, CheckIcon } from '@heroicons/react/24/outline';
 
 type ShareButtonProps = {
   url?: string;
@@ -11,11 +11,15 @@ type ShareButtonProps = {
 
 const ShareButton = ({ url, title, description }: ShareButtonProps) => {
   const [copied, setCopied] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState('');
 
-  // 현재 페이지 URL 가져오기
-  const currentUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
-  const shareTitle = title || document.title;
-  const shareDescription = description || '';
+  useEffect(() => {
+    if (url) {
+      setCurrentUrl(url);
+    } else if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+    }
+  }, [url]);
 
   const handleCopyLink = async () => {
     try {
