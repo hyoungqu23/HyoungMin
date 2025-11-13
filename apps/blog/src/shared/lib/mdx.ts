@@ -4,12 +4,22 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypePrettyCode, { type Options } from 'rehype-pretty-code';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
-import type { Element } from 'hast';
+import type { Element, Root } from 'hast';
 
 const prettyCodeOptions: Options = {
   theme: { light: 'github-light', dark: 'one-dark-pro' },
   keepBackground: false,
-  filterMetaString: (meta) => meta, // 파일명 메타데이터 유지
+  filterMetaString: (meta) => {
+    // title="filename" 형식에서 파일명 추출
+    const titleMatch = meta.match(/title="([^"]+)"/);
+    if (titleMatch) {
+      // 파일명을 반환 (rehype-pretty-code가 이를 title로 사용)
+      return titleMatch[1];
+    }
+    // title="filename"을 제거하고 나머지 메타데이터 반환
+    const cleaned = meta.replace(/title="[^"]+"/, '').trim();
+    return cleaned || meta;
+  },
   onVisitLine: (node) => {
     // 빈 줄 렌더 유지
     if (node.children.length === 0) {
