@@ -154,7 +154,11 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
                   <h1 className='flex-1'>{meta.title}</h1>
                   {/* 공유하기 버튼 (포스트 페이지에서만 표시) */}
                   <div className='flex-shrink-0'>
-                    <ShareButton url={`${siteUrl}/${slug}`} />
+                    <ShareButton
+                      url={`${siteUrl}/${slug}`}
+                      title={meta.title}
+                      description={meta.summary}
+                    />
                   </div>
                 </div>
                 <p className='text-lg text-gray-600 dark:text-gray-400'>{meta.summary}</p>
