@@ -512,9 +512,9 @@
 
 ---
 
-## 7) 개발 생산성
+## 7) 개발 생산성 ✅ (2025. 11. 13. 16:11:59)
 
-### 7.1 (선택) Husky + lint-staged
+### 7.1 (선택) Husky + lint-staged ✅ (2025. 11. 13. 16:11:59)
 
 - **작업**
 
@@ -758,7 +758,7 @@
 
 ## 11) UI/UX 컴포넌트 및 기능
 
-### 11.1 헤더 컴포넌트
+### 11.1 헤더 컴포넌트 ✅ (2025. 11. 13. 16:11:59)
 
 - **작업**
   - `apps/blog/src/widgets/header/Header.tsx`:
@@ -807,7 +807,7 @@
   - FOUC(Flash of Unstyled Content) 방지를 위해 스크립트를 `<head>`에 삽입.
   - `next-themes` 라이브러리 사용 고려 (선택).
 
-### 11.3 자동으로 만들어지는 Sticky 목차 (TOC)
+### 11.3 자동으로 만들어지는 Sticky 목차 (TOC) ✅ (2025. 11. 13. 16:11:59)
 
 - **작업**
   - `apps/blog/src/widgets/toc/TableOfContents.tsx`:
