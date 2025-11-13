@@ -6,15 +6,16 @@ export const metadata: Metadata = {
   description: 'Blog built with Next.js',
 };
 
-export default function RootLayout({
+const RootLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) => {
   return (
     <html lang='ko'>
       <body>{children}</body>
     </html>
   );
-}
+};
 
+export default RootLayout;
