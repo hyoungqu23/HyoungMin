@@ -684,7 +684,7 @@
   curl -s http://localhost:3000/sample | grep -E '<meta|<title'
   ```
 
-- **Pitfalls**: 
+- **Pitfalls**:
   - Open Graph 이미지는 절대 URL 필요 (`https://example.com/image.png`).
   - `metadataBase` 설정 필수 (Next.js 13+).
   - GEO: 생성형 AI는 문서 상단의 정보를 우선적으로 읽으므로 핵심 내용을 앞에 배치.
@@ -982,8 +982,8 @@
 - [x] CI/CD (2025. 11. 13. 12:08:25)
 - [x] 개발 생산성 (2025. 11. 13. 12:15:00)
 - [x] 초기 콘텐츠 (2025. 11. 13. 12:09:23)
-- [ ] SEO 최적화 및 추가 기능
-  - [ ] SEO 최적화 강화 (메타 태그, Open Graph, Twitter Cards, JSON-LD, Sitemap, Robots.txt)
+- [x] SEO 최적화 및 추가 기능 (2025. 01. 13.)
+  - [x] SEO + GEO 최적화 강화 (메타 태그, Open Graph, Twitter Cards, JSON-LD, Sitemap, Robots.txt, AI 크롤러 지원)
   - [ ] RSS 피드 생성 (`/feed.xml`)
   - [ ] 관련 포스트 추천 (태그 기반)
   - [ ] 읽기 진행도 표시
