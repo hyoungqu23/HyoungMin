@@ -4,6 +4,7 @@
   "private": true,
   "packageManager": "pnpm@10.21.0",
   "scripts": {
+    "dev": "pnpm turbo run dev",
     "lint": "pnpm turbo run lint --parallel",
     "typecheck": "pnpm turbo run typecheck --parallel",
     "test": "pnpm turbo run test --parallel",
