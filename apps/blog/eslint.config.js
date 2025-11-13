@@ -15,6 +15,9 @@ const compat = new FlatCompat({
 });
 
 export default [
+  {
+    ignores: ['.next/**', 'node_modules/**', 'dist/**', 'coverage/**'],
+  },
   js.configs.recommended,
   ...compat.extends('plugin:@typescript-eslint/recommended', 'plugin:react-hooks/recommended'),
   {
