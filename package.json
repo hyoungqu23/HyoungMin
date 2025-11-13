@@ -13,10 +13,14 @@
     "prepare": "husky install"
   },
   "lint-staged": {
-    "*.{ts,tsx,mdx}": ["eslint --fix", "prettier --write"]
+    "*.{ts,tsx,mdx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
+    "@eslint/eslintrc": "^3.3.1",
     "@types/node": "^24.10.1",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
