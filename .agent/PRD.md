@@ -26,8 +26,9 @@
 4. **이미지**: `<img>`→`<Image>` 매핑으로 **반응형 최적화**.
 5. **성능/SEO**: 정적 사전생성 + 부분 하이드레이션, Web Vitals 목표(FCP<1.8s, LCP<2.5s, INP<200ms). **SEO 최적화 강화**(메타 태그, Open Graph, Twitter Cards, JSON-LD 구조화 데이터, Sitemap.xml, Robots.txt).
 6. **콘텐츠 발견성**: **RSS 피드** 자동 생성, **관련 포스트 추천**(태그 기반), **읽기 진행도 표시**.
-7. **DX**: FSD, 공용 프리셋(ESLint/Prettier/TS), Zod 스키마 검증, 테스트 기본 세트.
-8. **자동화**: CI(ESLint/TypeCheck/Test/Build) + 릴리즈(Changesets) + 배포(Vercel Preview/Prod).
+7. **UI/UX**: **헤더**(Skip link 포함), **라이트/다크 모드 테마 변경**, **Sticky 목차(TOC)**, **Footer**, **공유하기 기능**(링크 복사, LinkedIn 필수), **접근성 & 키보드 단축키**(t: 테마 토글, g: 맨 위).
+8. **DX**: FSD, 공용 프리셋(ESLint/Prettier/TS), Zod 스키마 검증, 테스트 기본 세트.
+9. **자동화**: CI(ESLint/TypeCheck/Test/Build) + 릴리즈(Changesets) + 배포(Vercel Preview/Prod).
 
 ## B. 비목표(Non-Goals)
 
@@ -283,7 +284,16 @@ export const CodeBlock = (props: any) => {
 - **표시 형태**: 진행 바 (progress bar).
 - **접근성**: `aria-label` 제공.
 
-## 4.11 CI / 릴리즈 / 배포
+## 4.11 UI/UX 컴포넌트
+
+- **헤더**: 로고/사이트명, 네비게이션, Skip link (`href="#main"`), 테마 토글, 공유 버튼.
+- **라이트/다크 모드**: 테마 토글 버튼, `localStorage` 저장, 시스템 설정 따라가기 옵션.
+- **Sticky 목차(TOC)**: 헤딩(`h2`, `h3`) 자동 추출, 현재 섹션 하이라이트, `nav[aria-label="Table of contents"]`.
+- **Footer**: 저작권 정보, 소셜 링크, 사이트맵.
+- **공유하기**: 링크 복사(필수), LinkedIn 공유(필수), Twitter/Facebook/카카오톡(선택).
+- **접근성**: Skip link, 모든 버튼 `aria-label`, 키보드 단축키(t: 테마, g: 맨 위).
+
+## 4.12 CI / 릴리즈 / 배포
 
 ### CI(GitHub Actions) – 모노레포 전 패키지 대상으로 turbo 실행
 

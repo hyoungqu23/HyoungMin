@@ -732,7 +732,196 @@
 
 ---
 
-## 11) 스모크 체크리스트 (PR 머지 전)
+## 11) UI/UX 컴포넌트 및 기능
+
+### 11.1 헤더 컴포넌트
+
+- **작업**
+  - `apps/blog/src/widgets/header/Header.tsx`:
+    - 로고/사이트명 (홈 링크)
+    - 네비게이션 메뉴 (선택)
+    - Skip link (`<a href="#main">Skip to main content</a>`) - 접근성 필수
+    - 다크모드 토글 버튼 (11.2에서 구현)
+    - 공유하기 버튼 (11.5에서 구현)
+  - `apps/blog/src/app/layout.tsx`:
+    - `Header` 컴포넌트 import 및 렌더링
+    - 상단 고정 스타일 (`sticky top-0` 또는 `fixed`)
+
+- **DoD**: 모든 페이지 상단에 헤더 표시, Skip link 동작 확인.
+
+- **Verify**: 키보드로 Tab 키를 눌렀을 때 Skip link가 먼저 포커스됨.
+
+- **Pitfalls**: Skip link는 스크린 리더 사용자를 위해 필수.
+
+### 11.2 라이트/다크 모드 테마 변경 기능
+
+- **작업**
+  - `apps/blog/src/features/theme-toggle/ThemeToggle.tsx`:
+    - `'use client'` 컴포넌트
+    - `useState`로 현재 테마 관리 (`'light' | 'dark' | 'system'`)
+    - `localStorage`에 테마 저장
+    - `document.documentElement.classList`로 `dark` 클래스 토글
+    - `aria-label="Toggle theme"` 필수
+    - 아이콘 표시 (태양/달 아이콘)
+  - `apps/blog/src/app/layout.tsx`:
+    - `ThemeProvider` (또는 직접 구현)로 테마 상태 관리
+    - `ThemeToggle` 컴포넌트를 `Header`에 포함
+  - `apps/blog/src/root/globals.css`:
+    - 다크모드 스타일 정의 (`@media (prefers-color-scheme: dark)` 또는 `.dark` 클래스)
+    - Tailwind `dark:` 변형 사용
+
+- **DoD**: 
+  - 헤더의 테마 토글 버튼 클릭 시 라이트/다크 모드 전환.
+  - 페이지 새로고침 시 선택한 테마 유지.
+  - 시스템 설정 따라가기 옵션 (선택).
+
+- **Verify**: 
+  - 개발자 도구에서 `html` 요소의 `class` 속성 확인.
+  - `localStorage`에 테마 값 저장 확인.
+
+- **Pitfalls**: 
+  - FOUC(Flash of Unstyled Content) 방지를 위해 스크립트를 `<head>`에 삽입.
+  - `next-themes` 라이브러리 사용 고려 (선택).
+
+### 11.3 자동으로 만들어지는 Sticky 목차 (TOC)
+
+- **작업**
+  - `apps/blog/src/widgets/toc/TableOfContents.tsx`:
+    - `'use client'` 컴포넌트
+    - `useEffect`로 헤딩 요소(`h2`, `h3`) 추출
+    - `rehype-slug`로 생성된 `id` 속성 활용
+    - 현재 스크롤 위치에 따라 활성 항목 하이라이트
+    - `nav[aria-label="Table of contents"]` 속성 필수
+    - Sticky 포지셔닝 (`sticky top-20`)
+  - `apps/blog/src/app/[slug]/page.tsx`:
+    - `TableOfContents` 컴포넌트 import 및 렌더링
+    - 사이드바 또는 본문 옆에 배치
+
+- **DoD**: 
+  - 포스트 페이지에 목차 표시.
+  - 목차 항목 클릭 시 해당 섹션으로 스크롤 이동.
+  - 현재 읽는 섹션이 목차에서 하이라이트됨.
+
+- **Verify**: 
+  - 헤딩이 3개 이상인 포스트에서 목차 생성 확인.
+  - 목차 클릭 시 부드러운 스크롤 동작 확인.
+
+- **Pitfalls**: 
+  - 헤딩이 없는 포스트는 목차 숨김 처리.
+  - 모바일에서는 목차를 접을 수 있는 토글 버튼 제공 권장.
+
+### 11.4 Footer 컴포넌트
+
+- **작업**
+  - `apps/blog/src/widgets/footer/Footer.tsx`:
+    - 저작권 정보
+    - 소셜 링크 (GitHub, LinkedIn 등, 선택)
+    - 사이트맵 링크 (선택)
+    - 연락처 정보 (선택)
+  - `apps/blog/src/app/layout.tsx`:
+    - `Footer` 컴포넌트 import 및 렌더링
+    - 하단 고정 또는 본문 하단에 배치
+
+- **DoD**: 모든 페이지 하단에 Footer 표시.
+
+- **Verify**: Footer가 본문 아래에 올바르게 배치됨.
+
+- **Pitfalls**: 기존 코드 재활용 가능 시 재사용.
+
+### 11.5 공유하기 기능
+
+- **작업**
+  - `apps/blog/src/features/share/ShareButton.tsx`:
+    - `'use client'` 컴포넌트
+    - 링크 복사 기능 (필수):
+      - `navigator.clipboard.writeText()` 사용
+      - 복사 성공 피드백 표시
+      - `aria-label="Copy link"` 필수
+    - LinkedIn 공유 (필수):
+      - LinkedIn 공유 URL 형식: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
+      - 새 창 열기 (`target="_blank"`, `rel="noopener noreferrer"`)
+      - `aria-label="Share on LinkedIn"` 필수
+    - 추가 소셜 공유 (선택, 추천):
+      - Twitter/X: `https://twitter.com/intent/tweet?url=${url}&text=${title}`
+      - Facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`
+      - 카카오톡 (한국 사용자 고려)
+  - `apps/blog/src/app/[slug]/page.tsx`:
+    - `ShareButton` 컴포넌트 import 및 렌더링
+    - 헤더 또는 포스트 상단/하단에 배치
+
+- **DoD**: 
+  - 링크 복사 버튼 클릭 시 현재 페이지 URL 복사.
+  - LinkedIn 공유 버튼 클릭 시 LinkedIn 공유 페이지 열림.
+  - 복사 성공 시 피드백 표시.
+
+- **Verify**: 
+  - 복사한 링크를 다른 탭에 붙여넣기 테스트.
+  - LinkedIn 공유 버튼 클릭 시 올바른 URL로 이동 확인.
+
+- **Pitfalls**: 
+  - `navigator.clipboard`는 HTTPS 또는 localhost에서만 동작.
+  - Fallback으로 `document.execCommand('copy')` 고려 (구형 브라우저).
+
+### 11.6 상세 페이지 통합
+
+- **작업**
+  - `apps/blog/src/app/[slug]/page.tsx`:
+    - 헤더, 본문, 목차, 관련 포스트, Footer 통합 레이아웃
+    - 반응형 레이아웃 (모바일/데스크톱)
+    - 본문 영역에 `id="main"` 추가 (Skip link 대상)
+    - 메타데이터 표시 (제목, 날짜, 태그, 읽기 시간)
+    - 공유하기 버튼 배치
+    - 읽기 진행도 표시 (10.4에서 구현)
+
+- **DoD**: 상세 페이지에 모든 컴포넌트가 올바르게 통합되어 표시됨.
+
+- **Verify**: 
+  - 모바일/데스크톱에서 레이아웃 확인.
+  - 모든 인터랙티브 요소 동작 확인.
+
+- **Pitfalls**: 
+  - 모바일에서는 목차를 접을 수 있도록 처리.
+  - 본문 너비는 가독성을 위해 제한 (예: `max-w-3xl`).
+
+### 11.7 접근성 & 키보드 단축키
+
+- **작업**
+  - **Skip link** (11.1에서 구현):
+    - `<a href="#main">Skip to main content</a>`
+    - 키보드 포커스 시에만 표시 (`sr-only focus:not-sr-only`)
+  - **TOC 접근성** (11.3에서 구현):
+    - `nav[aria-label="Table of contents"]` 속성 필수
+    - 목차 항목에 적절한 `aria-current` 속성 (현재 섹션 표시)
+  - **테마/공유 버튼 접근성** (11.2, 11.5에서 구현):
+    - 모든 버튼에 `aria-label` 필수
+    - 아이콘만 있는 버튼은 스크린 리더를 위해 텍스트 라벨 필요
+  - **키보드 단축키** (선택):
+    - `apps/blog/src/features/keyboard-shortcuts/useKeyboardShortcuts.ts`:
+      - `t` 키: 테마 토글
+      - `g` 키: 맨 위로 스크롤
+      - `useEffect`로 키보드 이벤트 리스너 등록
+      - `?` 키로 단축키 도움말 표시 (선택)
+    - `apps/blog/src/app/layout.tsx`:
+      - `useKeyboardShortcuts` 훅 사용
+
+- **DoD**: 
+  - Skip link가 키보드로 접근 가능.
+  - 모든 인터랙티브 요소가 키보드로 접근 가능.
+  - 스크린 리더로 테스트 시 모든 요소가 올바르게 읽힘.
+  - (선택) 키보드 단축키 동작 확인.
+
+- **Verify**: 
+  - 키보드만으로 모든 기능 사용 가능.
+  - 스크린 리더 (NVDA, VoiceOver 등)로 테스트.
+  - WAVE 또는 axe DevTools로 접근성 검사.
+
+- **Pitfalls**: 
+  - 포커스 관리 중요 (모달, 드롭다운 등).
+  - 키보드 단축키는 충돌하지 않도록 주의 (브라우저 기본 단축키).
+
+---
+
+## 12) 스모크 체크리스트 (PR 머지 전)
 
 - [ ] `/` 목록 렌더(드래프트 제외, 날짜 정렬)
 - [ ] `/:slug` 본문 렌더(GFM/테이블/인용/체크박스)
@@ -745,6 +934,13 @@
 - [ ] RSS: `/feed.xml` 접근 가능 및 RSS 리더에서 구독 테스트
 - [ ] 관련 포스트: 상세 페이지 하단에 관련 포스트 표시
 - [ ] 읽기 진행도: 스크롤 시 상단 진행 바 표시
+- [ ] 헤더: Skip link 동작 확인, 네비게이션 메뉴 표시
+- [ ] 다크모드: 테마 토글 버튼 클릭 시 라이트/다크 모드 전환, 페이지 새로고침 시 테마 유지
+- [ ] 목차: 포스트 페이지에 Sticky 목차 표시, 클릭 시 해당 섹션으로 스크롤 이동
+- [ ] Footer: 모든 페이지 하단에 Footer 표시
+- [ ] 공유하기: 링크 복사 및 LinkedIn 공유 동작 확인
+- [ ] 접근성: Skip link 키보드 접근, 모든 버튼 aria-label 확인, 스크린 리더 테스트
+- [ ] 키보드 단축키: (선택) t(테마 토글), g(맨 위) 동작 확인
 - [ ] `pnpm run lint/typecheck/test:ci/build` 모두 green
 - [ ] Vercel Preview/Prod 배포 정상
 
@@ -767,3 +963,11 @@
   - [ ] RSS 피드 생성 (`/feed.xml`)
   - [ ] 관련 포스트 추천 (태그 기반)
   - [ ] 읽기 진행도 표시
+- [ ] UI/UX 컴포넌트 및 기능
+  - [ ] 헤더 컴포넌트 (Skip link 포함)
+  - [ ] 라이트/다크 모드 테마 변경 기능
+  - [ ] 자동으로 만들어지는 Sticky 목차 (TOC)
+  - [ ] Footer 컴포넌트
+  - [ ] 공유하기 기능 (링크 복사, LinkedIn 공유 필수)
+  - [ ] 상세 페이지 통합
+  - [ ] 접근성 & 키보드 단축키 (Skip link, aria-label, t/g 단축키)
