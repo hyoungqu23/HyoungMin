@@ -1,0 +1,28 @@
+---
+title: '샘플 포스트'
+date: 2025-01-13
+summary: 'GFM/코드 하이라이트/이미지/컴포넌트 데모를 포함한 샘플'
+tags: ['mdx', 'demo']
+draft: false
+---
+
+> 인용문 & 체크박스
+
+- [x] 할 일 1
+- [ ] 할 일 2
+
+```tsx:app/page.tsx showLineNumbers {1,4-5}
+export default function Page() {
+  return <div>Hello</div>;
+}
+```
+
+| A   | B   |
+| --- | --- |
+| 1   | 2   |
+
+<img src='/some/local/image.png' alt='샘플 이미지' />
+
+{/* (선택) 성능 데모 */}
+{/* <PerfDemoLoading label="RSC vs Client 로딩 비교" /> */}
+
