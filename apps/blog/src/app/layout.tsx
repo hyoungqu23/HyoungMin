@@ -24,6 +24,11 @@ export const metadata: Metadata = {
     title: siteName,
     description: 'Blog built with Next.js',
   },
+  alternates: {
+    types: {
+      'application/rss+xml': [{ url: `${siteUrl}/feed.xml`, title: `${siteName} RSS Feed` }],
+    },
+  },
 };
 
 const RootLayout = ({
