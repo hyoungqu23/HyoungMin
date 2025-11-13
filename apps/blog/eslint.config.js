@@ -49,11 +49,5 @@ export default [
       ],
     },
   },
-  {
-    files: ['**/*.mdx'],
-    languageOptions: {
-      parser: 'eslint-mdx',
-    },
-  },
 ];
 

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "lint": "eslint . --ext .ts,.tsx,.mdx",
+    "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest",
     "test:ci": "vitest run --coverage"
