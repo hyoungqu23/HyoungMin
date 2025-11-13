@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckIcon, LinkIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, LinkIcon, ShareIcon } from '@heroicons/react/24/outline';
 import { useMemo, useState } from 'react';
 
 type ShareButtonProps = {
@@ -9,14 +9,18 @@ type ShareButtonProps = {
   description?: string;
 };
 
-const ShareButton = ({ url }: ShareButtonProps) => {
+const ShareButton = ({ url, title, description }: ShareButtonProps) => {
   const [copied, setCopied] = useState(false);
-
+  const [isOpen, setIsOpen] = useState(false);
+  
   // useMemo로 클라이언트 사이드에서만 URL 계산 (useEffect 대신)
   const currentUrl = useMemo(() => {
     if (typeof window === 'undefined') return '';
     return url || window.location.href;
   }, [url]);
+
+  const shareTitle = title || (typeof document !== 'undefined' ? document.title : '');
+  const shareText = description || shareTitle;
 
   const handleCopyLink = async () => {
     try {
