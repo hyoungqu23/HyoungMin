@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import ThemeToggle from '@/features/theme-toggle/ThemeToggle';
 
 const Header = () => {
   return (
@@ -22,29 +23,8 @@ const Header = () => {
 
         {/* 우측 액션 버튼들 */}
         <nav className='flex items-center gap-4' aria-label='Header navigation'>
-          {/* 다크모드 토글 버튼 (11.2에서 구현 예정) */}
-          <button
-            type='button'
-            aria-label='Toggle theme'
-            className='p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors'
-            disabled
-          >
-            <span className='sr-only'>Theme toggle (coming soon)</span>
-            <svg
-              className='w-5 h-5 text-gray-700 dark:text-gray-300'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'
-              aria-hidden='true'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z'
-              />
-            </svg>
-          </button>
+          {/* 다크모드 토글 버튼 */}
+          <ThemeToggle />
 
           {/* 공유하기 버튼 (11.5에서 구현 예정) */}
           <button

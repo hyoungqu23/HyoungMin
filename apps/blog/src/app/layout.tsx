@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ThemeProvider } from 'next-themes';
 import Header from '@/widgets/header/Header';
 import '../root/globals.css';
 
