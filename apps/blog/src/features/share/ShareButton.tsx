@@ -11,7 +11,7 @@ type ShareButtonProps = {
 
 const ShareButton = ({ url }: ShareButtonProps) => {
   const [copied, setCopied] = useState(false);
-  
+
   // useMemo로 클라이언트 사이드에서만 URL 계산 (useEffect 대신)
   const currentUrl = useMemo(() => {
     if (typeof window === 'undefined') return '';
