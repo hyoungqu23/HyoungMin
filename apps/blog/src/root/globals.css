@@ -65,3 +65,24 @@ pre[data-title] {
   border-radius: 0 0 0.5rem 0.5rem;
 }
 
+/* 테이블 스타일 (Tailwind Typography 기본 스타일 보완) */
+.prose table {
+  @apply w-full border-collapse;
+}
+
+.prose thead {
+  @apply border-b border-gray-300 dark:border-gray-700;
+}
+
+.prose th {
+  @apply px-4 py-2 text-left font-semibold;
+}
+
+.prose td {
+  @apply px-4 py-2 border-b border-gray-200 dark:border-gray-800;
+}
+
+.prose tbody tr:hover {
+  @apply bg-gray-50 dark:bg-gray-900/50;
+}
+

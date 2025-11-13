@@ -9,7 +9,7 @@ import type { Element } from 'hast';
 const prettyCodeOptions: Options = {
   theme: { light: 'github-light', dark: 'one-dark-pro' },
   keepBackground: false,
-  filterMetaString: (meta) => meta, // title/filename/meta 그대로 유지
+  filterMetaString: (meta) => meta, // 파일명 메타데이터 유지
   onVisitLine: (node) => {
     // 빈 줄 렌더 유지
     if (node.children.length === 0) {
