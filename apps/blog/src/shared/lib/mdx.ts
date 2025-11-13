@@ -1,6 +1,8 @@
 import { compileMDX } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
 import rehypePrettyCode, { type Options } from 'rehype-pretty-code';
+import rehypeSlug from 'rehype-slug';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import { postMetaSchema } from '@hyoungmin/schema';
 
 const prettyCodeOptions: Options = {
@@ -28,7 +30,11 @@ export const compilePostMDX = async (source: string, components: Record<string, 
       parseFrontmatter: true,
       mdxOptions: {
         remarkPlugins: [remarkGfm],
-        rehypePlugins: [[rehypePrettyCode, prettyCodeOptions]],
+        rehypePlugins: [
+          rehypeSlug,
+          [rehypeAutolinkHeadings, { behavior: 'wrap' }],
+          [rehypePrettyCode, prettyCodeOptions],
+        ],
       },
     },
     components,

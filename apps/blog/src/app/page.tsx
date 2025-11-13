@@ -1,5 +1,4 @@
-import { listSlugs } from '@/shared/lib/fs';
-import { readArticle } from '@/shared/lib/fs';
+import { listSlugs, readArticle } from '@/shared/lib/fs';
 import { compilePostMDX } from '@/shared/lib/mdx';
 import Link from 'next/link';
 
@@ -10,7 +9,7 @@ const Home = async () => {
       const source = await readArticle(slug);
       const { meta } = await compilePostMDX(source, {});
       return { slug, meta };
-    })
+    }),
   );
 
   const publishedPosts = posts
