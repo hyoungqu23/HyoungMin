@@ -38,11 +38,13 @@ const RootLayout = ({
   children: React.ReactNode;
 }>) => {
   return (
-    <html lang='ko'>
+    <html lang='ko' suppressHydrationWarning>
       <body>
-        <Header />
-        {/* 헤더 높이만큼 패딩 추가 (h-16 = 64px) */}
-        <div className='pt-16'>{children}</div>
+        <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
+          <Header />
+          {/* 헤더 높이만큼 패딩 추가 (h-16 = 64px) */}
+          <div className='pt-16'>{children}</div>
+        </ThemeProvider>
       </body>
     </html>
   );
