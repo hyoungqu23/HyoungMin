@@ -48,7 +48,8 @@ code[data-highlighted-chars] {
 
 /* Code block filename header */
 pre[data-rehype-pretty-code-title]::before,
-pre[data-title]::before {
+pre[data-title]::before,
+figure[data-rehype-pretty-code-figure] > figcaption[data-rehype-pretty-code-title] {
   content: attr(data-rehype-pretty-code-title) attr(data-title);
   display: block;
   padding: 0.5rem 1rem;
@@ -61,8 +62,30 @@ pre[data-title]::before {
 }
 
 pre[data-rehype-pretty-code-title],
-pre[data-title] {
+pre[data-title],
+figure[data-rehype-pretty-code-figure] > pre {
   border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* rehype-pretty-code의 figure 구조 지원 */
+figure[data-rehype-pretty-code-figure] {
+  margin: 1.5rem 0;
+}
+
+figure[data-rehype-pretty-code-figure] > figcaption[data-rehype-pretty-code-title] {
+  display: block;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  background-color: rgb(243 244 246);
+  border-bottom: 1px solid rgb(229 231 235);
+  border-radius: 0.5rem 0.5rem 0 0;
+  margin-bottom: -1px;
+}
+
+figure[data-rehype-pretty-code-figure] > pre {
+  border-radius: 0 0 0.5rem 0.5rem;
+  margin-top: 0;
 }
 
 /* 테이블 스타일 (Tailwind Typography 기본 스타일 보완) */
