@@ -4,6 +4,7 @@ import { readArticle, listSlugs } from '@/shared/lib/fs';
 import { getRelatedPosts } from '@/shared/lib/related-posts';
 import ReadingProgress from '@/widgets/reading-progress/ReadingProgress';
 import TableOfContents from '@/widgets/toc/TableOfContents';
+import ShareButton from '@/features/share/ShareButton';
 import { Prose } from '@hyoungmin/ui';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
