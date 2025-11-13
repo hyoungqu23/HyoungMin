@@ -1,9 +1,10 @@
-import { compileMDX } from 'next-mdx-remote/rsc';
-import remarkGfm from 'remark-gfm';
+import { postMetaSchema } from '@hyoungmin/schema';
+import { compileMDX, type MDXRemoteProps } from 'next-mdx-remote/rsc';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypePrettyCode, { type Options } from 'rehype-pretty-code';
 import rehypeSlug from 'rehype-slug';
-import rehypeAutolinkHeadings from 'rehype-autolink-headings';
-import { postMetaSchema } from '@hyoungmin/schema';
+import remarkGfm from 'remark-gfm';
+import type { Element } from 'hast';
 
 const prettyCodeOptions: Options = {
   theme: { light: 'github-light', dark: 'one-dark-pro' },
@@ -16,14 +17,33 @@ const prettyCodeOptions: Options = {
     }
   },
   onVisitHighlightedLine: (node) => {
-    node.properties.className = (node.properties.className || []).concat('highlighted');
+    const className = node.properties.className;
+    if (Array.isArray(className)) {
+      const stringArray = className.filter((c): c is string => typeof c === 'string');
+      node.properties.className = [...stringArray, 'highlighted'];
+    } else if (typeof className === 'string') {
+      node.properties.className = [className, 'highlighted'];
+    } else {
+      node.properties.className = ['highlighted'];
+    }
   },
-  onVisitHighlightedChars: (node: any) => {
-    node.properties.className = (node.properties.className || []).concat('word--highlighted');
+  onVisitHighlightedChars: (node: Element) => {
+    const className = node.properties.className;
+    if (Array.isArray(className)) {
+      const stringArray = className.filter((c): c is string => typeof c === 'string');
+      node.properties.className = [...stringArray, 'word--highlighted'];
+    } else if (typeof className === 'string') {
+      node.properties.className = [className, 'word--highlighted'];
+    } else {
+      node.properties.className = ['word--highlighted'];
+    }
   },
 };
 
-export const compilePostMDX = async (source: string, components: Record<string, any>) => {
+export const compilePostMDX = async (
+  source: string,
+  components: MDXRemoteProps['components']
+) => {
   const { content, frontmatter } = await compileMDX({
     source,
     options: {
@@ -43,4 +63,3 @@ export const compilePostMDX = async (source: string, components: Record<string, 
   const meta = postMetaSchema.parse(frontmatter);
   return { content, meta };
 };
-

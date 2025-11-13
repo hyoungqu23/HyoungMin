@@ -1,7 +1,8 @@
-import { CodeBlock, MdxImage, Prose } from '@hyoungmin/ui';
+import { CodeBlock, MdxImage } from '@hyoungmin/ui';
+import type { MDXRemoteProps } from 'next-mdx-remote/rsc';
+import type { ComponentProps } from 'react';
 
-export const mdxComponents = {
-  pre: (props: any) => <CodeBlock {...props} />,
-  img: (props: any) => <MdxImage {...props} />,
-} as const;
-
+export const mdxComponents: MDXRemoteProps['components'] = {
+  pre: (props: ComponentProps<'pre'>) => <CodeBlock {...props} />,
+  img: (props: ComponentProps<'img'>) => <MdxImage {...props} />,
+};

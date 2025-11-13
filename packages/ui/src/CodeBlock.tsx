@@ -1,9 +1,10 @@
 'use client';
 import { useRef, useState } from 'react';
+import type { ComponentProps } from 'react';
 // TODO: shadcn Button 컴포넌트 설정 후 import
 // import { Button } from '@/components/ui/button';
 
-export const CodeBlock = (props: any) => {
+export const CodeBlock = (props: ComponentProps<'pre'>) => {
   const preRef = useRef<HTMLPreElement>(null);
   const [copied, setCopied] = useState(false);
 
