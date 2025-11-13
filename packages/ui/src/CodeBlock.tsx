@@ -1,6 +1,6 @@
 'use client';
-import { useRef, useState } from 'react';
 import type { ComponentProps } from 'react';
+import { useRef, useState } from 'react';
 // TODO: shadcn Button 컴포넌트 설정 후 import
 // import { Button } from '@/components/ui/button';
 

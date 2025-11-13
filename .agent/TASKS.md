@@ -630,7 +630,107 @@
 
 ---
 
-## 10) 스모크 체크리스트 (PR 머지 전)
+## 10) SEO 최적화 및 추가 기능
+
+### 10.1 SEO 최적화 강화
+
+- **작업**
+  - `apps/blog/src/app/[slug]/page.tsx`: 동적 메타데이터 생성
+    - `generateMetadata` 함수 구현
+    - `title`, `description`, `keywords` (frontmatter 기반)
+    - Open Graph 메타 태그 (`og:title`, `og:description`, `og:image`, `og:type`, `og:url`)
+    - Twitter Cards 메타 태그 (`twitter:card`, `twitter:title`, `twitter:description`, `twitter:image`)
+  - `apps/blog/src/app/[slug]/page.tsx`: JSON-LD 구조화 데이터
+    - Article/BlogPosting 스키마 생성
+    - `<script type="application/ld+json">` 태그로 삽입
+  - `apps/blog/src/app/sitemap.ts`: Sitemap.xml 자동 생성
+    - 모든 포스트 URL 포함
+    - `lastModified`, `changeFrequency`, `priority` 설정
+  - `apps/blog/src/app/robots.ts`: Robots.txt 생성
+    - `User-agent: *`, `Allow: /`, `Sitemap: ${siteUrl}/sitemap.xml`
+
+- **DoD**: 
+  - 각 포스트 페이지에 메타 태그, Open Graph, Twitter Cards 적용 확인.
+  - JSON-LD 구조화 데이터 검증 (Google Rich Results Test).
+  - `/sitemap.xml` 접근 가능.
+  - `/robots.txt` 접근 가능.
+
+- **Verify**
+  ```bash
+  # 개발 서버에서 확인
+  curl http://localhost:3000/sitemap.xml
+  curl http://localhost:3000/robots.txt
+  ```
+
+- **Pitfalls**: Open Graph 이미지는 절대 URL 필요 (`https://example.com/image.png`).
+
+### 10.2 RSS 피드 생성
+
+- **작업**
+  - `apps/blog/src/app/feed.xml/route.ts` (또는 `feed.ts`):
+    - RSS 2.0 형식으로 피드 생성
+    - 최신 포스트 목록 (드래프트 제외, 날짜 내림차순)
+    - 각 항목: title, link, description, pubDate
+    - `Content-Type: application/rss+xml` 헤더 설정
+
+- **DoD**: `/feed.xml` 접근 시 RSS 피드 XML 반환.
+
+- **Verify**
+  ```bash
+  curl http://localhost:3000/feed.xml
+  # RSS 리더에서 구독 테스트
+  ```
+
+- **Pitfalls**: 날짜 형식은 RFC 822 형식 (`Wed, 13 Nov 2025 00:00:00 +0000`).
+
+### 10.3 관련 포스트 추천
+
+- **작업**
+  - `apps/blog/src/shared/lib/related-posts.ts`:
+    - `getRelatedPosts(slug: string, allPosts: Post[], limit: number = 3)` 함수
+    - 태그 기반 유사도 계산 (공통 태그 수)
+    - 현재 포스트 제외
+    - 유사도 높은 순 정렬, 동일 시 최신순
+  - `apps/blog/src/app/[slug]/page.tsx`:
+    - 관련 포스트 데이터 가져오기
+    - 하단에 "관련 포스트" 섹션 렌더링
+    - 카드 형태로 표시 (제목, 요약, 링크)
+
+- **DoD**: 상세 페이지 하단에 관련 포스트 3-5개 표시.
+
+- **Verify**: 태그가 겹치는 포스트가 있을 때 관련 포스트가 표시됨.
+
+- **Pitfalls**: 태그가 없는 포스트는 관련 포스트 없음 처리.
+
+### 10.4 읽기 진행도 표시
+
+- **작업**
+  - `apps/blog/src/widgets/reading-progress/ReadingProgress.tsx`:
+    - `'use client'` 컴포넌트
+    - `useEffect`로 스크롤 이벤트 리스너 등록
+    - 스크롤 위치 기반 진행률 계산 (`scrollY / (documentHeight - windowHeight)`)
+    - 진행 바 렌더링 (`<div>` 또는 `<progress>` 요소)
+    - `aria-label="Reading progress"` 추가
+  - `apps/blog/src/app/[slug]/layout.tsx` 또는 `page.tsx`:
+    - `ReadingProgress` 컴포넌트 import 및 렌더링
+    - 상단 고정 스타일 (`fixed top-0 left-0 right-0 z-50`)
+
+- **DoD**: 스크롤 시 상단에 진행 바가 표시되고 진행률이 업데이트됨.
+
+- **Verify**: 브라우저 개발자 도구에서 스크롤 이벤트 확인.
+
+- **Pitfalls**: 스크롤 이벤트는 성능 고려하여 throttle/debounce 적용 권장.
+
+### 10.5 태그 시스템 (스키마 확인 및 유지)
+
+- **현재 상태**: `packages/schema/src/index.ts`에 `tags: z.array(z.string()).default([])` 이미 구현됨.
+- **결정 사항**: 태그 시스템 유지 (카테고리 대신).
+  - **이유**: 다중 분류 가능, 유연한 분류, SEO 유리, 관련 포스트 추천에 적합.
+- **추가 작업 없음**: 스키마는 이미 태그 시스템으로 구현되어 있음.
+
+---
+
+## 11) 스모크 체크리스트 (PR 머지 전)
 
 - [ ] `/` 목록 렌더(드래프트 제외, 날짜 정렬)
 - [ ] `/:slug` 본문 렌더(GFM/테이블/인용/체크박스)
@@ -638,6 +738,11 @@
 - [ ] 이미지: `<img>` → `<Image>` 매핑 정상
 - [ ] (선택) 헤더 앵커/자동 링크
 - [ ] (선택) Perf 데모 클릭 시 수치 표시
+- [ ] SEO: 메타 태그, Open Graph, Twitter Cards, JSON-LD 구조화 데이터 확인
+- [ ] SEO: `/sitemap.xml`, `/robots.txt` 접근 가능
+- [ ] RSS: `/feed.xml` 접근 가능 및 RSS 리더에서 구독 테스트
+- [ ] 관련 포스트: 상세 페이지 하단에 관련 포스트 표시
+- [ ] 읽기 진행도: 스크롤 시 상단 진행 바 표시
 - [ ] `pnpm run lint/typecheck/test:ci/build` 모두 green
 - [ ] Vercel Preview/Prod 배포 정상
 

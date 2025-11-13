@@ -9,7 +9,8 @@
 
 # 2) 결과 요약
 
-- **콘텐츠 파이프라인**: `contents/articles/*.mdx` → `next-mdx-remote/rsc.compileMDX()` → `remark-gfm` + **`rehype-pretty-code`**(Shiki 내부 사용) → **Zod**로 frontmatter 검증 → App Router `[slug]` **SSG**.
+- **콘텐츠 파이프라인**: `contents/posts/*.mdx` → `next-mdx-remote/rsc.compileMDX()` → `remark-gfm` + **`rehype-pretty-code`**(Shiki 내부 사용) → **Zod**로 frontmatter 검증 → App Router `[slug]` **SSG**.
+- **Frontmatter 스키마**: `title`, `date`, `summary`, `tags` (배열), `cover` (선택), `draft` (boolean). **태그 시스템 채택** (다중 분류 가능, SEO 유리, 관련 포스트 추천에 적합).
 - **컴포넌트 매핑**: `<MDXRemote components={{ pre: CodeBlock, img: MdxImage, ... }} />`.
 - **성능/SEO**: 하이라이트는 서버(빌드/요청 시), 본문은 SSG, 상호작용은 최소 하이드레이션.
 - **DX/유지보수**: Turborepo + 공용 ESLint/Prettier/TSConfig + 공용 UI 패키지 + 테스트(Vitest) + 릴리즈(Changesets) + 배포(Vercel).
@@ -22,9 +23,10 @@
 2. **코드 품질**: `rehype-pretty-code`로 **서버 하이라이트**, **라인 넘버**, **파일명(title) 표시**, **라인/단어 하이라이트**, **Copy 버튼**.
 3. **상호작용**: MDX 본문에 React 데모(버튼, 폼, **로딩 속도 비교**, **애니메이션 전/후 비교** 등) 삽입.
 4. **이미지**: `<img>`→`<Image>` 매핑으로 **반응형 최적화**.
-5. **성능/SEO**: 정적 사전생성 + 부분 하이드레이션, Web Vitals 목표(FCP<1.8s, LCP<2.5s, INP<200ms).
-6. **DX**: FSD, 공용 프리셋(ESLint/Prettier/TS), Zod 스키마 검증, 테스트 기본 세트.
-7. **자동화**: CI(ESLint/TypeCheck/Test/Build) + 릴리즈(Changesets) + 배포(Vercel Preview/Prod).
+5. **성능/SEO**: 정적 사전생성 + 부분 하이드레이션, Web Vitals 목표(FCP<1.8s, LCP<2.5s, INP<200ms). **SEO 최적화 강화**(메타 태그, Open Graph, Twitter Cards, JSON-LD 구조화 데이터, Sitemap.xml, Robots.txt).
+6. **콘텐츠 발견성**: **RSS 피드** 자동 생성, **관련 포스트 추천**(태그 기반), **읽기 진행도 표시**.
+7. **DX**: FSD, 공용 프리셋(ESLint/Prettier/TS), Zod 스키마 검증, 테스트 기본 세트.
+8. **자동화**: CI(ESLint/TypeCheck/Test/Build) + 릴리즈(Changesets) + 배포(Vercel Preview/Prod).
 
 ## B. 비목표(Non-Goals)
 
@@ -56,27 +58,27 @@
   ├─ schema/ # 공용 Zod 스키마(PostMeta, Post 등)
   ├─ ui/ # 공용 UI(CodeBlock, MdxImage, Prose)
 └─ apps/
-  └─ blog/
-    ├─ package.json
-    ├─ next.config.ts
-    ├─ tailwind.config.ts
-    ├─ postcss.config.js
-    ├─ tsconfig.json
-    ├─ contents/
+   └─ blog/
+      ├─ package.json
+      ├─ next.config.ts
+      ├─ tailwind.config.ts
+      ├─ postcss.config.js
+      ├─ tsconfig.json
+      ├─ contents/
     │ └─ posts/\*.mdx
-    └─ src/
+      └─ src/
       ├─ app/ # pages layer
       │ ├─ layout.tsx
       │ ├─ page.tsx # 목록
       │ └─ [slug]/page.tsx # 상세
       ├─ root/ # providers, globals.css
-      ├─ widgets/
-      ├─ features/
-      ├─ entities/
+         ├─ widgets/
+         ├─ features/
+         ├─ entities/
       │ └─ post/ # 도메인 모델 + UI(GET)
-      └─ shared/
+         └─ shared/
     ├─ lib/ # fs, mdx wrapper
-    ├─ styles/
+            ├─ styles/
     └─ ui/
 
 ```
@@ -249,7 +251,38 @@ export const CodeBlock = (props: any) => {
 - 기존 설계(SSG, `generateStaticParams`) 유지.
 - 원격 이미지 사용 시 `next.config.ts`에 `images.remotePatterns` 추가.
 
-## 4.7 CI / 릴리즈 / 배포
+## 4.7 SEO 최적화 강화
+
+- **메타 태그**: 동적 `title`, `description`, `keywords` (frontmatter 기반).
+- **Open Graph**: `og:title`, `og:description`, `og:image`, `og:type`, `og:url`.
+- **Twitter Cards**: `twitter:card`, `twitter:title`, `twitter:description`, `twitter:image`.
+- **JSON-LD 구조화 데이터**: Article/BlogPosting 스키마 (제목, 작성일, 작성자, 설명 등).
+- **Canonical URL**: 각 포스트의 정규 URL 설정.
+- **Sitemap.xml**: `/sitemap.xml` 자동 생성 (빌드 시 모든 포스트 URL 포함).
+- **Robots.txt**: `/robots.txt` 생성 (검색 엔진 크롤링 규칙).
+
+## 4.8 RSS 피드
+
+- **경로**: `/feed.xml` (또는 `/rss.xml`).
+- **내용**: 최신 포스트 목록 (제목, 링크, 설명, 날짜).
+- **생성 시점**: 빌드 시 SSG로 생성.
+- **포함 필드**: title, link, description, pubDate, author(선택).
+
+## 4.9 관련 포스트 추천
+
+- **알고리즘**: 태그 기반 유사도 계산 (공통 태그 수 기반).
+- **표시 위치**: 상세 페이지 하단 (`/[slug]/page.tsx`).
+- **추천 개수**: 최대 3-5개.
+- **정렬**: 유사도 높은 순, 동일 시 최신순.
+
+## 4.10 읽기 진행도 표시
+
+- **위치**: 상단 고정 또는 헤더 내부.
+- **계산 방식**: 스크롤 위치 기반 진행률 계산.
+- **표시 형태**: 진행 바 (progress bar).
+- **접근성**: `aria-label` 제공.
+
+## 4.11 CI / 릴리즈 / 배포
 
 ### CI(GitHub Actions) – 모노레포 전 패키지 대상으로 turbo 실행
 
@@ -297,9 +330,8 @@ jobs:
 
 # 5) 평가 및 리스크(Evaluator)
 
-- **요구 충족**: GFM/서버 하이라이트/라인 넘버/파일명/복사/반응형 이미지/CI/릴리즈/배포 ✅
+- **요구 충족**: GFM/서버 하이라이트/라인 넘버/파일명/복사/반응형 이미지/SEO 최적화/RSS 피드/관련 포스트 추천/읽기 진행도/CI/릴리즈/배포 ✅
 - **리스크 & 완화**
-
   - Tailwind v4 플러그인 호환 **확실하지 않음** → v3 롤백 가이드/문서 제공.
   - 코드블록 누적 시 빌드시간↑ → Vercel 캐시/ISR, 포스트 분할 빌드 고려.
 
