@@ -1,9 +1,15 @@
 import { listSlugs, readArticle } from '@/shared/lib/fs';
 import { compilePostMDX } from '@/shared/lib/mdx';
 import { NextResponse } from 'next/server';
+import type { PostMeta } from '@hyoungmin/schema';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com';
 const siteName = 'Blog';
+
+type PostWithMeta = {
+  slug: string;
+  meta: PostMeta;
+};
 
 // RFC 822 날짜 형식 변환
 const formatRFC822 = (date: Date): string => {
@@ -70,9 +76,9 @@ export async function GET() {
     );
 
     // 드래프트 제외 및 날짜 내림차순 정렬
-    const publishedPosts = posts
-      .filter((post): post is { slug: string; meta: typeof posts[0]['meta'] } => post !== null)
-      .sort((a, b) => new Date(b.meta.date).getTime() - new Date(a.meta.date).getTime());
+    const publishedPosts: PostWithMeta[] = posts
+      .filter((post): post is PostWithMeta => post !== null)
+      .sort((a, b) => b.meta.date.getTime() - a.meta.date.getTime());
 
     // RSS 2.0 형식 생성
     const rssItems = publishedPosts
@@ -86,7 +92,7 @@ export async function GET() {
       <guid isPermaLink="true">${url}</guid>
       <description>${escapeXml(post.meta.summary)}</description>
       <pubDate>${pubDate}</pubDate>
-      ${post.meta.tags.length > 0 ? `<category>${post.meta.tags.map((tag) => escapeXml(tag)).join('</category><category>')}</category>` : ''}
+      ${post.meta.tags.length > 0 ? `<category>${post.meta.tags.map((tag: string) => escapeXml(tag)).join('</category><category>')}</category>` : ''}
     </item>`;
       })
       .join('\n');
