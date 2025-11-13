@@ -8,7 +8,11 @@
     "typecheck": "pnpm turbo run typecheck --parallel",
     "test": "pnpm turbo run test --parallel",
     "test:ci": "pnpm turbo run test:ci --parallel",
-    "build": "pnpm turbo run build --parallel"
+    "build": "pnpm turbo run build --parallel",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,mdx}": ["eslint --fix", "prettier --write"]
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
@@ -20,6 +24,8 @@
     "eslint-mdx": "^3.6.2",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react-hooks": "^7.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
     "next": "^16.0.2",
     "prettier": "^3.6.2",
     "react": "^19.2.0",
