@@ -886,7 +886,7 @@
   - `navigator.clipboard`는 HTTPS 또는 localhost에서만 동작.
   - Fallback으로 `document.execCommand('copy')` 고려 (구형 브라우저).
 
-### 11.6 상세 페이지 통합
+### 11.6 상세 페이지 통합 ✅ (2025. 11. 14. 09:10:00)
 
 - **작업**
   - `apps/blog/src/app/[slug]/page.tsx`:
@@ -993,5 +993,5 @@
   - [x] 자동으로 만들어지는 Sticky 목차 (TOC) (2025. 11. 13. 16:11:59)
   - [x] Footer 컴포넌트 (2025. 11. 13. 17:30:00)
   - [x] 공유하기 기능 (링크 복사, LinkedIn 공유 필수) (2025. 11. 13. 16:50:00)
-  - [ ] 상세 페이지 통합
+  - [x] 상세 페이지 통합 (2025. 11. 14. 09:10:00)
   - [ ] 접근성 & 키보드 단축키 (Skip link, aria-label, t/g 단축키)
