@@ -1,7 +1,6 @@
 "use client";
 import type { ComponentProps } from "react";
 import { useRef, useState } from "react";
-import { Button } from "./Button";
 
 export const CodeBlock = (props: ComponentProps<"pre">) => {
   const preRef = useRef<HTMLPreElement>(null);
@@ -19,17 +18,16 @@ export const CodeBlock = (props: ComponentProps<"pre">) => {
   };
 
   return (
-    <div className="relative my-6 group">
-      <pre ref={preRef} {...props} />
-      <Button
+    <div className="relative w-full my-6 group">
+      <button
         type="button"
-        variant="ghost"
-        aria-label="Copy code"
+        aria-label={copied ? "Copied" : "Copy code"}
         onClick={handleCopy}
-        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition rounded px-2 py-1 text-sm bg-black/70 text-white hover:bg-black/80"
+        className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition rounded px-2 py-1 text-lg bg-black/70 text-white hover:bg-black/80"
       >
-        {copied ? "Copied!" : "Copy"}
-      </Button>
+        {copied ? "✅" : "📋"}
+      </button>
+      <pre ref={preRef} {...props} />
     </div>
   );
 };
