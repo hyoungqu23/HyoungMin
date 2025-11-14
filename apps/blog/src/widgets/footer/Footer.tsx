@@ -15,7 +15,7 @@ const Footer = () => {
             link.href ? (
               <li key={link.id}>
                 <Link
-                  href={link.href}
+                  href={new URL(link.href)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block transition-colors text-gray-400 hover:text-gray-200 dark:text-gray-500 dark:hover:text-gray-300"
