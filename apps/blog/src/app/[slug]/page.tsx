@@ -100,6 +100,9 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
 
   const { content, meta, headings } = await compilePostMDX(source, mdxComponents);
 
+  // 읽기 시간 계산
+  const readingTime = calculateReadingTime(source);
+
   // 관련 포스트 가져오기
   const relatedPosts = await getRelatedPosts(slug, 5);
 
