@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import Header from "@/widgets/header/Header";
 import Footer from "@/widgets/footer/Footer";
+import KeyboardShortcutsProvider from "@/features/keyboard-shortcuts/KeyboardShortcutsProvider";
 import "../root/globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
