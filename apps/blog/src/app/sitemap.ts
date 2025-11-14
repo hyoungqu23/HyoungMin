@@ -1,13 +1,13 @@
-import { listSlugs, readArticle } from '@/shared/lib/fs';
-import { compilePostMDX } from '@/shared/lib/mdx';
-import type { MetadataRoute } from 'next';
+import { listSlugs, readArticle } from "@/shared/lib/fs";
+import { compilePostMDX } from "@/shared/lib/mdx";
+import type { MetadataRoute } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
 
 type SitemapEntry = {
   url: string;
   lastModified: Date;
-  changeFrequency: 'monthly';
+  changeFrequency: "monthly";
   priority: number;
 };
 
@@ -26,8 +26,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
         return {
           url: `${siteUrl}/${slug}`,
-          lastModified: meta.date,
-          changeFrequency: 'monthly' as const,
+          lastModified: meta.createdAt,
+          changeFrequency: "monthly" as const,
           priority: 0.8,
         };
       } catch {
@@ -57,10 +57,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: siteUrl,
       lastModified: new Date(),
-      changeFrequency: 'daily',
+      changeFrequency: "daily",
       priority: 1.0,
     },
     ...prioritizedPosts,
   ];
 }
-

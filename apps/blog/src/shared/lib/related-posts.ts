@@ -1,6 +1,6 @@
-import { listSlugs, readArticle } from './fs';
-import { compilePostMDX } from './mdx';
-import type { PostMeta } from '@hyoungmin/schema';
+import { listSlugs, readArticle } from "./fs";
+import { compilePostMDX } from "./mdx";
+import type { PostMeta } from "@hyoungmin/schema";
 
 export type PostWithSlug = {
   slug: string;
@@ -72,7 +72,7 @@ export const getRelatedPosts = async (
       return {
         post,
         similarity: commonTagsCount,
-        date: post.meta.date,
+        date: post.meta.createdAt,
       };
     });
 
@@ -92,8 +92,7 @@ export const getRelatedPosts = async (
 
     return relatedPosts;
   } catch (error) {
-    console.error('Error getting related posts:', error);
+    console.error("Error getting related posts:", error);
     return [];
   }
 };
-
