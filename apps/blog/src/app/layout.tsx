@@ -46,12 +46,16 @@ const RootLayout = ({
     <html lang="ko" suppressHydrationWarning>
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Header />
-          {/* 헤더 높이만큼 패딩 추가 (h-16 = 64px) */}
-          <div className="pt-16 min-h-[calc(100vh-64px)] flex flex-col">
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <KeyboardShortcutsProvider>
+            <Header />
+            {/* 헤더 높이만큼 패딩 추가 (h-16 = 64px) */}
+            <div className="pt-16 min-h-[calc(100vh-64px)] flex flex-col">
+              <main id="main" className="flex-1">
+                {children}
+              </main>
+              <Footer />
+            </div>
+          </KeyboardShortcutsProvider>
         </ThemeProvider>
       </body>
     </html>
