@@ -46,7 +46,7 @@ export const generateMetadata = async ({
   }
 
   const title = meta.title;
-  const description = meta.summary;
+  const description = meta.description;
   const url = `${siteUrl}/${slug}`;
   const image = meta.cover
     ? meta.cover.startsWith("http")
@@ -76,8 +76,8 @@ export const generateMetadata = async ({
           alt: title,
         },
       ],
-      publishedTime: meta.date.toISOString(),
-      modifiedTime: meta.date.toISOString(),
+      publishedTime: meta.createdAt.toISOString(),
+      modifiedTime: meta.createdAt.toISOString(),
       authors: [siteName],
       tags: meta.tags.length > 0 ? meta.tags : undefined,
     },
@@ -115,14 +115,14 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: meta.title,
-    description: meta.summary,
+    description: meta.description,
     image: meta.cover
       ? meta.cover.startsWith("http")
         ? meta.cover
         : `${siteUrl}${meta.cover}`
       : `${siteUrl}/og-image.png`,
-    datePublished: meta.date.toISOString(),
-    dateModified: meta.date.toISOString(),
+    datePublished: meta.createdAt.toISOString(),
+    dateModified: meta.createdAt.toISOString(),
     author: {
       "@type": "Person",
       name: siteName,
@@ -164,16 +164,16 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
                   <ShareButton
                     url={`${siteUrl}/${slug}`}
                     title={meta.title}
-                    description={meta.summary}
+                    description={meta.description}
                   />
                 </div>
               </div>
               <p className="text-lg text-gray-600 dark:text-gray-400">
-                {meta.summary}
+                {meta.description}
               </p>
               <div className="flex flex-wrap items-center gap-4 my-4 text-sm text-gray-500 dark:text-gray-500">
                 <time>
-                  {meta.date.toLocaleDateString("ko-KR", {
+                  {meta.createdAt.toLocaleDateString("ko-KR", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
@@ -217,11 +217,11 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
                     {relatedPost.meta.title}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
-                    {relatedPost.meta.summary}
+                    {relatedPost.meta.description}
                   </p>
                   <div className="flex items-center justify-between">
                     <time className="text-xs text-gray-500 dark:text-gray-500">
-                      {relatedPost.meta.date.toLocaleDateString("ko-KR", {
+                      {relatedPost.meta.createdAt.toLocaleDateString("ko-KR", {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
