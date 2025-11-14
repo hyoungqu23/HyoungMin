@@ -2,6 +2,7 @@ import { compilePostMDX } from '@/shared/lib/mdx';
 import { mdxComponents } from '@/shared/lib/mdx-components';
 import { readArticle, listSlugs } from '@/shared/lib/fs';
 import { getRelatedPosts } from '@/shared/lib/related-posts';
+import { calculateReadingTime } from '@/shared/lib/reading-time';
 import ReadingProgress from '@/widgets/reading-progress/ReadingProgress';
 import TableOfContents from '@/widgets/toc/TableOfContents';
 import ShareButton from '@/features/share/ShareButton';
