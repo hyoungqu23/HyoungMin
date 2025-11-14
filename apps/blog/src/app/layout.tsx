@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import { ThemeProvider } from "next-themes";
-import Header from "@/widgets/header/Header";
-import Footer from "@/widgets/footer/Footer";
+
 import KeyboardShortcutsProvider from "@/features/keyboard-shortcuts/KeyboardShortcutsProvider";
-import "../root/globals.css";
+import "@/root/styles/globals.css";
+import { Analytics } from "@/root/analytics/ui/Anayltics";
+import Footer from "@/widgets/footer/Footer";
+import Header from "@/widgets/header/Header";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
 const siteName = "Blog";
@@ -44,7 +47,8 @@ const RootLayout = ({
 }>) => {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body>
+      <body className={pretendardFont.variable}>
+        <Analytics />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <KeyboardShortcutsProvider>
             <Header />
@@ -63,3 +67,56 @@ const RootLayout = ({
 };
 
 export default RootLayout;
+
+const pretendardFont = localFont({
+  src: [
+    {
+      path: "../../public/fonts/Pretendard-Black.subset.woff2",
+      weight: "900",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Pretendard-ExtraBold.subset.woff2",
+      weight: "800",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Pretendard-Bold.subset.woff2",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Pretendard-SemiBold.subset.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Pretendard-Medium.subset.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Pretendard-Regular.subset.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Pretendard-Light.subset.woff2",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Pretendard-ExtraLight.subset.woff2",
+      weight: "200",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Pretendard-Thin.subset.woff2",
+      weight: "100",
+      style: "normal",
+    },
+  ],
+  display: "swap",
+  preload: true,
+  variable: "--pretendard",
+});
