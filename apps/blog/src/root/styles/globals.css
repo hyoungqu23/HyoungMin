@@ -1,5 +1,39 @@
 @import 'tailwindcss';
 
+/* Code block syntax highlighting (rehype-pretty-code) */
+pre[data-theme] {
+  background-color: var(--shiki-light-bg, #fff);
+  color: var(--shiki-light, #24292e);
+}
+
+.dark pre[data-theme] {
+  background-color: var(--shiki-dark-bg, #282c34);
+  color: var(--shiki-dark, #abb2bf);
+}
+
+pre code {
+  display: grid;
+  min-width: 100%;
+  overflow-x: auto;
+  counter-reset: line;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.75;
+}
+
+/* rehype-pretty-code가 생성한 각 토큰의 색상 적용 */
+/* 각 span에 인라인 스타일로 설정된 CSS 변수를 사용 */
+pre code span[style*='--shiki-light'],
+pre code span[style*='--shiki-dark'] {
+  color: var(--shiki-light);
+}
+
+.dark pre code span[style*='--shiki-light'],
+.dark pre code span[style*='--shiki-dark'] {
+  color: var(--shiki-dark);
+}
+
 /* Code block line numbers */
 code[data-line-numbers] {
   counter-reset: line;

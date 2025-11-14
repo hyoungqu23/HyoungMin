@@ -205,7 +205,9 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
         {/* 관련 포스트 섹션 */}
         {relatedPosts.length > 0 && (
           <section className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">
-            <h2 className="text-2xl font-bold mb-6">관련 포스트</h2>
+            <h2 className="text-2xl font-bold mb-6">
+              😎 &nbsp; 다른 글도 읽어보세요!
+            </h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {relatedPosts.map((relatedPost) => (
                 <Link
