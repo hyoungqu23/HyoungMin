@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import InfiniteSkills from "./InfiniteSkills";
 import { COPYRIGHT } from "./config";
 
@@ -14,14 +12,14 @@ const Footer = () => {
           {Object.values(EXTERNAL_LINKS).map((link) =>
             link.href ? (
               <li key={link.id}>
-                <Link
-                  href={new URL(link.href)}
+                <a
+                  href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block transition-colors text-gray-400 hover:text-gray-200 dark:text-gray-500 dark:hover:text-gray-300"
                 >
                   {link.id.toUpperCase()}
-                </Link>
+                </a>
               </li>
             ) : null,
           )}

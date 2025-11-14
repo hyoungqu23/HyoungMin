@@ -149,64 +149,62 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <main id="main">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* TOC 사이드바 (데스크톱만 표시) */}
-            <TableOfContents headings={headings} />
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-12">
+          {/* TOC 사이드바 (데스크톱만 표시) */}
+          <TableOfContents headings={headings} />
 
-            {/* 본문 */}
-            <article className="flex-1 min-w-0 lg:max-w-3xl lg:mx-auto">
-              <Prose>
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <h1 className="flex-1">{meta.title}</h1>
-                  {/* 공유하기 버튼 (포스트 페이지에서만 표시) */}
-                  <div className="shrink-0">
-                    <ShareButton
-                      url={`${siteUrl}/${slug}`}
-                      title={meta.title}
-                      description={meta.summary}
-                    />
-                  </div>
+          {/* 본문 */}
+          <article className="flex-1 min-w-0 lg:max-w-3xl lg:mx-auto">
+            <Prose>
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <h1 className="flex-1">{meta.title}</h1>
+                {/* 공유하기 버튼 (포스트 페이지에서만 표시) */}
+                <div className="shrink-0">
+                  <ShareButton
+                    url={`${siteUrl}/${slug}`}
+                    title={meta.title}
+                    description={meta.summary}
+                  />
                 </div>
-                <p className="text-lg text-gray-600 dark:text-gray-400">
-                  {meta.summary}
-                </p>
-                <div className="flex flex-wrap items-center gap-4 my-4 text-sm text-gray-500 dark:text-gray-500">
-                  <time>
-                    {meta.date.toLocaleDateString("ko-KR", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </time>
-                  <span>·</span>
-                  <span>{readingTime}분 읽기</span>
-                  {meta.tags.length > 0 && (
-                    <>
-                      <span>·</span>
-                      <div className="flex flex-wrap gap-2">
-                        {meta.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 rounded"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-                {content}
-              </Prose>
-            </article>
-          </div>
+              </div>
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                {meta.summary}
+              </p>
+              <div className="flex flex-wrap items-center gap-4 my-4 text-sm text-gray-500 dark:text-gray-500">
+                <time>
+                  {meta.date.toLocaleDateString("ko-KR", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </time>
+                <span>·</span>
+                <span>{readingTime}분 읽기</span>
+                {meta.tags.length > 0 && (
+                  <>
+                    <span>·</span>
+                    <div className="flex flex-wrap gap-2">
+                      {meta.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 rounded"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+              {content}
+            </Prose>
+          </article>
         </div>
 
         {/* 관련 포스트 섹션 */}
         {relatedPosts.length > 0 && (
-          <section className="container mx-auto px-4 mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">
+          <section className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">
             <h2 className="text-2xl font-bold mb-6">관련 포스트</h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {relatedPosts.map((relatedPost) => (
@@ -247,7 +245,7 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
             </div>
           </section>
         )}
-      </main>
+      </div>
     </>
   );
 };
