@@ -1,0 +1,119 @@
+---
+title: 검색 기능 개발 프로젝트 회고
+description: 검색어 추천, 키보드 인터렉션을 포함한 검색 기능 구현 기업 과제
+createdAt: 2022-09-30
+category: React
+tags:
+  - React
+  - TypeScript
+  - Team Project
+  - Retrospective
+  - Wanted PreOnBoarding Frontend Course
+---
+
+## 시작
+
+https://github.com/wanted-pre-onboarding-fe-6th-team2/pre-onboarding-assignment-week-5-1-team-2
+
+마지막 과제는 검색 기능을 구현하는 과제다. 많은 기능이 포함된 것은 아니기 때문에 2명씩 페어 프로그래밍을 하기로 했다. 이번 코스에서 한번도 담당하지 않은 API 로직 관련 파트를 담당하게 되어 API 로직을 어떻게 하면 재사용성과 확장성을 가지면서 분리할 지에 대해 고민을 많이 했다.
+
+## 요구사항 분석
+
+API 로직 관련 요구사항은 다음과 같다.
+
+- API 호출별로 라이브러리를 활용하지 않고 로컬 캐싱을 구현
+- 입력마다 API를 호출하지 않도록 API 호출을 줄이는 전략 수립
+- API 호출 횟수를 파악할 수 있도록 호출마다 `console.info` 처리
+
+이 중 API 로직을 구현하는 것 자체와 호출 횟수 파악 관련 요구사항을 담당했고, 최적화와 로컬 캐싱은 다른 팀원들이 담당했다.
+
+## Axios API 로직 구현하기
+
+확장성과 재사용성을 고려해 Axios API 로직을 분리할 것이고, Axios 로직 내에서도 확장성을 고려해 Axios 인스턴스를 생성해 재사용되는 `config`를 처리했다.
+
+```jsx
+import axios from "axios";
+
+const BASE_URL = "http://localhost:4000";
+
+const http = axios.create({
+  baseURL: BASE_URL,
+  headers: { "Content-Type": "application/json" },
+});
+
+export default http;
+```
+
+이렇게 처리하면
+
+- API 로직 전체에 활용되는 config를 추가하기 쉽다.
+- http로 쉽게 API 로직을 추가할 수 있다.
+
+등의 장점이 있다.
+
+이후 Axios의 request interceptor를 활용해 모든 API 요청에 요구사항 `console.info("calling api")`를 삽입했다.
+
+```jsx
+import axios from "axios";
+
+const BASE_URL = "http://localhost:4000";
+
+const http = axios.create({
+  baseURL: BASE_URL,
+  headers: { "Content-Type": "application/json" },
+});
+
+http.interceptors.request.use(
+  (config) => {
+    console.info("calling api");
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
+
+export default http;
+```
+
+만들어둔 Axios 인스턴스와 `json-server`의 Full Text Search를 활용해 검색 API를 추가했다. 이때 전체 데이터를 가져오는 API의 경우 해당 과제에서 불필요하다고 생각해 제거했다.
+
+```jsx
+import http from "@/api";
+
+export const searchBySickName = async (keyword) => {
+  try {
+    const response = await http.get(`/sick?q=${keyword}`);
+
+    return response.data;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+```
+
+## 피드백을 통한 코드 개선
+
+Axios의 request interceptor를 eject하는 경우를 대비하여 함수로 분리하는 방식을 고민했으나, 이번 과제에서는 불필요한 코드라고 생각되어 작성하지 않았다. 하지만 타당한 피드백이었기 때문에 다음에 비슷한 유형의 코드를 작성할 때는 eject하는 경우의 코드도 한 번 작성해보는게 좋을 것 같다.
+
+또한 단순 keyword를 인자로 받아 API 호출을 하도록 처리했으나, 코드 리뷰 결과 확장성을 고려해 객체 형태로 인자의 데이터 타입을 변경했으며, Full Text Search 특성상 `병 코드` 또한 검색이 되어, JSON-Server의 like를 활용해 `병명`만 검색되게끔 추가적으로 수정했다.
+
+```jsx
+import http from "@/api";
+
+export const searchBySickName = async ({ keyword }) => {
+  try {
+    const response = await http.get(`/sick?sickNm_like=${keyword}`);
+
+    return response.data;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+```
+
+## 마무리
+
+한번도 해보지 않았던 API 호출 로직 개선을 해보면서, 자신감을 얻게 됐다. 심지어 좋은 피드백을 바탕으로 코드를 하나하나 개선해나가면서 정말 성취감을 느꼈다. 좋은 팀원들을 만나 재밌게 과제를 수행하고 실력있는 팀원들의 코드를 리뷰하면서 정말 재밌었다…!
+
+끝! 🙋🏻‍♂️

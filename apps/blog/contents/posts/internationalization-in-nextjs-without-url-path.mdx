@@ -1,0 +1,168 @@
+---
+title: Internationalization in Next.js App Router with Middleware 2, URL에서 lang parameter를 제거하자
+description: Next.js App Router에서 다국어 지원 기능 만들기
+createdAt: 2024-04-24
+category: Next.js
+tags:
+  - Next.js
+  - i18n
+  - Internationalization
+  - Localization
+  - React
+  - App Router
+  - Middleware
+---
+
+# 시작하며
+
+https://hyoungmin.vercel.app/internationalization-in-nextjs 에서 작성한 방식은 URL에 Locale Path(예: `/en` 또는 `/ko`)를 반드시 필요로 하는 방식은 홈페이지에서 흔히 사용되는 방식이다. 다만 웹 서비스에서 언어 변경 시 URL이 바뀌면 어색한 사용자 경험을 제공할 수 있다고 생각했고, 보다 깔끔하고 일관성 있게 다국어 데이터를 제공하는 방법을 고민했다. 결국, 인증 정보와 같이 쿠키에 Locale을 저장해서 관리하는 방식, 즉 Next.js의 공식 문서에서 제시하는 방법과 다른 새로운 접근법을 만들어 봤다.
+
+# 지원 언어 및 JSON 설정하기
+
+다국어 지원을 시작하려면 먼저 지원할 언어를 정의하고, 각 언어별 번역 데이터를 JSON 파일로 준비해야 한다.
+
+## `i18n.config.ts` 설정
+
+`i18n.config.ts` 파일에서 기본 언어와 지원 언어를 설정해야 한다. 예를 들어 기본 언어를 한국어(`ko`)로 설정하고, 한국어와 영어(`en`)를 지원하도록 다음과 같이 작성한다:
+
+```tsx
+export const i18nConfig = {
+  defaultLocale: "ko",
+  locales: ["ko", "en"],
+} as const;
+```
+
+## JSON 번역 데이터 파일 작성
+
+각 언어별로 번역 문자열을 포함하는 JSON 파일을 작성한다. 영어와 한국어 번역 파일은 다음과 같다:
+
+```json
+// en.json
+{
+  "GREETING": "Hi"
+}
+```
+
+```json
+// ko.json
+{
+  "GREETING": "안녕하세요"
+}
+```
+
+# Middleware에서 감지하기
+
+Next.js의 Middleware를 활용하여 사용자의 언어 설정을 감지하고, 이를 쿠키에 저장하여 Locale Path 없이 다국어를 지원할 수 있도록 설정한다.
+
+## 브라우저의 선호 설정 언어 감지 함수 생성
+
+`getBrowserLanguage` 함수는 사용자의 브라우저에서 전송된 언어 설정(HTTP 헤더의 `Accept-Language`)을 분석하여 지원 언어 중 하나를 선택한다. 지원하지 않는 언어가 감지되면 기본 언어를 반환한다.
+
+```tsx
+import { match as matchLocale } from "@formatjs/intl-localematcher";
+import Negotiator from "negotiator";
+import type { NextRequest } from "next/server";
+import { i18nConfig } from "./config";
+
+type Mutable<T> = {
+  -readonly [P in keyof T]: T[P];
+};
+
+export const getBrowserLanguage = (request: NextRequest): string => {
+  try {
+    const negotiatorHeaders: Record<string, string> = {};
+
+    request.headers.forEach((value, key) => (negotiatorHeaders[key] = value));
+
+    const locales = i18nConfig.locales as Mutable<typeof i18nConfig.locales>;
+
+    const languages = new Negotiator({
+      headers: negotiatorHeaders,
+    }).languages();
+
+    const locale = matchLocale(languages, locales, i18nConfig.defaultLocale);
+
+    return locale;
+  } catch (error) {
+    return i18nConfig.defaultLocale;
+  }
+};
+```
+
+- **Negotiator**: HTTP 헤더에서 언어 선호도를 파싱.
+- **matchLocale**: 사용자의 언어 선호도와 지원 언어를 매칭하여 최적의 언어를 선택.
+- **예외 처리**: 오류 발생 시 `defaultLocale`인 `ko`를 반환.
+
+## Middleware 설정
+
+Middleware는 요청이 들어올 때마다 쿠키에서 언어 설정을 확인하거나, 없으면 브라우저 언어를 감지하여 쿠키에 저장한다.
+
+```tsx
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import type { NextRequest } from "next/server";
+
+export const middleware = async (request: NextRequest) => {
+  const cookieStore = cookies();
+  const language =
+    cookieStore.get("language")?.value ?? getBrowserLanguage(request);
+
+  const response = NextResponse.next();
+
+  response.cookies.set("language", language);
+
+  return response;
+};
+```
+
+- **쿠키 확인**: `cookieStore.get('language')`로 기존 설정을 확인.
+- **기본값**: 쿠키가 없으면 `getBrowserLanguage`로 브라우저 언어를 감지.
+- **쿠키 설정**: 응답에 `language` 쿠키를 설정하여 이후 요청에서도 동일한 언어를 유지.
+
+# 서버에서 번역 데이터를 가져와 렌더링하기
+
+## Server Action으로 번역 데이터 가져오기
+
+서버 액션을 통해 현재 언어에 맞는 번역을 로드하는 `getDictionary` 함수를 작성한다.
+
+```tsx
+"use server";
+
+import { DICTIONARY_MAP, EDictionary, i18nConfig } from "./config";
+import { getLanguage } from "./getLanguage";
+import type { TDictionaries } from "./types";
+
+type DictionaryReturnType = {
+  [K in keyof TDictionaries]: TDictionaries[K] extends () => Promise<infer R>
+    ? R
+    : never;
+};
+
+export const getDictionary = async <T extends EDictionary>(
+  page: T,
+): Promise<DictionaryReturnType[T]> => {
+  const language = await getLanguage();
+
+  if (!i18nConfig.locales.includes(language)) {
+    throw new Error(`${language}는 지원하지 않는 언어입니다.`);
+  }
+
+  const dictionary = DICTIONARY_MAP[language][page];
+
+  const translation = await dictionary();
+
+  if (translation) return translation as DictionaryReturnType[T];
+
+  throw new Error(`${language}의 ${page}이 없습니다.`);
+};
+```
+
+## 번역 데이터를 렌더링하기
+
+```tsx
+const T = await getDictionary(EDictionary.GREETING);
+```
+
+# 결론
+
+위의 방식은 Locale Path 없이도 다국어를 지원할 수 있도록 설계했다. Middleware에서 언어를 감지하고 쿠키로 저장하며, Server Action으로 번역을 로드하여 컴포넌트에서 사용하게 된다. 이러한 쿠키 기반 I18N 방식은 일관된 사용자 경험을 제공하고 URL 변경이 없어 SEO에도 유리하다.

@@ -1,0 +1,341 @@
+---
+title: "Feature Sliced Design, FSD의 레이어, 슬라이스, 세그먼트"
+date:
+summary: ""
+tags: []
+draft: false
+---
+
+# 개요
+
+기능 분할 설계를 이해하기 위해서는 그 내부 구조를 구성하는 세 가지 요소에 대해 알 필요가 있다. 따라서 공식 문서를 번역하면서, 해당 요소에 대한 이해도를 높이고, 아키텍처 측면에서 어떤 제한점이 있는 지 확인하도록 한다.
+
+8월 15일 기준으로, 기능 분할 설계를 적용한 실제 프로젝트를 진행해보고 지켜진 점과 지키지 못한 점 등에 대해 추가적으로 남긴다. 잊지 말아야 할 것은 이 아티클은 공식 문서 번역을 기반으로, 실제 사용 후 개인적인 의견이 섞여있다는 사실이다.
+
+# 세그먼트
+
+세그먼트는 기능 분할 설계의 최하위 조직 계층으로, 기술적 특성을 기반으로 코드를 그룹화하는 것이 목적이다. 세그먼트에는 몇 가지 표준화된 명칭이 존재한다:
+
+- `api`
+  백엔드와의 상호작용 ⇒ 외부 API 요청 함수, 백엔드 API 메서드, 데이터 타입, Mapper 함수 등
+- `lib`
+  해당 슬라이스에서 다른 모듈이 필요로하는 보조 함수 및 인프라 코드(라이브러리 코드)
+- `model`
+  데이터 모델 ⇒ 스키마, 인터페이스, 비즈니스 로직, 데이터 저장소, 데이터 CRUD 함수 등
+- `ui`
+  UI와 관련된 모든 것 ⇒ UI 컴포넌트, 데이터 Formatter 함수, 스타일 등
+- `config`
+  구성 파일 및 기능 플래그 등
+
+슬라이스 구조를 가지지 않는 `App`, `Shared` 레이어에서는 세그먼트를 커스텀하여 가질 수 있다. 다만, 세그먼트 이름은 해당 모듈의 본질적인 목적을 설명할 수 있어야 한다. 즉, `components`, `types`, `hooks` 등의 세그먼트는 지양해야 한다.
+
+- ~~숨기기~~
+  |                 | `ui`   | `model`                  | `lib`                             | `api` |
+  | --------------- | ------ | ------------------------ | --------------------------------- | ----- |
+  | `Shared` 레이어 | UI kit | 일반적으로 사용되지 않음 | 관련된 여러 파일의 유틸리티 모듈. |
+  개별적인 헬퍼 사용이 필요한 경우, [`lodash-es`](https://lodash.com/)와 같은 유틸리티 라이브러리를 고려하는 것을 권장. | 인증 또는 캐싱과 같은 추가 기능이 포함된 기본 API 클라이언트 |
+  | `Entities` 레이어 | 비즈니스 엔티티의 기본 구성 요소와 상호작용 요소 슬롯 | 이 엔티티 인스턴스의 데이터 저장소 및 데이터 조작을 위한 함수.
+  이 세그먼트는 서버 측 데이터를 저장하기에 적합합니다.
+  [TanStack Query](https://tanstack.com/query)나 기타 간접 저장소 방식을 사용하는 경우, 이 세그먼트를 생략할 수도 있습니다. | 저장과 관련 없는 엔티티 인스턴스 조작 함수 | 백엔드와의 원활한 통신을 위해 `Shared` 레이어의 API 클라이언트를 사용하는 API 메서드 |
+  | `Features` 레이어 | 사용자가 이 기능을 활용할 수 있는 상호작용 요소 | 비즈니스 로직 및 필요한 경우 인프라 데이터 저장소(예: 현재 앱 테마). 사용자에게 실제로 가치를 제공하는 코드. | `model` 세그먼트의 비즈니스 로직을 간결하게 설명하는 인프라 코드 | 백엔드에서 이 기능을 나타내는 API 메서드.
+  Entities의 API 메서드를 조합할 수 있습니다. |
+  | `Widgets` 레이어 | Entities 및 Features를 구성하여 독립적인 UI 블록으로 구성.
+  에러 경계 및 로딩 상태도 포함 가능 | 필요한 경우 인프라 데이터 저장소 | 비즈니스와 관련 없는 상호작용(예: 제스처) 및 페이지에서 블록이 작동하는 데 필요한 기타 코드 | 일반적으로 사용되지 않지만, 중첩된 라우팅 컨텍스트(예: [Remix](https://remix.run/))에서 데이터 로더를 포함할 수 있습니다. |
+  | `Pages` 레이어 | `Entities`, `Features`, `Widgets` 레이어를 구성하여 완성된 페이지로 구성.
+  에러 경계 및 로딩 상태도 포함 가능 | 일반적으로 사용되지 않음 | 비즈니스와 관련 없는 상호작용(예: 제스처) 및 페이지에서 완전한 사용자 경험을 제공하기 위한 기타 코드 | SSR 지향 프레임워크용 데이터 로더 |
+
+# 슬라이스
+
+슬라이스는 기능 분할 설계의 차상위 조직 계층오로, 제품, 비즈니스나 애플리케이션을 위한 의미를 기반으로 코드를 그룹화하는 것이 주된 목적이다.
+
+슬라이스는 애플리케이션의 비즈니스 도메인에 따라 직접적으로 결정되기 때문에 그 명칭은 표준화되어 있지 않다. 예를 들어, 사진 갤러리의 경우 `photos`, `create-album`, `gallery-page` 등을 슬라이스로 가질 수 있고, 소셜 네트워크의 경우 `post`, `add-user-to-friends`, `news-feed` 등과 같이 다른 슬라이스를 요구된다.
+
+`Shared` 레이어의 경우 비즈니스 로직을 포함하지 않으므로 제품, 비즈니스나 애플리케이션을 위한 의미가 없고, `App` 레이어의 경우 전체 애플리케이션과 관련된 모듈만 포함되어야 하므로 분할이 필요하지 않기 때문에 두 레이어는 슬라이스를 포함하지 않는다.
+
+## 낮은 결합도와 높은 응집도
+
+슬라이스는 독립적이고 응집력이 높은 코드 파일의 그룹을 의미한다.
+
+![[이미지 출처](https://feature-sliced.design/img/coupling-cohesion-dark.svg#dark-mode-only)](https://feature-sliced.design/img/coupling-cohesion-dark.svg#dark-mode-only)
+
+이상적인 슬라이스는 동일한 레이어의 다른 슬라이스로부터 독립적이고(낮은 결합도), 본질적인 주요 목적에 관련된 대부분의 코드를 포함하고 있어야 한다.(높은 응집도) 이러한 독립성은 레이어 Import 규칙에 의해 강제된다.
+
+> _A module (file) in a slice can only import other slices when they are located on layers strictly below._
+>
+> 슬라이스의 모듈은 바로 아래 레이어에 있는 다른 슬라이스의 모듈만 가져올 수 있습니다.
+
+## 슬라이스의 공개 API 규칙
+
+슬라이스 내부에서 코드는 원하는 방식대로 구성할 수 있다. 다른 슬라이스가 사용할 수 있는 좋은 공개 API 제공하는 한 문제가 되지 않는다.
+
+> _Every slice (and segment on layers that don't have slices) must contain a public API definition._
+>
+> 모든 슬라이스, 또는 슬라이스가 없는 레이어의 세그먼트는 공개 API 정의를 반드시 포함해야 한다.
+
+> _Modules outside of this slice/segment can only reference the public API, not the internal file structure of the slice/segment._
+>
+> 슬라이스나 세그먼트 외부의 모듈은 공개 API만을 참조해야 하며, 그 내부 파일 구조를 참조할 수 없다.
+
+공개 API의 중요성과 최선의 구현 방식에 대해서는 [공개 API 문서](https://feature-sliced.design/kr/docs/reference/public-api)에 자세히 확인할 수 있다.
+
+## 슬라이스 그룹
+
+밀접히 관련된 슬라이스는 디렉토리에 구조적으로 그룹화될 수 있지만, 다른 슬라이스와 마찬가지로 해당 디렉토리에 공유되는 코드가 존재하지 않아야 한다는 규칙을 준수해야 한다.
+
+![image.png](https://feature-sliced.design/kr/assets/images/graphic-nested-slices-b9c44e6cc55ecdbf3e50bf40a61e5a27.svg)
+
+# 레이어
+
+레이어는 기능 분할 설계에서 최상위 조직 계층을 구성한다. 레이어의 목적은 필요한 책임 범위와 해당 코드가 모듈(이하 앱 내 모듈을 의미한다. 즉, NPM 패키지를 의미하는 것이 아님에 유의해야 한다.)에 의존하는 정도에 따라 코드를 분리하는 것이다.
+
+모든 레이어는 코드에서 모듈에 얼마나 많은 책임을 할당할 지를 결정하는 데 도움이 된다는 특별한 의미를 가진다. 레이어의 이름과 의미는 기능 분할 설계를 적용한 모든 프로젝트에서 표준화되어 있다.
+
+책임과 의존도에 따라 7가지의 레이어가 존재한다:
+
+- `App`
+- `~~Processes~~` (deprecated)
+- `Pages`
+- `Widgets`
+- `Features`
+- `Entities`
+- `Shared`
+
+![[이미지 출처](https://feature-sliced.design/img/layers/folders-graphic-dark.svg#dark-mode-only)](https://feature-sliced.design/img/layers/folders-graphic-dark.svg#dark-mode-only)
+
+프로젝트에서 모든 레이어를 활용하는 것은 아니다. 프로젝트에서 필요로하는 레이어만 추가하면 된다. 일반적으로 대부분의 프론트엔드 프로젝트들에는 적어도 `Shared`, `Pages`, `App` 레이어가 존재한다.
+
+실제로 레이어는 소문자로 폴더를 구성하게 되며, 새로운 레이어를 추가하는 것은 레이어의 의미가 이미 표준화되어 있기 때문에 권장되지 않는다.
+
+실제 기능 분할 설계를 적용한 프로젝트를 진행해보니 6가지 레이어(depreacated된 `Processes` 레이어를 제외한 나머지 모든 레이어)를 활용하는 것이 타당하다고 느꼈다. 특히 코드의 책임 범위에 따라 레이어가 구분되어 디버깅이 보다 편해졌고, 후술할 내용처럼 의미가 있는 네이밍을 가진 슬라이스에 의해 프로젝트 온보딩 시에 다른 개발자에게도 도움이 될 것 같다.
+
+## 레이어 Import 규칙
+
+레이어는 높은 응집력을 가지는 슬라이스로 구성된다. 기능 분할 설계는 낮은 결합도를 지향하므로 레이어 Import 규칙을 통해 슬라이스간 의존 관계를 강제한다.
+
+> _A module in a slice can only import other slices when they are located on layers strictly below._
+
+슬라이스의 모듈은 하위 레이어에 있는 다른 슬라이스만 가져올 수 있다.
+
+>
+
+즉, `Features` 레이어 > `aaa` 슬라이스 > `api` 세그먼트에 위치하는 request.ts 모듈은 `Features` 레이어 > `bbb` 슬라이스의 그 어떤 모듈도 가져올 수 없다. 다만 `Entities`, `Shared` 레이어와 `Features` 레이어 > `aaa` 슬라이스의 모듈은 가져올 수 있다.
+
+```tsx
+// features/aaa/api/request.ts
+
+import { moduleA } from "@features/bbb"; // 불가능
+import { moduleB } from "@shared/ccc"; // 가능
+import { moduleC } from "@entities/ddd"; // 가능
+import { moduleD } from "@features/aaa"; // 가능
+```
+
+`App`과 `Shared` 레이어의 경우 레이어인 동시에 슬라이스가 되기 때문에 이 규칙의 예외이다. 즉, 슬라이스는 비즈니스 도메인을 기준으로 코드를 분할하는데, `Shared` 레이어에는 비즈니스 도메인이 존재하지 않으며, `App` 레이어에서는 모든 비즈니스 도메인을 결합하기 때문에 두 레이어는 예외가 된다. 실제로 두 레이어는 세그먼트로만 구성되고, 세그먼트 내의 모듈은 자유롭게 교차하여 가져올 수있다.
+
+다만, 공식 문서에 다음과 같이 정의되어 있는 것이고, 실제로 활용해보니 후술할 `Entities` 레이어에서 문제가 발생했다. 물론 다른 레이어에서도 발생할 수 있지만, 프로젝트의 엔티티의 경우 동등한 경우보다 계층적인 경우가 많기 때문에 `Entities` 레이어에서 자주 발생하는 것으로 보인다.
+
+그 외에 발생하는 역방향 Import의 경우 대부분 개발자가 레이어를 제대로 구분하지 못해 발생하는 문제로 보였다. 즉, 레이어를 그 책임의 범위와 모듈 의존도에 따라, 그리고 아래 공식 문서에서 정의한 기준에 따라 적절하게 구분한다면 레이어 Import 규칙은 어렵지 않게 준수할 수 있다고 생각한다.
+
+추가적으로 [기능 분할 설계 공식 레포지토리](https://github.com/feature-sliced)에서 확인할 수 있는 [Steiger](https://github.com/feature-sliced/steiger) Linter를 활용해 해당 아키텍처의 준수 여부를 검증할 수 있다. Steiger의 레이어에 대한 규칙을 상세히 살펴보면 다음과 같다.
+
+- **_Steiger Linter Rules_**
+  [`ambiguous-slice-names`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/ambiguous-slice-names)
+  Shared 레이어에 존재하는 세그먼트와 동일한 이름을 가진 다른 레이어의 슬라이스를 금지하는 규칙이다. 다만 `ui`, `lib` 등 이미 표준화된 `Shared` 레이어의 세그먼트에 대해서는 허용된다.
+  [`excessive-slicing`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/excessive-slicing)
+  그룹화되지 않은 슬라이스가 20개를 초과하거나, 그룹화되어도 슬라이스가 20개를 초과하는 경우를 금지한다.
+  [`forbidden-imports`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/forbidden-imports)
+  상위 레이어에서 가져오기 혹은 동일한 레이어의 다른 슬라이스 간 교차 가져오기를 금지한다.
+  ```tsx
+  // pages/editor/ui/EditorPage.tsx
+  import { Editor } from "./Editor";
+  import { Button } from "@shared/ui";
+
+  // pages/editor/ui/Editor.tsx
+  import { Button, TextField } from "@shared/ui";
+
+  // entities/user/ui/UserAvatar.tsx
+  import { Button } from "@shared/ui";
+  ```
+  [`import-locality`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/import-locality)
+  동일한 슬라이스에서의 가져오기는 상대적이어야 하고, 다른 슬라이스에서의 가져오기는 절대적이어야 한다. 슬라이스 내부의 디렉토리 구조를 변경하더라도, 다른 슬라이스의 가져오기는 변경되지 않아야하기 때문이다.
+  ```tsx
+  // entities/user/ui/Avatar.tsx
+  import { AvatarStatus } from "./AvatarStatus";
+  import { Button } from "@shared/ui";
+  ```
+  [`inconsistent-naming`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/inconsistent-naming)
+  `Entities` 레이어의 모든 이름은 복수형으로 일관되게 작성해야 한다는 규칙이다. 이 또한 대체로 개발자들은 엔티티의 명칭을 작성할 때 복수형을 활용하기에 크게 어렵지 않게 준수할 수 있다.
+  [`insignificant-slice`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/insignificant-slice)
+  참조가 없는 슬라이스는 제거할 것을, 참조가 하나만 존재하는 슬라이스는 상위 레이어에 병합할 것을 제안하는 규칙으로, 페이지는 애플리케이션에 대한 진입점과 유사하므로 참조가 하나만 존재하는 것이 허용된다.
+  기능 분할 설계를 도입할 때 모든 것을 레이어와 슬라이스로 분해하려고 하는 경우에 응집력을 저해하게 되므로 해당 슬라이스가 한 번만 사용된다면 별도의 슬라이스로 분리하는 것이 가치가 없게 되기 때문이다.
+  [`no-file-segments`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/no-file-segments)
+  세그먼트는 파일이 아닌 폴더로 작성되어야 한다는 규칙이다. 당연히 기능 분할 설계의 계층 구조를 따른다면 준수할 수 있다.
+  [`no-layer-public-api`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/no-layer-public-api)
+  레이어 수준에서의 공개 API 설정을 위한 `index` 파일을 금지하는 규칙이다. 대부분 어렵지 않게 준수할 수 있는 규칙이다. 일부 번들러에서 index 파일은 트리 쉐이킹 이슈를 유발하기 때문에 가능한 적게 가지는 것이 번들 크기를 줄이는 데 도움이 된다.
+  예외적으로 `App` 레이어에서는 애플리케이션의 진입점 역할의 `index` 파일을 선호하는 일부 사용자를 위해 허용된다.
+  [`no-public-api-sidestep`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/no-public-api-sidestep)
+  슬라이스 내부 모듈에서 직접 다른 모듈을 가져오기 위해 슬라이스의 공개 API를 우회하여 모듈을 가져오는 것을 금지하는 규칙이다. 슬라이스의 공개 API는 해당 슬라이스에 대한 유일한 진입점이 되어야 하고, 공개 API가 유지되는 한 내부 구조의 자유로운 변경을 보장하므로, 코드 베이스의 안정성을 높일 수 있다.
+  다만, `Shared` 레이어의 `ui`, `lib` 세그먼트의 경우에 그룹화될 수 있기 때문에 깊이가 깊어질 수 있는 점은 허용된다.
+  ```tsx
+  import { Button } from "@shared/ui";
+  import { formatForHumans } from "@shared/lib/dates";
+  import { translator } from "@shared/i18n";
+  import { UserAvatar } from "@entities/user";
+  import { EditorPage } from "@pages/editor";
+  ```
+  [`no-reserved-folder-names`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/no-reserved-folder-names)
+  표준화된 세그먼트 이름(`ui`, `model`, `api`, `lib`, `config`)는 세그먼트 하위 그룹의 이름으로 활용할 수 없다는 규칙이다.
+  [`no-segmentless-slices`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/no-segmentless-slices)
+  세그먼트가 없는 슬라이스는 금지된다. 이 또한 기능 분할 설계의 계층 구조에 따르기만 하면 준수할 수 있다.
+  [`no-segments-on-sliced-layers`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/no-segments-on-sliced-layers)
+  슬라이스가 있는 레이어(`Shared`, `App` 레이어를 제외한 나머지 모든 레이어)에 표준화된 세그먼트 이름을 활용할 수 없다.
+  [`no-ui-in-app`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/no-ui-in-app)
+  `App` 레이어에 `ui` 세그먼트는 존재할 수 없다. `App` 레이어는 일반적으로 애플리케이션의 유일한 진입점으로 활용되기에 `ui` 세그먼트가 존재할 수 없다.
+  [`public-api`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/public-api)
+  슬라이스 또는 슬라이스가 없는 레이어의 세그먼트는 반드시 공개 API를 가져야 한다. [상술](https://www.notion.so/Feature-Sliced-Design-FSD-13cd4564876980148151f150dd5749b4?pvs=21)한 것처럼, 슬라이스의 공개 API는 해당 슬라이스에 대한 유일한 진입점이 되어야 하고, 공개 API가 유지되는 한 내부 구조의 자유로운 변경을 보장하므로, 코드 베이스의 안정성을 높일 수 있다.
+  [`repetitive-naming`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/repetitive-naming)
+  슬라이스 이름에 레이어가 반복되는 것을 금지하는 규칙이다. 즉, `Pages` 레이어의 `homePage` 슬라이스는 해당 규칙을 위반하는 것이다.
+  [`segments-by-purpose`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/segments-by-purpose)
+  코드의 목적에 따라 세그먼트로 분리해야 한다. 즉, `hooks` 세그먼트로 useResizeObserver와 useQuery를 그룹화하는 것은 서로 목적이 다르기 때문에 금지된다. 세그먼트는 기술적 목적에 따라 코드를 그룹화해야 한다. 그렇게 해야 [Utility Dump](https://dev.to/sergeysova/why-utils-helpers-is-a-dump-45fo)를 피할 수 있고 코드를 더 쉽게 탐색할 수 있기 때문이다.
+  이 규칙에 따르면 모든 레이어에서 `utils`, `helpers`, `hooks`, `modals`, `components`, `types`, `constants`, `consts`, `const`와 같은 세그먼트 이름은 금지된다.
+  [`shared-lib-grouping`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/shared-lib-grouping)
+  `Shared` 레이어의 `lib` 세그먼트 하위에 그룹화되지 않은 모듈이 너무 많은 경우 코드베이스를 탐색하거나 이해할 때 어렵기 때문에 15개를 초과하는 경우를 금지하는 규칙이다.
+  [`typo-in-layer-name`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/typo-in-layer-name)
+  표준화된 레이어 명칭에 따라 레이어를 작성했는 지 검증하는 규칙이다.
+
+## 레이어 정의
+
+### `Shared` 레이어
+
+프로젝트 또는 비즈니스 로직에 대해 독립적인 모듈, 컴포넌트, 추상화를 의미한다. 다만, Shared 레이어를 [Utility Dump](https://dev.to/sergeysova/why-utils-helpers-is-a-dump-45fo)처럼 대하지 말아야 한다.(실제로 모듈의 본질을 인지할 수 없는 `utils`, `helpers` 디렉토리가 아니라 `lib/datetime`, `lib/classname` 등과 같이 의미 있는 명칭으로 처리해야 한다.)
+
+`Shared` 레이어는 애플리케이션의 기초를 구성하는데, 백엔드, 다른 라이브러리, 환경 등 외부 세계와의 연결을 생성하는 곳이다. 또한 자신만의 독립적이고 높은 응집력을 가진 라이브러리를 정의하는 레어어로도 사용된다.
+
+`Shared` 레이어는 `App` 레이어와 마찬가지로 슬라이스를 포함하지 않는다. 슬라이스는 본질적으로 레이어를 비즈니스 도메인으로 나누기 위한 구조이기에 비즈니스 도메인을 가지지 않는 `Shared` 레이어에서는 슬라이스를 가지는 대신 세그먼트를 바로 가지게 되므로 해당 레이어의 모든 파일은 서로 참조하고 가져올 수 있음을 의미한다.
+
+일반적으로 `Shared` 레이어에서 다음과 같은 세그먼트를 확인할 수 있다.
+
+1. `/api`
+
+   API 클라이언트, 특정 엔드포인트에 요청을 보내는 함수 등
+
+2. `/ui`
+
+   비즈니스 로직을 포함하지 않는 UI 컴포넌트, 단순 UI 컴포넌트와 UI 로직을 포함한 컴포넌트 모두.
+
+3. `/lib`
+
+   내부 라이브러리 모음으로, 각 라이브러리는 명확하고 특정된 목적을 가져야 한다.(날짜 처리, 색상 관리, 텍스트 조작 등)
+
+   반드시 `README.md` 파일에 문서화해야 한다.
+
+4. `/config`
+
+   환경 변수, 글로벌 기능 플래그, 애플리케이션의 기타 전역 설정 파일.
+
+5. `/routes`
+
+   라우트 상수나 라우트를 매칭하기 위한 패턴, 로직 등.
+
+6. `/i18n`
+
+   번역 설정 코드 등.
+
+실제로, `Shared` 레이어가 Utility Dump가 되지 않도록 구성하려 노력했다. 특히, 서버리스 데이터베이스를 활용하는 프로젝트이다 보니, 관련 SDK를 초기화하는 로직을 최대한 `Shared`의 `api` 세그먼트에 추가했고, 이외에 UI 컴포넌트에서 활용되는 Custom Hooks나 Observer Pattern의 `Toast` 클래스, 프로젝트 전반에서 재사용되는 `type`에 대한 선언 등을 추가했다.
+
+처음에는 세그먼트를 각 본질적인 목적에 따라 구분했지만, `Shared` 레이어의 세그먼트는 후술할 세그먼트 파트에 나오듯 대략적으로 표준화된 구분법을 따르는 것으로 변경했다. 다만 프로젝트 진행 당시에는 세그먼트 하위에서 그룹핑하지 않아 하나의 세그먼트가 점점 길어졌는데, 이는 아키텍처 리팩토링을 진행하면서, 그 본질적 목적에 적합한 기준을 기반으로 세그먼트 하위 그룹핑을 진행하면 프로젝트 전반적인 가독성과 아키텍처 활용성이 보다 개선될 여지가 있다고 생각한다.
+
+```
+// 개선 전
+src/shared/
+├── api
+│   ├── converter.ts
+│   ├── firebase.ts
+│   └── index.ts
+├── config
+│   ├── firebase.ts
+│   └── index.ts
+└── constant
+    ├── firebase.ts
+    ├── index.ts
+    ├── route.ts
+    └── utils.ts
+```
+
+```
+// 개선 후
+src/shared/
+└── api
+    ├── firebase
+    │   ├── sdk.ts
+    │   ├── config.ts
+    │   ├── converter.ts
+    │   └── constant.ts
+    └── index.ts
+```
+
+### `Entities` 레이어
+
+프로젝트의 본질을 구성하는 현실의 개념으로, 일반적으로 비즈니스에서 제품을 설명하는 데 사용하는 용어이다.
+
+`Entities` 레이어에 포함된 각 슬라이스는 정적인 UI 요소, 데이터 저장소 그리고 CRUD 동작 모듈을 포함할 수 있다.
+
+- Social Network 예시
+  User, Post, Group, …
+- Git 프론트엔드 예시
+  Repository, File, Commit, …
+
+> Git 프론트엔드 예시의 Repository는 File을 포함하고 있음을 알 수 있다. 이는 repository가 다른 엔티티를 포함하는 상위 엔티티가 된다는 것이다. 이러한 상위 엔티티는 일반적인 엔티티 구성 상황으로, 레이어 Import 규칙에 위배되지 않게 상위 엔티티를 관리하는 것은 어려울 때가 있다.
+>
+> 이를 해결하기 위한 여러 제안 사항은 다음과 같다.
+>
+> - 상위 `Entity` 레이어의 UI에는 하위 엔티티를 삽입할 위치에 대한 슬롯이 있어야 한다.
+> - 엔티티간 상호작용에 관련된 비즈니스 로직은 (대부분의 경우) `Features` 레이어에 배치해야 한다.
+> - 데이터베이스 엔티티의 타입 정의는 API Client와 함께 하위 레이어인 `Shared` 레이어로 분리할 수 있다.
+
+### `Features` 레이어
+
+사용자가 비즈니스 엔티티와 상호작용하여, 가치를 획득하기 위해 애플리케이션에서 수행할 수 있는 작업을 의미한다. `Features` 레이어는 사용자를 대신하여 애플리케이션이 가치를 창출하기 위해 수행하는 작업도 포함된다.
+
+Features 레이어의 각 슬라이스는 인터렉티브한 UI 요소, 내부 상태와 가치를 창출할 수 있는 작업을 가능케하는 API 호출을 포함할 수 있다.
+
+- Social Network 예시
+  Authenticate, Create a Post, Join a Group, …
+- Git 프론트엔드 예시
+  Edit a File, Leave a Comment, Merge Branches, …
+- 사용자를 대신한 동작 예시
+  Detect dark mode, Perform background computation, User-Agent based Actions, …
+
+### `Widgets` 레이어
+
+`Entites`, `Features` 레이어와 같은 하위 수준의 구성 요소를 조합해 독립적인 UI 블록을 의미한다.
+
+`Widgets` 레이어는 `Entities` 레이어의 UI 내부에 남겨진 슬롯을 다른 Entities 레이어나 Features 레이어의 인터렉티브 요소로 채우는 방법을 제공한다. 따라서 일반적으로 Widgets 레이어에는 비즈니스 로직을 포함하지 않고, `Features` 레이어에 비즈니스 로직을 남겨둔다. 각 슬라이스는 바로 사용할 수 있는 UI 컴포넌트와 제스처, 키보드 상호작용과 같은 비즈니스 로직이 아닌 로직을 포함한다.
+
+하지만 일부 경우에는 비즈니스 로직을 이 레이어에 포함하는 것이 더 편리할 때도 있다. 주로 이러한 상황은 해당 위젯이 복잡한 상호작용을 포함하고(예: 인터랙티브 데이터 테이블), 그 안에 포함된 비즈니스 로직이 다른 곳에서 사용되지 않을 때 발생한다.
+
+- Social Network 예시
+  Post Card, User Profile Header, …
+- Git 프론트엔드 예시
+  List of Files in a Repository, Comment in a Thread, Repository Card, …
+
+> Remix의 라우터와 같은 중첩 라우팅 시스템을 활용하고 있다면 `Widgets` 레이어를 평면 라우팅 시스템의 `Pages` 레이어처럼 활용하는 것이 유용할 수 있다. 이러한 방법을 활용해 데이터 가져오기 로직(`fetch`), 로딩 상태(`isLoading`), 에러 경계(`Error Boundary`)를 포함한 완전한 인터페이스 블록을 생성할 수 있다. 마찬가지로, 페이지 레이아웃 또한 `Widgets` 레이어에 저장할 수도 있다.
+
+### `Pages` 레이어
+
+웹 사이트와 같은 페이지 기반 애플리케이션의 완전한 페이지나 모바일 앱과 같은 스크린 기반 애플리케이션의 스크린/동작을 의미한다.
+
+`Pages` 레이어는 `Widgets` 레이어와 구성적으로 유사하지만 규모가 더 크다. 각 슬라이스는 라우터에 연결할 준비가 된 UI 컴포넌트와 때로는 데이터 가져오기 로직 및 에러 처리 로직이 포함되어 있다.
+
+- Social Network 예시
+  News Feed, Community Page, User Public Profile Page, …
+- Git 프론트엔드 예시
+  Repository Page, User’s Repositories Page, Branches in a Repository, …
+
+### `App` 레이어
+
+애플리케이션 전반에 걸친 모든 사항, 즉 기술적 측면(예: Context Provider)과 비즈니스적 측면(예: Analytics) 모두를 포함한다.
+
+이 레이어는 일반적으로 `Shared` 레이어와 마찬가지로 슬라이스를 포함하지 않고 세그먼트들로 구성된다.
+
+- 예시
+  Styles, Routing, Store and other Context Providers, Analytics initialization, …

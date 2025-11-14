@@ -1,0 +1,417 @@
+---
+title: Next.js에서 FSD 적용하기
+description: Next.js에 맞게 Feature Sliced Design 아키텍처를 개선해 팀 컨벤션으로 만들기!
+createdAt: 2024-06-14
+category: Next.js
+tags:
+  - Next.js
+  - Feature Sliced Design
+  - FSD
+  - Architecture
+  - Coding Convention
+  - Frontend Architecture
+---
+
+# 왜 Feature Sliced Design인가?
+
+Next.js App Router 프로젝트에서 Feature Sliced Design Architecture(이하 FSD라 한다.)를 적용한 이유는 명확하다. 사내 다수 웹 프로젝트의 디렉토리 구조와 개발 방식이 모두 달라 유지보수 과정에서 Context Switching이 발생하면 뇌에서 약간의 딜레이가 발생하기도 했고, 새로운 개발자에게 각각 온보딩을 해주어야 하는 상황이 발생할 수 있기 때문이다.
+
+처음에는 기존 진행 중이었던 프로젝트에서 Firebase만이 아니라 Supabase도 추가적으로 의존하게 되었고, 또한 기존 코드 베이스가 MVP의 빠른 개발을 위해 작성되었기에 이후 유지보수성과 확장성을 확대할 필요가 있었다. 그래서 프로젝트 아키텍처부터 고민하고 있었는데 병렬적으로 진행하고 있던 Flutter 프로젝트의 아키텍쳐(일부 변형된 MVVM)과 유사한 방식으로 Next.js 프로젝트에 적용한다면, 팀 내 개발자들이 서로의 프로젝트에 온보딩하기 쉽지 않을까라는 생각을 했다.
+
+그렇게 시작한 아키텍처 스터디를 통해서 프론트엔드 진영의 아키텍처뿐만 아니라 모바일 앱 설계 방식(`MVC`, `MVVM` 등), 백엔드의 `Hexagonal Architecture`, `DDD`, `FDD` 등을 모두 고려해봤으나 생각한 것보다 개발 경험 및 유지보수성 향상에 기여하지 못할 것으로 예측됐다. 러닝 커브도 있을 뿐더러, 기존 코드를 모두 마이그레이션할 생각을 가졌기 때문에 빠른 기간 내에 적용할 수 있도록 습득할 수 있어야한다고 생각했다. 추가적으로 (물론 개발한 사람마다 차이가 심하게 있으나) 현재 유지보수하는 프로젝트들의 근간은 프론트엔드의 모놀리식 아키텍처이기 때문에 이와 유사하거나 모듈을 쉽게 분리할 수 있는 아키텍처를 찾고 있었다.
+
+크게 마무리되지 않는 고민을 하던 시기 즈음에 Feature Sliced Design Architecture(이하 FSD라 한다.)에 대한 [번역 아티클](https://emewjin.github.io/feature-sliced-design)을 메일로 받아봤다. 해당 아티클에서는 FSD 아키텍처에 대한 설명과 그 장단점, 잠재력 등을 말하고 있는데, 처음 보는 순간 러닝 커브나 Next.js 프레임워크와의 호환성과 같은 걱정거리보다 도입했을 때의 깔끔한 프로젝트 구조가 눈 앞에 그려졌다. 다만 역시나 이는 한낱 2년차 개발자의 편협한 사고와 부족한 배경지식에 기반한 오만에 불과했다는 사실만 다시 깨닫게 되었지만, 역시 선배 개발자들의 방법론을 습득하는 것만으로도 충분히 좋은 아키텍처를 만들어낼 수 있다는 사실 또한 다시 한 번 느낄 수 있었다.
+
+특히, 약 1년간 업무를 하면서 가장 부족한 점이 (변명 같겠지만) 시간에 쫓겨 전혀 프론트엔드 아키텍처를 신경쓰지 않고 개발했다는 점이었다. 물론 6개월차를 벗어난 시점부터 수많은 디자인 패턴과 CCP, 합성 컴포넌트와 같은 다양한 컴포넌트 설계 방법론을 적용하고자 했었지만 여전히 마음에 쏙 들고, 활용하기 편한 아키텍처를 구성하는 것은 사실상 하늘의 별 따기라고 생각했다.
+
+그래도 어느 정도 팀 내 Flutter 프로젝트와 유사한 구조를 가지고 도입해보고 싶은 느낌이 들었기에, 혼자 FSD에 대해 스터디를 진행하고 몇 번의 테스트를 실행한 뒤, 현재 고민하고 있던 프로젝트에 적용하기 시작했다. 물론, 어짜피 혼자 개발하는 프로젝트기에 시행착오에도 큰 문제가 없다고 생각하여 도입한 것이기도 하다.
+
+FSD [공식 문서의 첫 페이지](https://feature-sliced.design/docs)에는 다음과 같이 FSD를 설명하고 있다.
+
+> **Feature-Sliced Design** (FSD) is an architectural methodology for scaffolding front-end applications. Simply put, it's a compilation of rules and conventions on organizing code. The main purpose of this methodology is to make the project more understandable and structured in the face of ever-changing business requirements.
+
+기능 분할 설계(FSD)는 프론트엔드 앱을 [스캐폴딩](https://wikidocs.net/152533)(앱의 골격을 빠르게 설정하는 기술, 앱의 뼈대를 빠르게 세우는 기법 등으로 해석할 수 있다.)하기 위한 아키텍처 방법론이다. 쉽게 말하면 코드 구성에 관한 규칙과 컨벤션의 집합이다. 이 방법론의 주된 목적은 끊임없이 변화하는 비즈니스 요구사항에 직면하면서 프로젝트를 더 이해하기 쉽고 체계적으로 구성하는 것이다.
+
+>
+
+FSD가 내 상황에 효과적이다고 생각한 점 또한 이 공식 문서의 서론 때문이었다. 스타트업에서 업무를 하다 보면 확실히 ‘끊임없이 변화하는 비즈니스 요구사항’에 하루에 열 번도 더 개발 중인 기능의 수정 사항이 발생하곤 한다. 물론 완료되었다고 전달받은 UI가 실시간으로 변경되는 것 또한 비일비재하다.
+
+그렇다면 어떤 방식으로 프로젝트를 구성해야 하는지에 대해 고민할 수 밖에 없는데 그 결과 수많은 디자인 패턴의 잔해와 각기 다르게 구성된 컴포넌트들이 활용되는 프로젝트가 내 유지보수 목록에 포함되어 버린다. 결국, 새로운 방법론을 찾게 되고, FSD가 제공하는 스캐폴딩 방법론은 흥미를 끌 수 밖에 없게 되는 것이다. 심지어 공식 문서에서는 프론트엔드 앱 아키텍처이고, 라이브러리나 UI Kit이 아닌 앱 아키텍처라고 단언하고 있으며, 특정 프로그래밍 언어, 프레임워크, 상태 관리 라이브러리를 강제하지 않는다고 하니 프로젝트에서 원하는 기술을 활용할 수 있는 나로서는 매우 적절하다고 판단했다.
+
+# Feature Sliced Design Architecture w. Next.js App Router
+
+이렇게 Next.js App Router 프로젝트에 FSD를 도입하게 됐고, FSD 레이어에는 App 레이어가 존재하는 바, 이를 순종적으로 이행하기 위해서 `layers` 디렉토리를 만들고 그 하위에 각각 `app`, `widgets`, `features`, `entities`, `shared` 디렉토리를 각각 레이어로 구성해 프로젝트 구조를 기획하고 개발을 진행했다.
+
+물론, [FSD 공식 문서의 Usage with NextJS](https://feature-sliced.design/kr/docs/guides/tech/with-nextjs)에 따르면 Next.js app 디렉토리를 프로젝트 루트에, 즉 `create next-app`에서 src 활용 옵션(Would you like to use `src/` directory?)을 사용하지 않고, Next.js 프로젝트를 초기화한 뒤에 `src` 디렉토리를 직접 생성하여 그 내부에 각각의 레이어 네이밍을 가진 디렉토리를 추가하는 것을 권장하고 있다.
+
+하지만 Next.js App Router의 `layout.tsx`, `page.tsx`, `loading.tsx`와 `app` 디렉토리의 경우 이미 프레임워크에서 강제된 사항이다. Next.js는 라이브러리가 아니라 프레임워크이기 때문에 해당 프레임워크에서 강제하고 있는 디렉토리 기반 라우팅 시스템을 활용하지 않을 이유가 없을 뿐더러 충분한 효용이 있다.
+
+다만, 실제 개발을 진행하면서, 시행착오를 겪어본 결과 Next.js App Router 프로젝트에서 FSD를 반영하여 프로젝트 구조를 설계할 때 이를 반영해야만 DX를 향상시킬 수 있으며, 추후 유지보수에서도 FSD의 강점을 발휘할 수 있을 것이라 판단했다. 따라서 Next.js App Router 프레임워크에 맞게 FSD를 유연하게 개선하여 반영하고, 이를 팀 컨벤션으로 만들고자 했다.
+
+# 기존 FSD w. Next.js App Router 프로젝트 구조와 문제점
+
+프로젝트를 시작할 때, 처음 FSD를 적용하면서 설계한 구조는 다음과 같다.
+
+```
+📦 (root)
+ ┣ ...
+ ┗ 📂 src
+   ┣ 📂 app
+   ┗ 📂 layers
+		 ┣ 📂 app
+ 		 ┣ 📂 pages
+		 ┣ 📂 widgets
+		 ┣ 📂 features
+		 ┣ 📂 entities
+		 ┗ 📂 shared
+```
+
+`src` 디렉토리 하위에 Next.js 디렉토리인 `app`와 FSD 디렉토리인 `layers`를 활용하고, `layers` 디렉토리 하위에 `app`, `pages`, `widgets`, `features`, `entities`, `shared` 디렉토리를 통해 FSD의 각 레이어를 구분하는 방식이었다.
+
+하지만 이러한 방식을 실제 프로젝트에 적용해 프로젝트 개발을 진행할 때 여러 문제가 발생했다.
+
+1. Next.js의 `page.tsx`와 FSD의 Page Layer 사이에 큰 차이가 존재하지 않는다. 결국, 분리하지 않아도 되는 컴포넌트가 과도하게 분리되어 개발 효율을 저해하는 경우가 종종 발생했다.
+
+   예를들어, `src/app/login` 디렉토리 하위의 `page.tsx`에 충분히 `<LoginPage />`를 구현할 수 있음에도 불구하고, Page 레이어를 활용하기 위해서 `src/layers/pages` 디렉토리 하위에 `ui` 디렉토리를 생성하고, 그 내부에 `<LoginPage />` 컴포넌트를 추가하는 등 불필요한 작업이 발생하여 개발 경험을 저해하는 요인이 됐다.
+
+   즉, FSD라는 아키텍처 도구를 도입하여 개발 경험을 향상시키고, 유지보수의 효율성을 높이는 등의 장점을 반영하기 위해 결국 다시 개발 경험을 낮추게 되는 모순적인 상황이 발생했다. 이는 주객이 전도된 상황으로 FSD를 도입한 목적성을 잃는 방식으로 잘못 적용한 케이스라고 판단했다.
+
+2. 처음 적용해보는 방식이기 때문에 명확히 어떤 Segment에 어떤 로직이 추가되어야 하는 지에 대해 규칙 없이 접근하여, 결국 다시 `components`, `domain` 등의 디렉토리를 활용하는 프론트엔드의 고전적인 Architecture와 유사하게 스파게티 코드들이 눈에 거슬리기도 했다.
+3. 다수의 Directory를 생성하고, 각각 Public API를 구분하여 처리해야 하기 때문에 하나의 Layer의 Slice를 생성할 때 추가해야할 보일러플레이트 코드가 늘어났다.
+4. 다수의 Serverless 서비스를 활용하고 있어 해당 SDK를 선언하고, 이를 활용할 때, Client SDK(예: Firebase Client SDK 등)와 Server SDK(예: Firebase Admin SDK 등)이 동일하게 Shared 레이어의 Segment에서 import하게 처리했다. 하지만 Next.js App Router의 Server Component와 Client Component의 구분으로 인해 Client Component에서 이를 import할 수 없는 문제가 발생했다.
+
+   ```tsx
+   // ./src/layers/shared/firebase/index.ts
+
+   export { firbaseAdminSDK } from "./server"; // Server SDK Module
+   export { firbaseClientSDK } from "./client"; // Client SDK Module
+   export { FIRESTORE_COLLECTION_NAMES } from "./config"; // Client + Server Constant
+   ```
+
+5. 다음과 같은 Star Export 이슈가 개발 중 지속적으로 발생했다.
+
+   ```tsx
+   The requested module './ComponentA' contains conflicting star exports for the name '$$ACTION_0' with the previous requested module './ComponentA'
+   ```
+
+각각 발생한 문제점을 되짚어보며, Next.js App Router와 FSD를 보다 잘 적용하여 개발 경험과 유지보수성 향상을 중점적으로 리팩토링 방향성을 결정하기로 했다.
+
+# Next.js에서 FSD 디렉토리 구조와 규칙
+
+위 문제점의 첫 번째와 두 번째 이슈를 해결하기 위해서 프로젝트 디렉토리 구조를 재설계하고, FSD 아키텍처 반영을 위한 명확한 규칙을 설계했다.
+
+## 프로젝트 디렉토리 구조 재설계
+
+먼저 재설계한 프로젝트 디렉토리 구조는 다음과 같다.
+
+```
+📦 (project root)
+ ┣ ...
+ ┗ 📂 src
+	 ┣ 📂 root
+	 ┣ 📂 app
+	 ┣ 📂 widgets
+	 ┣ 📂 features
+	 ┣ 📂 entities
+	 ┗ 📂 shared
+```
+
+기존과 다르게 `layers` 디렉토리를 제거하고, 같은 선상에 모든 디렉토리를 둔 점이 가장 큰 변경점이다. 이는 가독성을 향상시킬 수 있고, 프로젝트 구조를 명확히 받아들일 수 있게 한다.
+
+또한, Next.js App Router의 `app` 디렉토리와 FSD의 Page 레이어를 통합했다. 조금 유연성을 발휘한 부분인데, `app` 디렉토리 자체가 Next.js 프레임워크의 강제 사항이다 보니 기존의 App 레이어를 `root` 디렉토리로 처리하고, Next.js `app` 디렉토리 그 자체를 Page 레이어로 활용하면서 `pages` 디렉토리를 제거했다. 동일한 이유로 Page 레이어를 대체한 Next.js app 디렉토리는 FSD의 Slice, Segment를 활용하지 않게 되고, Next.js의 파일 기반 라우팅 시스템대로 구성된다.
+
+그 이하에 존재하는 Widget, Feature, Entity, Shared 레이어의 경우 기존과 동일한 디렉토리 구조를 갖지만, 새로 정립한 규칙에 따라 내부 구조는 변경된다.
+
+## FSD 규칙 설계
+
+FSD에서는 Slice와 Segment를 잘 구분하고, 이를 잘 활용하는 것이 중요한데, 프로젝트를 진행하면서 해당 부분에 대한 명확한 설계 규칙이 있어야 한다고 느꼈다. 즉, 프로젝트 초반에는 Slice와 Segment를 필요한대로 생성하고, 코드를 작성했더니 결국 기존의 고전적인 프론트엔드 아키텍처와 유사한 스파게티 코드가 되어버렸고, 이를 해결하기 위해서는 명확하게 팀 내 합의된 규칙이 필요하다고 생각했다.
+
+회고를 통해 설계한 Slice & Segment 규칙은 다음과 같다.
+
+1. Slice는 각 레이어에 따라 `camelCase`로 작성한 디렉토리로 구성되며 컴포넌트(`Compoent.tsx`) 파일을 제외하면 모두 `camelCase`를, 컴포넌트 파일은 `PascalCase`로 작성된다.
+   1. Shared 레이어에는 프로젝트에서 재사용되는 공통 로직, SDK, UI 등을 작성한다.
+   2. Shared 레이어는 슬라이스를 가지지 않고 `api`, `lib`, `model`, `ui`, `config` 등과 같은 세그먼트를 가지며, 기본적으로 세그먼트 내 하나의 파일이 하나의 모듈로 구성된다. 다만, 누가봐도 명확하게 프로젝트 전역에서 재사용되지만 거대한 모듈(`error`, `route`, `i18n` 등)은 하나의 세그먼트로 분리하여 작성한다.
+
+      예를 들어, `shared/ui/Modal.tsx`에는 `Modal` 컴포넌트와 `useModal` 커스텀 훅, `modalStore` 전역 상태 스토어를 모두 가진다.
+
+      사실 이 부분에서 많은 고민을 했었는데, 처음에는 `error`, `route`, `i18n` 등과 같이 프로젝트 전역에서 활용되는 거대한 모듈의 경우에 `config`, `lib`, `model`, `api` 등의 세그먼트에 나누어 작성을 했다. 그 이유는 Shared 레이어는 재사용되는 모듈을 가지는데, `error`, `route`, `i18n`과 같이 사실상 하나의 슬라이스 느낌으로 관리하게 되면 Shared 레이어의 원칙에 맞지 않다고 생각했기 때문이다.
+
+      다만, 프로젝트 전역에서 재사용되는 거대한 모듈을 분리하여 관리하다보니, 관리 포인트가 분산되어 있고, 유지보수 시 Shared 레이어 내부의 많은 세그먼트를 업데이트해야 하기 때문에 개발 생산성이 떨어진다고 느꼈다. 따라서 이 원칙([Shared 레이어는 슬라이스를 가지지 않고 `api`, `lib`, `model`, `ui`, `config` 등과 같은 세그먼트를 가지며, 기본적으로 세그먼트 내 하나의 파일이 하나의 모듈로 구성된다. 다만, 누가봐도 명확하게 프로젝트 전역에서 재사용되지만 거대한 모듈(`error`, `route`, `i18n` 등)은 하나의 세그먼트로 분리하여 작성한다.](https://www.notion.so/Shared-api-lib-model-ui-config--1a3d4564876980679646c0c26678853b?pvs=21))을 추가하게 됐다.
+
+   3. Entity 레이어에는 도메인 관련 스키마와 기본적인 Services를 작성한다.
+
+      예를 들어, User Entity에는 User 스키마와 User 데이터베이스 테이블에 CRUD 로직, 인증/인가 로직, User 스키마에서만 활용되는 Helper 함수 등이 작성된다.
+
+   4. Feature 레이어에는 Entity 레이어에서 작성한 하나 또는 여러 도메인을 활용한 기능을 작성한다.
+
+      예를 들어, `UserLoginForm` 컴포넌트, `handleLoginFormSubmit` 함수, `onPhoneNumberChange`함수, 여러 API가 조합된 `login` API 혹은 Server Action 등이 있다.
+
+   5. Widget 레이어에서는 Feature 레이어의 각 컴포넌트를 하나의 구성으로 조합한다.
+
+      즉, 로그인 페이지에 존재하는 `UserLoginForm`, `PasswordResetLink`, `ContactUsLink` 등을 조합해 하나의 Widget으로 만든다.
+
+   6. Page 레이어, 즉 Next.js App Router 하의 App 디렉토리는 웹 사이트의 각 페이지를 담당하고, 여러 Widget을 모아서 하나의 페이지로 구현한다.
+   7. App 레이어, 즉 Next.js App Router 하의 Root 디렉토리는 잘 사용하지는 않으나 `Provider`, `Layout` 등과 관련된 컴포넌트나 GA4, Vercel Analytics, Microsoft Clarity, Channel Talk 등의 Tracking Tools와 같이 전역적으로 설정하는 모듈을 작성한다.
+2. Public API는 Shared와 App 레이어, 즉 슬라이스가 없는 레이어에서는 세그먼트에서 직접 `index.ts` 를 활용해 내보내지며, 이외의 슬라이스가 존재하는 레이어는 모두 슬라이스 하위에 `index.ts`를 활용해 모든 세그먼트가 한 번에 내보내지는 구조로 한다.
+3. Entity 레이어, Feature 레이어, Widget 레이어의 구분은 위 규칙을 기반으로 팀 내 합의 하에 결정한다.
+
+따라서 다음과 같이 대략적인 프로젝트 구조가 생성된다.
+
+```
+📦 (root)
+ ┣ ...
+ ┣ 📂 public
+ ┣ 📂 scripts
+ ┗ 📂 src
+	 ┣ 📂 root # FSD App 레이어
+	 ┃ ┣ 📂 provider
+	 ┃ ┃ ┣ 📂 lib
+	 ┃ ┗ ┗ 📂 ui
+	 ┃ ┣ 📂 layout
+	 ┃ ┃ ┣ 📂 lib
+	 ┃ ┗ ┗ 📂 ui
+	 ┃
+	 ┣ 📂 app # Next.js App Router Directory = FSD Pages 레이어
+	 ┃
+	 ┣ 📂 widgets
+	 ┃ ┗ 📂 UserLogin
+	 ┃   ┣ 📂 config
+	 ┃   ┣ 📂 lib
+	 ┃   ┗ 📂 ui
+	 ┃
+	 ┣ 📂 features
+	 ┃ ┣ 📂 userLogin
+	 ┃ ┃ ┣ 📂 api
+	 ┃ ┃ ┣ 📂 config
+	 ┃ ┃ ┣ 📂 lib
+	 ┃ ┃ ┣ 📂 model
+	 ┃ ┃ ┗ 📂 ui
+	 ┃ ┣ 📂 userRegister
+	 ┃ ┃ ┣ 📂 api
+	 ┃ ┃ ┣ 📂 config
+	 ┃ ┃ ┣ 📂 lib
+	 ┃ ┃ ┣ 📂 model
+	 ┃ ┗ ┗ 📂 ui
+	 ┃
+	 ┣ 📂 entities
+	 ┃ ┣ 📂 user
+	 ┃ ┃ ┣ 📂 config
+	 ┃ ┃ ┣ 📂 model
+	 ┃ ┗ ┗ 📂 lib
+	 ┃
+	 ┗ 📂 shared
+	 	 ┣ 📂 api
+	 	 ┣ 📂 config
+		 ┣ 📂 lib
+		 ┣ 📂 model
+		 ┣ 📂 route
+		 ┣ 📂 error
+		 ┣ 📂 i18n
+		 ┗ 📂 ui
+```
+
+# Public API (반?)자동화
+
+FSD 하에서는 Public API를 설정하고, 그에 맞게 `import`하는 방식으로 코드를 결합시키기 때문에 필요한 로직이나 UI만을 명확하게 외부로 내보낼 수 있으며 내부에서만 활용되는 UI나 로직과 잘 구분될 수 있다는 장점이 있다. 추가적으로 공개된 API만을 `import`하는 방식을 통해 이후 기획 변경사항에 있어 `import` 구문을 수정할 필요가 없다는 점도 큰 장점이다.
+
+하지만, 항상 빛이 비추는 자리에는 그림자가 존재하듯, 이러한 장점에도 불구하고 공개 API를 생성하고, 구분해 `export` 해주는 작업이 필요한 것은 단점이다. 이러한 단점을 조금이라도 줄여나가기 위해서 여러 방안을 고민해봤다.
+
+## (1) VS Code 확장 프로그램 생성
+
+현재 코드 에디터로 활용중인 VS Code의 확장 프로그램을 생성하고, 이를 활용하여 디렉토리 구조와 Public API를 쉽게 처리하는 방식을 적용하는 것이다. 기존에 이미 존재하는 FSD 관련 확장 프로그램은 원하는 기능을 제공하지 않아 새롭게 만드는 방식을 고안했으며, chatGPT 등의 도움을 받으면 만드는 데 오래 걸리지 않을 것이라고 예상했다.
+
+하지만, 프로젝트 개발 기간이 줄어들어 시간이 부족한 상태에서 하기에는 일정 이슈가 발생할 것으로 예측되어 이후에 날을 잡고 만들어보는 것으로 한다.
+
+## (2) Script File 추가
+
+로컬에서 활용하기 위해 스크립트 파일을 하나 만들고, 이를 통해 처리하는 방법이 가장 쉽고 간결하고 빠를 것으로 생각되어 바로 스크립트를 만들었다.
+
+Node.js를 활용해 만들었고, 이를 실행하기 위해 Node 버전 23.8 이하에서는 vite-node를 설치해야 한다.
+
+```bash
+pnpm add -D vite-node
+```
+
+```tsx
+// scripts/public-api.ts
+
+import fs from "fs";
+import path from "path";
+
+const BASE_DIR = "src";
+const NO_SLICED_LAYERS = ["root", "shared"];
+const SLICED_LAYERS = ["widgets", "features", "entities"];
+const LAYERS = [...SLICED_LAYERS, ...NO_SLICED_LAYERS];
+
+const target = process.argv[2];
+
+const isDirectory = (dir: string) =>
+  fs.existsSync(dir) && fs.statSync(dir).isDirectory();
+
+const getNormalExports = (filePath: string) => {
+  const fileContent = fs.readFileSync(filePath, "utf-8");
+  const regex = /^export (const|let|var|function|class|enum) ([a-zA-Z0-9_]+)/gm;
+  const matches = [];
+  let match;
+  while ((match = regex.exec(fileContent)) !== null) {
+    matches.push(match[2]);
+  }
+  return matches.filter((exportItem) => !exportItem!.startsWith("_"));
+};
+
+const getTypeExports = (filePath: string): string[] => {
+  const fileContent = fs.readFileSync(filePath, "utf-8");
+  const regex = /^export (type|interface) ([a-zA-Z0-9_]+)/gm;
+  const matches: string[] = [];
+  let match;
+
+  while ((match = regex.exec(fileContent)) !== null) {
+    if (!match[2]!.startsWith("_")) {
+      matches.push(match[2]!);
+    }
+  }
+
+  return matches;
+};
+
+const processFiles = (dir: string, prefix?: string) => {
+  const filePath = prefix ? path.join(dir, prefix) : path.join(dir);
+
+  const files = fs
+    .readdirSync(filePath)
+    .filter((file) => file.endsWith(".ts") || file.endsWith(".tsx"))
+    .filter((file) => file !== "index.ts");
+
+  for (const file of files) {
+    const filePath = prefix
+      ? path.join(dir, prefix, file)
+      : path.join(dir, file);
+    const filename = path.basename(filePath, path.extname(filePath));
+
+    const normalExports = getNormalExports(filePath);
+    const typeExports = getTypeExports(filePath);
+
+    const from = prefix ? `./${prefix}/${filename}` : `./${filename}`;
+
+    if (normalExports.length > 0) {
+      fs.appendFileSync(
+        path.join(dir, "index.ts"),
+        `export { ${normalExports.join(", ")} } from "${from}";\n`,
+      );
+    }
+
+    if (typeExports.length > 0) {
+      fs.appendFileSync(
+        path.join(dir, "index.ts"),
+        `export type { ${typeExports.join(", ")} } from "${from}";\n`,
+      );
+    }
+  }
+};
+
+const processLayer = (layer: string) => {
+  const layerPath: string = path.join(BASE_DIR, layer);
+
+  if (NO_SLICED_LAYERS.includes(layer)) {
+    const segments = fs.readdirSync(layerPath);
+
+    for (const segment of segments) {
+      const segmentPath = path.join(layerPath, segment);
+
+      fs.writeFileSync(
+        path.join(segmentPath, "index.ts"),
+        "// Auto Generated File. DO NOT EDIT MANUALLY.\n\n",
+      );
+
+      processFiles(segmentPath);
+    }
+
+    console.log(
+      `슬라이스가 없는 레이어 ${layer}의 모든 세그먼트에 대해 공개 API가 설정되었습니다.`,
+    );
+  }
+
+  if (SLICED_LAYERS.includes(layer)) {
+    const slices = fs.readdirSync(layerPath);
+
+    for (const slice of slices) {
+      const slicePath = path.join(layerPath, slice);
+
+      fs.writeFileSync(
+        path.join(slicePath, "index.ts"),
+        "// Auto Generated File. DO NOT EDIT MANUALLY.\n\n",
+      );
+
+      const segments = fs.readdirSync(slicePath);
+
+      for (const segment of segments) {
+        const segmentPath = path.join(slicePath, segment);
+
+        if (isDirectory(segmentPath)) {
+          processFiles(slicePath, segment);
+        }
+      }
+
+      console.log(
+        `${layer} 레이어 내부 슬라이스 ${slice}의 모든 세그먼트에 대해 공개 API가 설정되었습니다.`,
+      );
+    }
+  }
+};
+
+if (!target) {
+  for (const layer of LAYERS) {
+    const layerPath: string = path.join(BASE_DIR, layer);
+
+    if (!isDirectory(layerPath)) {
+      console.error(`❌ 사용하지 않는 레이어: ${layer}`);
+      continue;
+    }
+
+    console.log(`🔍🔍🔍 ${layer} 레이어를 검사합니다.`);
+
+    processLayer(layer);
+  }
+} else {
+  const [layer, ..._rest] = target.split("/");
+
+  if (!layer) {
+    console.error("❌ Target Layer is not defined");
+    process.exit(1);
+  }
+
+  const targetPath = path.join(BASE_DIR, target);
+  const targetFiles = fs.readdirSync(targetPath);
+  const hasSegment = targetFiles
+    .filter((file) => file !== "index.ts")
+    .every((file) => isDirectory(path.join(targetPath, file)));
+
+  if (hasSegment) {
+    console.log(`🔍🔍🔍 ${target} 하위 세그먼트를 검사합니다.`);
+
+    fs.writeFileSync(
+      path.join(targetPath, "index.ts"),
+      "// Auto Generated File. DO NOT EDIT MANUALLY.\n\n",
+    );
+
+    const segments = targetFiles.filter((file) => file !== "index.ts");
+
+    for (const segment of segments) {
+      const filePath = path.join(targetPath, segment);
+
+      if (isDirectory(filePath)) {
+        processFiles(targetPath, segment);
+      }
+    }
+  } else {
+    console.log(`🔍🔍🔍 ${target} 세그먼트를 검사합니다.`);
+
+    fs.writeFileSync(
+      path.join(targetPath, "index.ts"),
+      "// Auto Generated File. DO NOT EDIT MANUALLY.\n\n",
+    );
+
+    processFiles(targetPath);
+  }
+}
+```

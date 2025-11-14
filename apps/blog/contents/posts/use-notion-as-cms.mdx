@@ -1,0 +1,680 @@
+---
+title: Next.js에서 Notion API를 활용해 CMS 만들기
+description: Next.js의 Page Router에서 Notion을 연결하는 방법
+createdAt: 2022-11-04
+category: Next.js
+tags:
+  - React
+  - TypeScript
+  - Next.js
+  - Tailwind CSS
+  - Notion
+  - Notion API
+  - CMS
+---
+
+## 시작 - 왜 CMS로 변경하려고 하는가?
+
+기술 블로그가 아니더라도 학습과 경험을 자신의 것으로 완벽히 흡수하고, 기억이 아니라 기록에 의존하기 위해서는 글을 작성하는 것이 좋다고 생각한다. 그런데 글을 쓰는 도구가 불편하거나 만족스럽지 못하다면, 당연히 글을 쓰기를 주저하거나 미루게 될 것이다.
+
+그렇다고 직접 입맛에 맞는 에디터나 CMS를 제작하는 것은 배보다 배꼽이 더 큰 상황이 될 것 같았다. 이미 설명했듯 기존 플랫폼을 활용하지 않는 것은 커스터마이징을 하기 위해서이지만, 주객이 전도되는 상황은 아무래도 납득하기 어렵기 때문에 CMS, 에디터 직접 제작은 바로 “언젠가 할 일" 리스트에 추가해뒀다.
+
+아무튼 글을 유려하게 쓰는 것도 아니면서 그냥 VS Code에서 마크다운 편집기로 글을 쓰려고 하면 자꾸 코드 생각이 나고 집중도도 떨어지며, 이미지를 추가하기도 불편했다. 결국, 마크다운을 작성하는 것이 아니라 이전부터 굉장히 많이 사용하고 있었던 Notion을 활용해 글을 작성해 옮기기만 하게 됐다. 물론 개발자에게 마크다운이란 빼놓을 수 없고, 사실 Notion 자체도 마크다운과 작성법이 유사하므로 딱히 바꿀 이유가 크리티컬하지는 않다.
+
+하지만, 지속적으로 글을 작성할 예정이기 때문에 하나 작성하는데 불편하게 작성하고 싶지 않아서 편하게 Notion에 작성하고, CMS에 업로드하여 블로그를 운영하고자 했다.
+
+다만, 잘 생각해보면 익숙하고 편리한 Notion에 작성하고, CMS에 옮긴 후 이를 가져오는 것은 불필요한 과정을 포함하고 있다. 딱히 Notion에 작성한 컨텐츠의 수정이 있는 것도 아니고, 단순히 CMS에 복붙하여 넣는 것이기 때문이다.
+
+따라서, Notion API를 활용해 Notion을 데이터베이스로 활용하면서, Notion에 작성한 글을 쉽게 가져와 하나의 블로그를 만드는 것이 보다 효율적이라고 판단했다.
+
+## Notion API 사용하기
+
+다음 링크로 들어가면 Notion API를 활용하기 위해 API Integration을 생성할 수 있다.
+
+[Notion - The all-in-one workspace for your notes, tasks, wikis, and databases.](https://www.notion.so/my-integrations)
+
+`새 API 통합`을 통해 새로운 API Integration의 기본 정보를 입력하고, 기타 설정을 추가할 수 있다. 이후 제출을 눌러 시크릿 키를 확인할 수 있다.
+
+![Screenshot 2022-10-17 at 02.24.47.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/96c12b4b-100c-4946-b89e-c6011060669d/Screenshot_2022-10-17_at_02.24.47.png)
+
+![Screenshot 2022-10-17 at 02.25.39.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/36f16436-7bdb-4ae4-a113-f2262ece7b4c/Screenshot_2022-10-17_at_02.25.39.png)
+
+이후 원하는 API를 [여기](https://developers.notion.com/reference/intro)서 확인하여 활용하면 된다.
+
+[Start building with the Notion API](https://developers.notion.com/reference/intro)
+
+## `Axios` 라이브러리를 활용한 Notion API 구성하기
+
+원하는 `config`를 기반으로 간단한 Axios 인스턴스인 `http`를 생성하고, 이를 활용해 각각의 API를 만들 수 있다. 이러한 방법은 원티드 프리온보딩 프론트엔드 코스에서 기업 과제를 진행할 때 API의 확장성과 재사용성을 고려하는 Best Practice를 고민해본 결과물이다.
+
+```tsx
+// services/index.ts
+
+import axios from "axios";
+import { BASE_URL, TOKEN_ID } from "config";
+
+const http = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    Authorization: `Bearer ${TOKEN_ID}`,
+    "Notion-Version": "2022-06-28",
+    "Content-Type": "application/json",
+  },
+});
+
+export default http;
+```
+
+이제 Blog Notion Database에 존재하는 Post의 목록 데이터를 가져와 UI로 구현하기 위해 `getNotionPostList`를 만들어야 한다. 특히 확장성을 고려해 `get`, `post`, `delete` 등 메서드만 Axios 인스턴스에 추가하여 활용하는 방식으로 구현했다.
+
+```tsx
+// services/notionApiServices.ts
+
+import http from "services";
+import { DATABASE_ID } from "config";
+
+export const getNotionPostList = async () => {
+  const response = await http.post(`${DATABASE_ID}/query`);
+
+  return response;
+};
+```
+
+### 첫 번째 타입 에러 발생..!
+
+`**ERROR!!**` 다만 이렇게 구현하는 경우, `index.tsx`에서 `getServerSideProps`에서 `response.results`를 가져올 때 타입 에러가 발생한다.
+
+```
+'AxiosResponse<any, any>' 형식에 'results' 속성이 없습니다.ts(2339)
+```
+
+```tsx
+// pages/index.tsx
+
+export const getServerSideProps = async () => {
+  const response = await getNotionPostList();
+  const data = response.results;
+
+  return {
+    props: { data: response },
+  };
+};
+```
+
+이를 확인하기 위해 Axios 라이브러리의 타입을 확인하기 위해 `axios/index.d.ts` 파일을 열어봤는데, `post` 메서드 제네릭이 기본값으로 `any`가 설정되어 있기 때문인 것처럼 보였다. 따라서, 넘어오는 데이터의 타입을 설정해주어야 하기 때문에 데이터를 보고 하나하나 타입을 지정해주기 시작했다.
+
+```tsx
+// axios/index.d.ts
+
+export class Axios {
+  // ...
+  post<T = any, R = AxiosResponse<T>, D = any>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig<D>,
+  ): Promise<R>;
+  // ...
+}
+```
+
+```tsx
+// services/notionApiServices.ts
+
+import http from "services";
+import { DATABASE_ID } from "config";
+
+export const getNotionPostList = async () => {
+  const response = await http.post(`${DATABASE_ID}/query`);
+
+  return response;
+};
+```
+
+우선, `getNotionPostList`에서 `http`는 Axios 인스턴스로, 타입이 `AxoisInstance`이고, `post` 메서드의 타입은 다음과 같다. 이때 `AxiosResponse`와 `AxiosRequestConfig`에서 제네릭 `T`, `D`가 활용되기 때문에 이 또한 확인해보았다.
+
+```tsx
+// post 메서드의 타입
+
+Axios.post<T = any, R = AxiosResponse<T, any>, D = any>(url: string, data?: D, config?: AxiosRequestConfig<D>): Promise<R>
+```
+
+```tsx
+export interface AxiosResponse<T = any, D = any> {
+  data: T;
+  status: number;
+  statusText: string;
+  headers: RawAxiosResponseHeaders | AxiosResponseHeaders;
+  config: AxiosRequestConfig<D>;
+  request?: any;
+}
+```
+
+```tsx
+export interface AxiosRequestConfig<D = any> {
+  url?: string;
+  method?: Method | string;
+  baseURL?: string;
+  transformRequest?: AxiosRequestTransformer | AxiosRequestTransformer[];
+  transformResponse?: AxiosResponseTransformer | AxiosResponseTransformer[];
+  headers?: RawAxiosRequestHeaders;
+  params?: any;
+  paramsSerializer?: ParamsSerializerOptions;
+  data?: D;
+  timeout?: Milliseconds;
+  timeoutErrorMessage?: string;
+  withCredentials?: boolean;
+  adapter?: AxiosAdapter;
+  auth?: AxiosBasicCredentials;
+  responseType?: ResponseType;
+  responseEncoding?: responseEncoding | string;
+  xsrfCookieName?: string;
+  xsrfHeaderName?: string;
+  onUploadProgress?: (progressEvent: AxiosProgressEvent) => void;
+  onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void;
+  maxContentLength?: number;
+  validateStatus?: ((status: number) => boolean) | null;
+  maxBodyLength?: number;
+  maxRedirects?: number;
+  maxRate?: number | [MaxUploadRate, MaxDownloadRate];
+  beforeRedirect?: (
+    options: Record<string, any>,
+    responseDetails: { headers: Record<string, string> },
+  ) => void;
+  socketPath?: string | null;
+  httpAgent?: any;
+  httpsAgent?: any;
+  proxy?: AxiosProxyConfig | false;
+  cancelToken?: CancelToken;
+  decompress?: boolean;
+  transitional?: TransitionalOptions;
+  signal?: GenericAbortSignal;
+  insecureHTTPParser?: boolean;
+  env?: {
+    FormData?: new (...args: any[]) => object;
+  };
+  formSerializer?: FormSerializerOptions;
+}
+```
+
+결국, 모두 `data`의 타입임을 확인할 수 있었다. 따라서 콘솔에 찍히는 데이터를 기반으로 `data`의 타입을 다음과 같이 설정해 넣어주었다.
+
+```tsx
+export interface NotionPostDataType {
+  object: string;
+  results: NotionPostType[];
+  has_more: boolean;
+  type: string;
+}
+```
+
+```tsx
+const response = await http.post<
+  NotionPostDataType,
+  AxiosResponse<NotionPostDataType, NotionPostDataType>,
+  NotionPostDataType
+>(`${DATABASE_ID}/query`);
+```
+
+다만, 여전히 Props로 넘어오는 값이 `any`가 되고 있었다.
+
+```tsx
+(parameter) data: any
+```
+
+[Next.js 공식 홈페이지](https://nextjs.org/docs/api-reference/data-fetching/get-server-side-props#getserversideprops-with-typescript)의 `getServerSideProps`의 Type을 유추할 수 있게 해주는 `inferGetServerSidePropsType`을 활용해도 동일하게 any가 발생했다.
+
+```tsx
+const Home: NextPage = ({
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  return <div>MAIN</div>;
+};
+```
+
+다음 진행을 해야하기 때문에 `any`로 둔 채 넘어가고, 이후에 조금 더 찾아봐야겠다. 😭
+
+다시 한 번 Axios 인터셉터를 활용해 `config`와 `response`를 모두 출력해 확인해보고자 했다.
+
+```tsx
+http.interceptors.request.use(
+  (config) => {
+    console.info("===config를 확인해보자 ===");
+    console.log(config);
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
+
+http.interceptors.response.use(
+  (response) => {
+    console.info("===response를 확인해보자===");
+    console.log(response);
+    return response.data;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
+```
+
+이번에 다시 확인해야할 것은 아래 `post` 메서드에서 `T`, `R`, `D`에 들어갈 타입을 확인하기 위해 해당 부분의 데이터 형태를 확인해야 한다.
+
+```tsx
+Axios.post<T = any, R = AxiosResponse<T, any>, D = any>(url: string, data?: D, config?: AxiosRequestConfig<D>): Promise<R>
+```
+
+우선 `T`는 `AxiosResponse`의 `data` 속성의 값의 Type으로 들어가기 때문에 해당 `data` 속성을 확인해봐야 한다.
+
+```tsx
+export interface AxiosResponse<T = any, D = any> {
+  data: T;
+  status: number;
+  statusText: string;
+  headers: RawAxiosResponseHeaders | AxiosResponseHeaders;
+  config: AxiosRequestConfig<D>;
+  request?: any;
+}
+```
+
+```
+===response를 확인해보자===
+
+{
+  status: 200,
+  statusText: 'OK',
+  headers: AxiosHeaders { ... },
+  config: { ... },
+  request: <ref *1> ClientRequest { ... },
+
+  data: {
+    object: 'list',
+    results: [ [Object], [Object], [Object], [Object] ],
+    next_cursor: null,
+    has_more: false,
+    type: 'page',
+    page: {}
+  }
+}
+```
+
+결국, `T`는 `NotionPostDataType`의 형태를 띄고 있는 것을 확인할 수 있었다. `results` 속성 값인 배열을 다시 확인해보니, 결국 `NotionPostType`의 형태를 가지고 있다.
+
+```
+results: [
+    {
+      object: 'page',
+      id: '...',
+      created_time: '2022-10-16T14:02:00.000Z',
+      last_edited_time: '2022-10-16T14:29:00.000Z',
+      created_by: [Object],
+      last_edited_by: [Object],
+      cover: null,
+      icon: [Object],
+      parent: [Object],
+      archived: false,
+      properties: [Object],
+      url: '....'
+    },
+		.......
+]
+```
+
+가장 중요한 데이터가 있는 `properties`를 다시 확인해보자.
+
+```
+{
+  summary: { id: 'ALA%3E', type: 'rich_text', rich_text: [ [Object] ] },
+  status: {
+    id: 'Gv%7C%40',
+    type: 'status',
+    status: {
+      id: 'd4bc155d-6949-46b9-9929-1b983803f49c',
+      name: 'Writing Contents',
+      color: 'blue'
+    }
+  },
+  date: {
+    id: 'a~vg',
+    type: 'date',
+    date: { start: '2022-10-16', end: null, time_zone: null }
+  },
+  category: {
+    id: 'd%3F%40%3B',
+    type: 'multi_select',
+    multi_select: [ [Object], [Object] ]
+  },
+  slug: { id: 'q%7CXS', type: 'rich_text', rich_text: [ [Object] ] },
+  title: { id: 'title', type: 'title', title: [ [Object] ] }
+}
+```
+
+결국, Notion에 저장된 글의 데이터임을 확인할 수 있었다.
+
+그렇다면 `D`는 무엇인지 확인하기 위해 `config` 데이터를 출력했다. 그 이유는 제네릭 `D`가 `AxiosRequestConfig`의 `data`의 타입을 지칭하고 있기 때문이다.
+
+```tsx
+export interface AxiosRequestConfig<D = any> {
+  // ...
+  data?: D;
+  // ...
+}
+```
+
+```
+=== config를 확인해보자 ===
+{
+	// ...
+  data: { filter: { property: 'status', status: [Object] } }
+}
+```
+
+즉, API 호출을 할 때 작성한 필터에 관련된 추가적인 정보가 `data`이므로, 이를 `Filter` 타입으로 선언해주었다.
+
+결국 최종적으로 다음과 같이 코드를 구성했더니 제대로 자동완성도 되고, `any`에서 탈출할 수 있었다..!
+
+```tsx
+// services/notionApiServices.ts
+
+import http from "services";
+import { AxiosResponse } from "axios";
+import { DATABASE_ID } from "config";
+import { NotionPostDataType } from "types";
+
+type Filter = {
+  filter: {
+    property: string;
+    status: {
+      equals: string;
+    };
+  };
+};
+
+export const getNotionPostList = async (filter: Filter) => {
+  const response = await http.post<
+    NotionPostDataType,
+    AxiosResponse<NotionPostDataType>,
+    Filter
+  >(`${DATABASE_ID}/query`, filter);
+
+  return response;
+};
+```
+
+```tsx
+// pages/index.tsx
+
+import type { NextPage } from "next";
+import { getNotionPostList } from "services/notionApiServices";
+import { NotionPostDataType } from "types";
+
+type HomeProps = {
+  data: NotionPostDataType;
+};
+
+const Home: NextPage = ({ data }: HomeProps) => {
+  console.log(data);
+
+  return (
+    <>
+      {data.results.map(({ properties }) => (
+        <div>
+          <h2>{properties.title.title[0].plain_text}</h2>
+        </div>
+      ))}
+    </>
+  );
+};
+
+export default Home;
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  const response = await getNotionPostList({
+    filter: {
+      property: "status",
+      status: {
+        equals: "Upload",
+      },
+    },
+  });
+
+  const data = response.data;
+
+  return {
+    props: { data },
+  };
+};
+```
+
+### 두 번째 타입 에러 발생.. 😭
+
+자동완성도 되고, 타입 추론도 제대로 되기 때문에 문제가 없네? 하고 넘어가려고 했는데, `Home`에서 다시 타입 에러가 발생했다.
+
+```tsx
+'({ data }: HomeProps) => JSX.Element' 형식은 'NextPage<{}, {}>' 형식에 할당할 수 없습니다.
+  '({ data }: HomeProps) => JSX.Element' 형식은 'FunctionComponent<{}> & { getInitialProps?(context: NextPageContext): {} | Promise<{}>; }' 형식에 할당할 수 없습니다.
+    '({ data }: HomeProps) => JSX.Element' 형식은 'FunctionComponent<{}>' 형식에 할당할 수 없습니다.
+      '__0' 및 'props' 매개 변수의 형식이 호환되지 않습니다.
+        'data' 속성이 '{}' 형식에 없지만 'HomeProps' 형식에서 필수입니다.ts(2322)
+index.tsx(6, 3): 여기서는 'data'이(가) 선언됩니다.
+```
+
+마지막에서 두 번째 에러 메시지에 주목했다.
+
+```tsx
+'data' 속성이 '{}' 형식에 없지만 'HomeProps' 형식에서 필수입니다.ts(2322)
+```
+
+즉, `NextPage`의 타입에는 `data` 속성이 없지만, `HomeProps`에서는 필수적이기 때문에 발생하는 문제로 파악했다. 따라서 `data` 속성을 옵셔널하게 변경해주었다.
+
+```tsx
+type HomeProps = {
+  data?: NotionPostDataType;
+};
+
+const Home: NextPage = ({ data }: HomeProps) => {
+  console.log(data);
+
+  return (
+    <>
+      {data?.results.map(({ properties }) => (
+        <div>
+          <h2>{properties.title.title[0].plain_text}</h2>
+        </div>
+      ))}
+    </>
+  );
+};
+```
+
+다만, 이러한 방식이 최선인지는 모르겠다. 결국 다시 `NextPage`를 한 번 열어봤다.
+
+```tsx
+// next/types/index.d.ts
+
+/**
+ * `Page` type, use it as a guide to create `pages`.
+ */
+export type NextPage<P = {}, IP = P> = NextComponentType<
+  NextPageContext,
+  IP,
+  P
+>;
+```
+
+제네릭으로 설정된 `P`의 값의 기본값이 `{}` 임을 확인하고, `P`는 어디에서 활용되는 지 보기 위해 `NextComponentType`을 확인했다.
+
+```tsx
+// next/dist/shared/lib/utils.d.ts
+
+export declare type NextComponentType<
+  C extends BaseContext = NextPageContext,
+  IP = {},
+  P = {},
+> = ComponentType<P> & {
+  /**
+   * Used for initial page load data population. Data returned from `getInitialProps` is serialized when server rendered.
+   * Make sure to return plain `Object` without using `Date`, `Map`, `Set`.
+   * @param ctx Context of `page`
+   */
+  getInitialProps?(context: C): IP | Promise<IP>;
+};
+```
+
+즉, `ComponentType`에서 활용되는 것을 보고, 다시 `ComponetType`을 `F12`로 열어보니 React의 컴포넌트를 의미하는 듯한 타입이 보였다. 특히 namespace를 에 떡하니 React라고 작성되어 있기에 확인하기 어렵지 않았다.
+
+```tsx
+// @types/react/index.d.ts
+
+declare namespace React {
+  //
+  // React Elements
+  // ----------------------------------------------------------------------
+
+  // ...
+
+  type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
+
+  // ...
+}
+```
+
+근데 클래스형 컴포넌트는 거의 활용하지 않으며 함수형 컴포넌트를 주로 사용하며 지금도 사용하고 있기 때문에 `FunctionComponent`를 확인했다. 이걸 확인하면서 무심코 사용했던 React.FC가 FunctionComponent를 지칭하고 있음을 두 눈으로 확인했다.
+
+```tsx
+// @types/react/index.d.ts
+
+type FC<P = {}> = FunctionComponent<P>;
+
+interface FunctionComponent<P = {}> {
+  (props: P, context?: any): ReactElement<any, any> | null;
+  propTypes?: WeakValidationMap<P> | undefined;
+  contextTypes?: ValidationMap<any> | undefined;
+  defaultProps?: Partial<P> | undefined;
+  displayName?: string | undefined;
+}
+```
+
+즉, Props를 의미하는 제네릭이 `P`였다.(P로 지칭한 거에서 눈치 챌 만 했는데 눈치가 없었나보다) Props는 없을 수도 있기 때문에 기본 값으로 빈 객체가 설정되어 있고, 따라서 `NextPage`의 제네릭 `P`를 설정해주면 해결되는 문제였다!
+
+```tsx
+type HomeProps = {
+  data: NotionPostDataType;
+};
+
+const Home: NextPage<HomeProps> = ({ data }) => {
+  console.log(data);
+
+  return (
+    <>
+      {data.results.map(({ properties }) => (
+        <div>
+          <h2>{properties.title.title[0].plain_text}</h2>
+        </div>
+      ))}
+    </>
+  );
+};
+```
+
+결국 두 가지 타입 에러를 모두 해결했다..!
+
+## Notion 데이터 렌더링하기
+
+상세 페이지를 만들기 위해서는 Notion으로 받아오는 데이터를 렌더링해야 한다. 가장 기본적인 방법으로는, `slug`에 따라 `pageId`를 찾은 뒤에 해당 `pageId`에 맞는 Notion API를 활용해 데이터를 가져와 렌더링하는 방식이다. 하지만 이러한 방식을 적용하면, 각각의 JSX에 대해 Tailwind CSS로 모두 스타일링을 해주어야 하고, 코드 박스, 인용, 토글 등을 직접 구현해야 하기 때문에 비효율적이라고 판단했다. 나중에 시간이 되면 직접 구현하여 라이브러리처럼 만들어도 좋을 듯 하다.
+
+결국 여러 라이브러리를 찾아본 결과 `[react-notion-x](https://github.com/NotionX/react-notion-x)`를 가장 쉽게 활용할 수 있다고 판단이 되어 해당 라이브러리로 결정했다.
+
+https://github.com/NotionX/react-notion-x
+
+이 라이브러리를 활용하면, `pageId`로 해당 페이지를 손쉽게 렌더링할 수 있다.
+
+```tsx
+import { NotionAPI } from 'notion-client'
+
+const notion = new NotionAPI()
+
+const recordMap = await notion.getPage(pageId: string);
+```
+
+우선 `getStaticPaths`로 모든 경로를 만들었다.
+
+```tsx
+// pages/blog/[slug].tsx
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const slugs = await getNotionPostSlugs({
+    filter: {
+      property: "status",
+      status: {
+        equals: "Upload",
+      },
+    },
+  });
+
+  return {
+    paths: slugs,
+    fallback: false,
+  };
+};
+```
+
+이후, slug를 바탕으로 pageId를 가져오는 API 함수를 생성하고, 이를 통해 Notion Page 데이터를 가져오는 API 함수를 생성해 데이터를 받아왔다.
+
+```tsx
+// services/notionApiService.ts
+
+export const getNotionPostPageId = async (filter: slugFilter) => {
+  const response = await http.post<
+    NotionPostDataType,
+    AxiosResponse<NotionPostDataType>,
+    slugFilter
+  >(`databases/${DATABASE_ID}/query`, filter);
+
+  return response.data.results[0].id;
+};
+
+export const getBlockMapByPageId = async (id: string) => {
+  const notion = new NotionAPI();
+
+  id = id.split("-").join("");
+
+  const recordMap = await notion.getPage(id);
+
+  return recordMap;
+};
+```
+
+이렇게 받아온 데이터를 `NotionRenderer` 컴포넌트에 넘겨주면 렌더링이 된다. 다만 코드 박스, 콜렉션, 수식 등의 기능은 추가적인 라이브러리를 가져와야 사용할 수 있다.
+
+```tsx
+// components/post/PostDetail.tsx
+
+const PostDetail = ({ data }: PostDetailProps) => {
+  return (
+    <NotionRenderer
+      recordMap={data}
+      fullPage={true}
+      darkMode={false}
+      components={{
+        Code,
+        Collection,
+        Equation,
+      }}
+    />
+  );
+};
+
+export default PostDetail;
+```
+
+결국 이렇게 렌더링되는 것을 확인할 수 있다.
+
+![https://minilog-dev.vercel.app/blog/minilog-notion-api-retrospective](/images/Use-Notion-as-CMS/Notion-API.png)
+
+## 마무리
+
+물론 아직 스타일링과 세세한 이슈들이 존재하지만, 블로그를 화분처럼 가꿔나가며 지식욕을 해소하고, 다른 개발자들에게 한 줌의 도움이라도 될 수 있으면 좋겠다. 내가 하고싶었던 것을 만드는 것이 얼마나 즐거운 일인지도 깨달았다. 처음에 타입 에러가 지속될 때 정말 문제가 뭔지 이해가 되지 않고 그랬는데, 목표였던 블로그를 만들기 위해 고군분투하다보니 해결되어 정말 만족스럽다. 이제는 블로그에 추가할 기능들과 스타일링에 대한 고민은 지속적으로 해봐야겠다…!
+
+이번 프로젝트는 영원히 진행할 것이므로 끝이라는 인사는 생략하도록 하겠다!

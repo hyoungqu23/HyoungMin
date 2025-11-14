@@ -1,0 +1,123 @@
+---
+title: Nextjs API Handler
+description: Nextjs에서 withHandler를 활용해 API Routes의 중복 코드를 제거하기
+createdAt: 2023-07-20
+category: Next.js
+tags:
+  - React
+  - Next.js
+  - TypeScript
+  - Clean Code
+  - HoF
+  - withHandler
+  - 고차함수
+  - Page Router
+---
+
+# withHandler
+
+⭐ Nextjs에서 withHandler를 활용해 API Routes의 중복 코드를 제거하기
+
+Nextjs의 API Routes에서 `withHandler`를 활용하게 되면, 비즈니스 로직의 분리에 따른 관심사의 분리를 충족할 수 있으며, 이로 인해 코드의 유지보수성을 높일 수 있다. 코드의 재사용성 또한 높일 수 있기 때문에 API Routes를 활용하는 경우에 웬만하면 사용하고자 한다.
+
+`withHandler`의 경우 하나의 HoF(고차함수, Higher-order Function)로, Nextjs API Routes의 `Request Handler` 함수를 인자로 받아, 새로운 함수를 반환한다. 즉, 우리는 `withHandler`를 기반으로 request handler 함수를 호출하기 전과 후에, 원하는 로직을 실행할 수 있게 되는 것이다.
+
+생각건대, `[Axios](https://github.com/axios/axios)` 라이브러리의 [interceptors](https://axios-http.com/kr/docs/interceptors)와 유사한 기능을 한다고 생각된다. `request`와 `response`를 가로채, 필요한 작업을 진행한다는 점이 유사한 기능을 한다고 느껴진다.
+
+```tsx
+import type { NextApiRequest, NextApiResponse } from "next";
+
+// Request Handler 함수의 타입 정의
+type RequestHandler = (
+  req: NextApiRequest,
+  res: NextApiResponse,
+) => Promise<void>;
+
+// withHandler 고차 함수의 타입 정의
+type WithHandler = (
+  handler: RequestHandler,
+) => (req: NextApiRequest, res: NextApiResponse) => Promise<void>;
+
+// withHandler 고차 함수 구현
+const withHandler: WithHandler = (handler) => async (req, res) => {
+  try {
+    // Request Handler 함수 실행 이전의 로직 추가
+    console.log("Preparing to handle request...");
+
+    // Request Handler 함수의 실행
+    await handler(req, res);
+
+    // Request Handler 함수 실행 이후의 로직 추가
+    console.log("Request handled successfully!");
+  } catch (error) {
+    // Request Handler 함수의 에러 처리
+    console.error("Error handling request:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+```
+
+## `method` 검증 로직
+
+조금 더 고도화해보자면, `method` 또한 인자로 받아 검증하기 위해 해당 `method`에 대한 타입을 정의한다.
+
+```tsx
+import type { NextApiRequest, NextApiResponse } from "next";
+
+export type TMethod = "GET" | "POST" | "PUT" | "DELETE";
+```
+
+위 예시와 결합하면, 우리는 다음과 같이 `withHandler` 고차 함수의 인자를 추가하고, 이를 통해 `method`의 검증도 처리할 수 있다.
+
+```tsx
+import type { NextApiRequest, NextApiResponse } from "next";
+
+export type TMethod = "GET" | "POST" | "PUT" | "DELETE";
+
+export type RequestHandler = (
+  req: NextApiRequest,
+  res: NextApiResponse,
+) => Promise<void>;
+
+export interface IWithHandlerConfig {
+  method: TMethod;
+  handler: RequestHandler;
+}
+
+type WithHandler = ({
+  method,
+  handler,
+}: IWithHandlerConfig) => (
+  req: NextApiRequest,
+  res: NextApiResponse,
+) => Promise<void>;
+```
+
+정의한 타입으로만 보면, `withHandler` 고차 함수는 `Request Handler` 함수와 해당 함수의 `method`를 인자로 받아, 필요한 로직과 함께 `Request Handler` 함수를 실행하는 고차 함수가 된다.
+
+실제 `withHandler` 고차 함수의 구현체는 다음과 같다.
+
+```tsx
+const withHandler: WithHandler = ({ method, handler }) => {
+  return async (req, res) => {
+    // method 검증 로직 추가
+    if (req.method !== method) {
+      return res.status(405).end();
+    }
+
+    try {
+      await handler(req, res);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(500).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    }
+  };
+};
+```
+
+- `Request Handler` 함수의 `req.method`가 미리 정의된 `method`와 일치하지 않는 경우 RFC 2616에 따라 `method`가 허용되지 않는 405 에러로 처리하게 된다.
+- 이후에는 `Request Handler` 함수를 실행하고, 에러가 발생하는 경우 500 에러로 처리하며, 에러 객체를 넘겨주게 된다.
+- 실행된 `Request Handler` 함수는 해당 함수 내에서 `res.status(200).json({ … })`을 통해서 결과 데이터를 넘겨주게 된다.

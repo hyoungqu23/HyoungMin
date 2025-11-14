@@ -1,0 +1,72 @@
+---
+title: Clarity를 활용해 사용자를 추적하자!
+description: 사용자 경험 추적 도구 Microsoft의 Clarity
+createdAt: 2024-01-08
+category: Frontend
+tags:
+  - Clarity
+  - 사용자 추적
+  - 사용자 추적 도구
+  - 사용자 경험 추적
+  - Microsoft Clarity
+  - React
+---
+
+# 시작
+
+사실 회사 홈페이지에 처음 추가한 Microsoft Clarity라는 도구의 실용성과 장점을 크게 느끼지 못하고 있던 찰나, 회사 홈페이지에 특정 페이지에 신청 Form을 추가한 이후, 누군가가 Form을 제출하여 신청 메일이 도착했다. 그래서 신청 Form을 사용하는 데 어려움은 없었는지, 문제가 되는 점은 없었는지 확인해보고자 한 번 확인해봤는데 충격적이었다.
+
+정확한 영상을 공유할 수는 없지만, 사용자가 신청 Form을 입력하고 제출 버튼을 누르는 순간 새로고침이 되며 404 페이지가 잠깐 렌더되었다가 신청 완료 페이지가 보이는 것을 확인했는데, 전혀 의도하지 않은 페이지의 라우팅이었다. 따라서 바로 로직을 확인해보니, 신청 완료 페이지로 넘어가기 전, Middleware에서 redirect 로직의 예외 처리가 되어야 하는데, 해당 부분에 예외 처리가 없어 추가하여 빠르게 수정할 수 있었다.
+
+사용자의 행동을 추적하는 도구를 활용하지 않았다면, 절대 확인하지 못할 이슈였는데 바로 확인하고 이슈에 대응할 수 있어 만족스러웠다.
+
+# Microsoft Clarity란 무엇인가?
+
+[Microsoft Clarity - Free Heatmaps & Session Recordings](https://clarity.microsoft.com/)
+
+Microsoft Clarity는 사용자 경험 추적 도구로서, 히트맵, 스크롤 맵, 클릭 맵과 세션 녹화 기능을 활용할 수 있는 무료 도구이다. 회사 홈페이지나 개인 블로그 등에서 사용자의 행동을 추적하여 사용자 경험과 전환율을 개선하는 등에 도움을 줄 수 있는 유용한 도구 중 하나이다.
+
+Microsoft Clarity 공식 사이트에는 다음과 같이 설명하고 있다.
+
+<aside>
+💡 Clarity는 사람들이 사이트를 사용하는 방식을 파악하는 무료 도구입니다. 설정이 쉽고 몇 분 안에 데이터를 얻기 시작할 수 있습니다.
+
+</aside>
+
+특히 공식 사이트에서 ‘추측은 그만두고 Clarity를 가지세요’라고 말하는데, 내가 사용자 경험 추적 도구가 필요하다고 생각한 이유와 정확하게 동일했다. 항상 내가 만든 웹 사이트에서 사용자가 어떤 방식으로 해당 네비게이션 버튼을 누르지 않았는지, 스크롤을 왜 내리다가 말았는지 등에 대한 의문만 가지고 있었다. 그리고 그에 대한 추측성 답변으로 웹 사이트를 개선하려고 했지 이렇게 명확한 도구를 활용하여 사용자의 행동을 추적해볼 생각은 하지 못했다.
+
+# Clarity 추가하기
+
+## 새 프로젝트 시작하기
+
+![Clarity-Homepage.png](/public/images/articles/Clarity/Clarity-Homepage.png)
+
+우선 [Microsoft Clarity 홈페이지](https://clarity.microsoft.com/)에 접속하여 로그인을 한 뒤, 시작 버튼을 누르면 새로운 프로젝트를 생성할 수 있다.
+
+![New-Clarity-Project.png](/public/images/articles/Clarity/Clarity-Homepage.png)
+
+웹 사이트의 이름과 URL을 통해 새 프로젝트를 추가할 수 있고, 모바일 앱(React Native, Native Android 등)의 앱 프로젝트도 등록할 수 있다는 장점이 있다.
+
+## Clarity Tour를 활용해 기본 설정하기
+
+아래 이미지와 같이 쉽게 기본 설정을 완료할 수 있게끔 단계별 셀프 가이드 투어가 존재하는데, 이 가이드만 따라가도 쉽게 웹 페이지에 설치할 수 있고, GA에 통합할 수 있다. 또한 IP Blocking, 개인정보 Masking 등 유용한 기능도 지원하고 있음을 확인할 수 있고 본인의 프로젝트에 맞게 설정할 수 있다는 장점이 있다.
+
+![Untitled](/public/images/articles/Clarity/Clarity-Tour.png)
+
+# 레코딩
+
+![Clarity-Recording.png](/public/images/articles/Clarity/Clarity-Recording.png)
+
+# 대시보드 기능
+
+![Clarity-Dashboard.png](/public/images/articles/Clarity/Clarity-Dashboard.png)
+
+# 히트맵, 스크롤맵, 섹션맵
+
+![Clarity-Heatmap.png](/public/images/articles/Clarity/Clarity-Heatmap.png)
+
+![Clarity-ScrollMap.png](/public/images/articles/Clarity/Clarity-ScrollMap.png)
+
+![Clarity-SectionMap.png](/public/images/articles/Clarity/Clarity-SectionMap.png)
+
+이렇게 다양한 기능을 통해 사용자 행동을 추적하고, 사용자가 왜 스크롤을 여기까지만 내렸는지, 왜 해당 섹션은 많이 클릭하였는지, 어떤 버튼을 가장 많이 클릭했는지 등을 확인할 수 있으며, 이러한 데이터를 기반으로 충분히 보다 나은 UI로 개선해나갈 수 있다고 생각한다.

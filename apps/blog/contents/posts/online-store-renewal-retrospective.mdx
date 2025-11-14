@@ -1,0 +1,149 @@
+---
+title: 온라인 스토어 신규 페이지 리뉴얼 프로젝트 회고
+description: 로컬앤라이프의 온라인 스토어를 리뉴얼 기업 과제
+createdAt: 2022-09-05
+category: React
+tags:
+  - React
+  - TypeScript
+  - Team Project
+  - Retrospective
+  - Wanted PreOnBoarding Frontend Course
+---
+
+## 시작
+
+https://github.com/wanted-pre-onboarding-fe-6th-team2/pre-onboarding-assignment-week-1-2-team-2
+
+[프루떼-오늘도프룻해!](https://fruitte-renewal.netlify.app/)
+
+이번 과제는 기존 운영 서비스인 온라인 스토어의 신규 페이지를 제작하는 과제이다. API가 존재하지 않기 때문에 더미 데이터로 작업을 진행해야 한다는 점이 조금 아쉬웠다. API 호출을 하면 최적화라던지 관심사의 분리를 위한 코드 분리라던지 학습하면서 코드를 어떻게 하면 더 깔끔하게 작성할 지 고민할 수 있기 때문이다.
+
+[프룻스토어](https://www.fruitte.co.kr/fruitstore)
+
+아무튼 없는 건 이미 없는 것이니까 진행하기로 하고 팀원들과 담당 작업을 나눈 후에 상품 목록 페이지를 담당하게 됐다.
+
+## 요구사항 분석
+
+상품 목록 페이지는 크게 두 가지를 구현해야 한다.
+
+- 상품 목록의 UI
+- 10개 단위의 페이지네이션
+
+상품 목록 UI의 경우에는 결국 `map`을 활용해 상품 목록 아이템 컴포넌트를 렌더링해주면 되기 때문에 별다른 이슈나 문제될 상황은 없을 것이라고 예상했다. 다만, 10개 단위의 페이지네이션 기능의 경우 API 호출에 `page`, `limit`를 넘겨주는 방식은 구현해봤지만, API 호출 없이 구현해야하기에 어떤 방식으로 진행해야 하는지 고민이 있었다.
+
+## API 없는 페이지네이션 구현하기
+
+페이지네이션의 알고리즘 자체를 알고 있으면 이후에 어디서든 활용할 수 있을 거라고 생각했다. 페이지네이션의 로직에서 `page`와 `limit`를 활용해 상품 배열에서 일부를 잘라내는 것이 가장 중요하다. 예를 들어, `page`가 `2`이고 `limit`가 `10`이라면, 11번째 상품부터 20번째 상품까지를 잘라서 가져오는 것이다.
+
+결국, API에 넘겨주는 `page`, `limit`를 `state`로 처리하여 구현하면 될 것 같다는 생각을 했다. 따라서 페이지네이션을 하나의 컴포넌트로 구현하고, 해당 컴포넌트를 상품 목록 컴포넌트 상위에 두면 될 것이라고 생각했다.
+
+```jsx
+// common/Pagination/Pagination.jsx
+
+import React, { useState, Children, isValidElement, cloneElement } from 'react';
+import PaginationButton from '@/components/common/Pagination/PaginationButton';
+import * as Styled from '@/components/common/Pagination/Pagination.styled';
+
+const Pagination = ({ data, children }) => {
+	// 1 page를 기본값으로 설정
+  const [currentPage, setCurrentPage] = useState(1);
+
+	// 10개를 limit로 함
+  const itemsPerPage = 10;
+
+	// 즉, page와 limit를 조합하여 인덱싱 처리하기
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+
+	// 페이지네이션 로직에 맞게 배열 자르기
+  const currentItems = items => {
+    let currentItems = 0;
+    currentItems = items.slice(indexOfFirst, indexOfLast);
+    return currentItems;
+  };
+
+	return ();
+};
+
+export default Pagination;
+```
+
+결국 원하는 대로 페이지네이션 로직처럼 상품 목록의 배열을 나누는데에는 성공했지만, Props는 읽기 전용이기에 수정할 수 없으므로 children 컴포넌트에 추가적인 Props로 전달할 수가 없었다. [React 공식 문서](https://ko.reactjs.org/docs/react-api.html#cloneelement)를 보면 children 컴포넌트를 `[React.cloneElement](https://ko.reactjs.org/docs/react-api.html#cloneelement)`로 복제하여 Props를 추가하고 이를 반환할 수 있게 되어 있어, 이를 활용해 JSX를 반환하여 추후 다른 페이지에서의 페이지네이션을 쉽게 활용할 수 있게 했다.
+
+```jsx
+// common/Pagination/Pagination.jsx
+
+import React, { useState, Children, isValidElement, cloneElement } from "react";
+import PaginationButton from "@/components/common/Pagination/PaginationButton";
+import * as Styled from "@/components/common/Pagination/Pagination.styled";
+
+const Pagination = ({ data, children }) => {
+  // 1 page를 기본값으로 설정
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // 10개를 limit로 함
+  const itemsPerPage = 10;
+
+  // 즉, page와 limit를 조합하여 인덱싱 처리하기
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+
+  // 페이지네이션 로직에 맞게 배열 자르기
+  const currentItems = (items) => {
+    let currentItems = 0;
+    currentItems = items.slice(indexOfFirst, indexOfLast);
+    return currentItems;
+  };
+
+  return (
+    <Styled.PaginationSection>
+      **
+      {cloneElement(children, {
+        data: currentItems(data),
+        page: currentPage,
+        totalItemNumber: data.length,
+      })}
+      **
+      <PaginationButton
+        itemsPerPage={itemsPerPage}
+        totalItemNumber={data.length}
+        page={currentPage}
+        paginate={setCurrentPage}
+      />
+    </Styled.PaginationSection>
+  );
+};
+
+export default Pagination;
+```
+
+물론, `limit`를 Props로 처리하여 기준 개수를 변경할 수 있게 하는 것이 조금 더 재사용성에 도움이 될 것 같다.
+
+```jsx
+const Pagination = ({ data, limit, children }) => {
+	// 1 page를 기본값으로 설정
+  const [currentPage, setCurrentPage] = useState(1);
+
+	// limit를 props로 받아옴
+  const itemsPerPage = limit;
+
+// ...
+```
+
+## 기존 스토어 개선점
+
+- 기존 웹사이트의 경우, 모든 상품 목록에 렌더링되기 때문에 추후 스토어에 더 많은 상품이 입점될 경우에 전체 렌더링 시간이 오래 걸릴 것을 고려하여 페이지네이션 로직을 추가해 사용자의 대기 시간과 서버의 로드 시간을 줄였다.
+- 페이지네이션 로직을 분리하여 다른 페이지에서도 사용할 수 있게 확장성과 재사용성을 고려하여 작업했다.
+- 상품 제목 등 UI가 깨지는 부분을 개선하고, 작은 이미지 애니메이션을 추가해 UI를 조금 더 부드럽게 만들었다.
+- UX를 높이기 위해 상품 목록 페이지에서 좋아요 버튼을 추가했다.
+
+## 마무리
+
+기본에 해당하는 목록 페이지를 구현하면서 페이지네이션 로직을 직접 구현해보니 조금 더 깊이 이해할 수 있는 좋은 과제였다. UI/UX를 고려하면서 Emotion으로 작업을 진행하면서 어떤 부분이 어떻게 사용자에게 영향을 미칠 지 고민했는데, 아직 이러한 부분에서는 부족한 것 같아서 추후에 UX 관련해서 학습하는 것도 좋을 것 같다.
+
+끝! 🙋🏻‍♂️
+
+## 참고 자료
+
+- **[React cloneElement()](https://ko.reactjs.org/docs/react-api.html#cloneelement)**

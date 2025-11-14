@@ -1,0 +1,304 @@
+---
+title: "Next.js Error Handling Strategy 2 - 중앙화된 에러 처리"
+date:
+summary: ""
+tags: []
+draft: false
+---
+
+> TL;DR
+>
+> - 1편에서 설계한 모든 전략은 `DomainError`라는 단일 에러 모델과 `handleError`라는 중앙 에러 처리기를 통해 구체화돼요.
+> - 스키마 단일 소스 원칙에 따라, Zod(혹은 StandardSchema)로 `details` 구조를 먼저 정의하고 그 타입을 100% 자동으로 유도해요. 이를 통해 타입 안정성과 런타임 안정성을 모두 확보할 수 있어요.
+> - `makeError` 팩토리 함수는 에러 생성 시 런타임 검증을 강제해 잘못된 형태의 에러가 시스템에 유입되는 것을 원천 차단하는 1차 방어선의 역할을 해요.
+> - 중앙 에러 처리기인 `handleError` 함수는 모든 클라이언트 에러가 최종적으로 모이는 중앙 허브 역할을 하면서 에러 처리 정책 맵을 통해 로깅, UX 피드백 등을 일관되게 수행하게 해줘요.
+
+[예제 코드 보기](https://github.com/hyoungqu23/examples-nextjs)
+
+## 0. 시작하기 전에: 우리의 목표
+
+1편에서 에러 처리 전략의 ‘왜(Why)’와 ‘무엇을(What)’에 대해 이야기 했다면, 2편에서는 ‘어떻게(How)’에 집중할 거에요. 이 글을 다 읽고 나면 프로젝트에 바로 적용할 수 있는 타입, 런타임 모두에서 안전한 에러 처리 코드를 모두 얻을 수 있어요.
+
+## 1. Step 1: `ERROR_CODE`로 에러의 종류 정의하기
+
+`as const` 객체를 활용해 트리 쉐이킹에 유리하고 일반 JavaScript 객체처럼 다루기 쉬운 `ERROR_CODE`를 정의해요. `as const`를 활용하면 값 자체가 타입이 되어 더 엄격히 타입 체크를 할 수 있고, 런타임에 실제 객체로 존재해 쉽게 참조할 수 있어요. 개인적인 선호이니 `enum`을 활용해도 좋아요.
+
+```tsx
+// error/code.ts
+
+export const ERROR_CODE = {
+  // --- 서버로부터 받은 의도한 에러 ---
+  VALIDATION: "VALIDATION",
+  AUTH_REQUIRED: "AUTH_REQUIRED",
+  FORBIDDEN: "FORBIDDEN",
+  NOT_FOUND: "NOT_FOUND",
+  RATE_LIMITED: "RATE_LIMITED",
+
+  // --- 클라이언트 경계에서 발생한 시스템 레벨 에러 ---
+  NETWORK_ERROR: "NETWORK_ERROR",
+  TIMEOUT_ERROR: "TIMEOUT_ERROR",
+
+  // --- 모든 경계에서 발생할 수 있는 최후의 에러 ---
+  INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",
+  UNKNOWN_CLIENT_ERROR: "UNKNOWN_CLIENT_ERROR",
+
+  // ... (추가 가능)
+};
+
+// 객체의 key로부터 Union 타입을 유도
+export type ErrorCode = keyof typeof ERROR_CODE;
+```
+
+## 2. Step 2: `DomainError` 단일 에러 모델 설계하기
+
+모든 종류의 에러를 담을 단 하나의 표준 그릇, `DomainError` 클래스를 만들어요.
+
+### 2.1 스키마 단일 소스(SSOT) 원칙에 따른 스키마 정의
+
+에러의 추가적인 정보를 담당하는 `details`의 형태를 Zod 스키마로 한 곳에서 정의해요. 굳이 Zod가 아니더라도 상관없어요. 무튼 이렇게 설정한 `ErrorDetailsSchema`가 에러 처리 시스템의 유일한 진실의 원천(SSOT)이 돼요.
+
+```tsx
+// error/schema.ts
+
+import { z } from "zod";
+import { ERROR_CODE, type ErrorCode } from "./code";
+
+export const ErrorDetailsSchema = {
+  [ERROR_CODE.VALIDATION]: z.object({
+    fieldErrors: z.record(z.array(z.string()).optional()),
+  }),
+  [ERROR_CODE.RATE_LIMITED]: z.object({ retryAfter: z.number().positive() }),
+  [ERROR_CODE.AUTH_REQUIRED]: z.void(), // 값이 없음을 z.void()로 명시적으로 표기
+  [ERROR_CODE.FORBIDDEN]: z.void(),
+  [ERROR_CODE.NOT_FOUND]: z.void(),
+  [ERROR_CODE.NETWORK_ERROR]: z.void(),
+  [ERROR_CODE.TIMEOUT_ERROR]: z.void(),
+  [ERROR_CODE.INTERNAL_SERVER_ERROR]: z.void(),
+  [ERROR_CODE.UNKNOWN_CLIENT_ERROR]: z.void(),
+
+  // ... (추가 가능)
+
+  // 'satisfies'를 활용해 모든 ErrorCode에 대한 스키마가 정의되었는지 컴파일 타임에 검사
+} as const satisfies Record<ErrorCode, z.ZodTypeAny>;
+
+// 스키마로부터 타입을 유도
+export type ErrorDetails = {
+  [K in ErrorCode]: z.infer<(typeof ErrorDetailsSchema)[K]>;
+};
+```
+
+### 2.2 `Error`를 확장한 `DomainError` 클래스 정의
+
+위에서 설정한 스키마와 타입을 기반으로 타입, 런타임 모두에서 안전한 `DomainError` 클래스를 정의해요. 기본 JavaScript `Error` 클래스를 확장하는 이유는 다음과 같아요.
+
+- 표준과의 호환성
+  `Error` 클래스를 확장하면 `DomainError` 객체가 JavaScript 런타임 환경의 표준 에러 객체로 인식돼요. 이는 `console.error`, Sentry 같은 외부 모니터링 도구, 그리고 브라우저 개발자 도구 등이 `DomainError`를 자동으로 인식하고 Stack Trace와 같은 유용한 디버깅 정보를 잘 표시해줄 수 있어요.
+- `instanceof` 연산자 활용이 가능해요.
+- `name`, `message`, `stack`과 같은 표준 속성을 상속받아 일관된 기본 정보를 가질 수 있어요.
+
+`DomainError` 클래스는 `code`, `message`, `details`, `cause` 데이터를 가져요.
+
+- `code`: 어떤 종류의 에러인지 식별하는 고유 식별자에요. 중앙 에러 처리기가 에러 처리 정책을 결정하는 핵심 키가 돼요.
+- `details`: `code`만으로 부족한 구체적인 데이터를 담아요.
+- `message`: 개발자 혹은 사용자에게 보여줄 설명이에요.
+- `cause`: `DomainError`가 발생하게 된 근본적인 원인 에러를 담아요. 디버깅에 유용한 정보에요.
+
+```tsx
+// error/domain-error.ts
+import type { ErrorCode } from "./code";
+import type { ErrorDetails } from "./schema";
+
+export type ErrorArgs<C> = {
+  code: C;
+  details: ErrorDetails[C];
+  messages?: string;
+  cause?: unknown;
+};
+
+export class DomainError<C extends ErrorCode = ErrorCode> extends Error {
+  public readonly code: C;
+  public readonly details: ErrorDetails[C];
+  public readonly cause?: unknown;
+
+  constructor(args: ErrorArgs<C>) {
+    super(args.message ?? args.code);
+    this.name = "DomainError";
+    this.code = args.code;
+    this.details = args.details;
+    this.cause = args.cause;
+  }
+}
+
+// 타입 가드 함수
+export const isDomainError = <C extends ErrorCode>(
+  e: unknown,
+  code?: C,
+): e is DomainError<C> =>
+  e instanceof DomainError && (!code || e.code === code);
+```
+
+### 2.3 `DomainError`를 만드는 `makeError` 팩토리 정의
+
+`makeError`는 `DomainError`를 안전하게 생성하는 팩토리 함수에요. 이 함수의 가장 중요한 역할은 `code`에 맞는 `details` 객체가 전달되었는지를 런타임에 엄격히 검증하여 타입과 런타임 모두에서 안정성을 보장하는 거에요.
+
+이 함수는 만약 `code`가 `VALIDATION`이면 `details`는 반드시 `{ fieldErrors: ... }` 형태여야 한다는 까다로운 타입 규칙을 해결하기 위해 ‘Discriminated Union’ 패턴을 활용해요. 먼저 `makeError`가 받을 수 있는 모든 유효한 인자 조합을 정의해요. `code`가 판별자 역할을 하고, 그 값에 따라 `details` 타입이 결정되는 구조가 돼요.
+
+```tsx
+// error/make-error.ts
+import { ERROR_CODE, type ErrorCode } from "./code";
+import { DomainError, type ErrorArgs } from "domain-error";
+import { ErrorDetailsSchema } from "./schema";
+
+type Params = {
+  [C in ErrorCode]: {
+    code: C;
+    details: ErrorDetails[C];
+    message?: string;
+    cause?: unknown;
+  };
+}[ErrorCode];
+
+export const makeError = ({
+  code,
+  details,
+  messages,
+  cause,
+}: Params): DomainError => {
+  const validation = ErrorDetailsSchema[code].safeParse(details);
+
+  if (!validation.success) {
+    console.error(`Invalid details for error code ${code}: `, validation.error);
+
+    return new DomainError({
+      code: ERROR_CODE.UNKNOWN_CLIENT_ERROR,
+      message: "잘못된 에러 details 정보로 에러 객체가 생성되었습니다.",
+      details: undefined,
+      cause: { validationError: validation.error, originalCause: cause },
+    });
+  }
+
+  return new DomainError({ code, details: validation.data, message, cause });
+};
+```
+
+## 3. Step 3: `handleError`로 중앙 에러 처리기 만들기
+
+모든 클라이언트 측 에러가 최종적으로 모이는 중앙 허브인 handleError 함수를 만들어 에러에 대해 한 곳에서 처리할 수 있도록 해요.
+
+### 3.1 `ERROR_POLICIES` 에러 처리 정책 설계하기
+
+먼저 각 `ERROR_CODE`에 대해 어떻게 처리할 지에 대한 기본 정책을 설계해야 해요. 어떤 에러는 토스트 메시지로, 어떤 에러는 로그도 남기지 않을 수 있어요.
+
+```tsx
+// error/policies.ts
+import { ERROR_CODE, type ErrorCode } from "./code";
+
+export type BaseUxAction = "toast" | "alert" | "none";
+export type ErrorPolicy<UxAction = BaseUxAction> = {
+  ux: UxAction;
+  log: "info" | "error" | "warning" | "none";
+};
+
+export const ERROR_POLICIES: Record<ErrorCode, ErrorPolicy> = {
+  [ERROR_CODE.VALIDATION]: { ux: "none", log: "warning" },
+  [ERROR_CODE.AUTH_REQUIRED]: { ux: "alert", log: "error" },
+  [ERROR_CODE.NETWORK_ERROR]: { ux: "toast", log: "error" },
+  [ERROR_CODE.INTERNAL_SERVER_ERROR]: { ux: "toast", log: "error" },
+  [ERROR_CODE.UNKNOWN_CLIENT_ERROR]: { ux: "toast", log: "error" },
+
+  // ... (추가 가능)
+};
+
+// 기본 정책
+export const DEFAULT_ERROR_POLICY: ErrorPolicy = { ux: "toast", log: "info" };
+```
+
+### 3.2 `handleError` 함수로 중앙 에러 처리기 만들기
+
+어떤 종류의 에러든 `DomainError`로 변환하고 위에서 설계한 에러 처리 정책을 바탕으로 일관성있게 에러를 처리해요.
+
+```tsx
+// error/handler.ts
+import { toast } from "sooner";
+import { Sentry } from "@event/sentry";
+import { ERROR_CODE, type ErrorCode } from "./code";
+import { DomainError, isDomainError } from "./domain-error";
+import { makeError } from "./make-error";
+import {
+  ERROR_POLICIES,
+  DEFAULT_ERROR_POLICY,
+  type ErrorPolicy,
+  type BaseUxAction,
+} from "./policies";
+
+type ErrorPolicyWithCustomOptions = Partial<
+  ErrorPolicy<BaseUxAction & ((error: DomainError) => void)>
+>;
+
+export const handleError = (
+  error: unknown,
+  options: ErrorPolicyWithCustomOptions = {},
+) => {
+  const domainError = isDomainError(error)
+    ? error
+    : makeError({
+        code: ERROR_CODE.UNKNOWN_CLIENT_ERROR,
+        details: undefined,
+        message: "알 수 없는 에러가 발생했습니다.",
+        cause: error,
+      });
+
+  const policy: ErrorPolicy =
+    ERROR_POLICIES[domainError.code] || DEFAULT_ERROR_POLICY;
+  const finalUx = options.ux ?? policy.ux;
+  const finalLog = options.log ?? policy.log;
+
+  // UX 처리
+  if (typeof finalUx === "function") {
+    finalUx(domainError);
+  } else if (finalUx === "toast") {
+    toast.error(domainError.message);
+  } else if (finalUx === "alert") {
+    alert(domainError.message);
+  }
+
+  // 로깅 처리
+  if (finalLog === "info") {
+    console.info(domainError);
+  } else if (finalLog === "warning") {
+    console.warning(domainError);
+  } else if (finalLog === "error") {
+    console.error(domainError);
+    Sentry.captureException(domainError);
+  }
+};
+```
+
+## 4. 결론: 우리가 얻은 ‘질서’와 ‘유연성’
+
+2편에서는 1편의 청사진을 타입과 런타임 모두에서 안전한 실제 코드로 구현했어요. 우리는 이제 다음과 같은 강력하고 유지보수 가능한 도구를 가지게 됐어요.
+
+- 모든 에러를 담을 수 있는 단일 그릇, `DomainError`
+- 에러를 안전하게 생성하고 검증하는 공장, `makeError`
+- 모든 에러를 일관된 정책으로 처리하는 중앙 허브, `handleError`
+
+이 아키텍처의 진정한 힘은 유지보수성과 확장성에 있어요.
+
+1. 정책은 한 곳에서만 수정
+
+   새로운 에러에 대한 UX 정책이나 로깅 레벨을 변경하려면 `policies.ts` 파일 하나만 수정하면 돼요. 애플리케이션의 수많은 파일을 탐색하며 업데이트할 필요가 전혀 없어져요.
+
+2. 쉽고 빠른 새로운 에러 추가
+
+   새로운 에러 시나리오가 생겨도 `code.ts`에 해당 에러 코드를 추가하고 `schema.ts`에 `details` 스키마를 정의하고, `policies.ts`에 정책만 추가하면 끝이에요. 핵심 로직인 `DomainError`, `makeError`, `handleError`는 전혀 수정할 필요가 없어요.
+
+3. 경계 로직의 단순화
+
+   다음 아티클에서 보게 될 각 경계에 대한 래퍼 함수인 `safeAction`, `networkBoundary` 등은 이제 어떻게 처리할지에 대해 고민할 필요 없이 ‘오직 발생한 에러를 `DomainError`로 변환하여 `handleError`로 잘 넘겨준다’는 단 하나의 책임에만 집중할 수 있게 돼요.
+
+이제 다음 아티클에서는 이 도구들을 활용해 각 경계의 래퍼 함수를 실제로 완성하고 전체 아키텍처를 하나로 조립해볼게요.
+
+## 참고자료
+
+- https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Error
+- https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Error/Error

@@ -1,0 +1,355 @@
+---
+title: Next.js 보일러 플레이트를 만들어보자
+description: Next.js, TypeScript, Tailwind CSS, ESLint, Prettier, Husky를 활용해 보일러 플레이트를 만들어보자!
+createdAt: 2022-12-28
+category: Next.js
+tags:
+  - React
+  - TypeScript
+  - Next.js
+  - Tailwind CSS
+  - ESLint
+  - Prettier
+  - Husky
+---
+
+## 시작
+
+개인 프로젝트를 이제 Next.js로 진행하고자 마음먹은 후, 코드 컨벤션, Git 컨벤션 등과 이를 적용할 ESLint와 Prettier, Husky를 추가하고 TypeScript와 Tailwind CSS를 적용한 보일러플레이트를 하나 만들어두고자 관련된 정보를을 수집하기 시작했다.
+
+사실 원티드 프리온보딩 프론트엔드 코스에서 팀원분이 생성해주신 React, Vite 보일러 플레이트를 생성해두고 팀 프로젝트를 하는 것이 정말 편리했다. 또한, 프로젝트 시작 전 환경 설정의 시간을 줄여줄 수 있다는 점에서 환경 설정으로 인해 프로젝트 시작이 어려웠던 점을 해결하여 개인 프로젝트를 쉽게 시작할 수 있다는 것이 마음에 들어서 보일러플레이트를 만들고자 했다.
+
+## Create Next App
+
+우선 기본적으로 [Create Next App](https://nextjs.org/docs/basic-features/typescript#create-next-app-support)를 통해 프로젝트를 시작했다.
+
+```bash
+npx create-next-app@latest --ts
+# or
+yarn create next-app --typescript
+# or
+pnpm create next-app --ts
+```
+
+다음과 같이 프로젝트 파일이 생성된다.
+
+![Untitled](/images/Nextjs-Boilerplate/Directory Structure.png)
+
+## Tailwind CSS
+
+이제 Tailwind CSS를 설치해야 한다. 관련된 내용은 [Tailwind CSS 공식 문서](https://tailwindcss.com/docs/guides/nextjs)에 존재한다.
+
+다음 명령어로 관련된 의존성를 설치하고, `tailwind.config.js`, `postcss.config.js`를 생성하기 위해 Tailwind CSS를 시작한다.
+
+```bash
+npm install -D tailwindcss postcss autoprefixer
+```
+
+```bash
+npx tailwindcss init -p
+```
+
+이후 기본적인 설정을 `tailwind.config.js`에 추가해주고, `globals.css`에 지시자를 추가해주면 된다.
+
+```jsx
+// tailwind.config.js
+
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+```
+
+```css
+/* globals.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+## ESLint with Airbnb
+
+기본적으로 Next.js 프로젝트를 Create Next App으로 생성하면, 기본적으로 ESLint config가 추가되어 있다.
+
+```json
+// .eslintrc.json
+
+{
+  "extends": "next/core-web-vitals"
+}
+```
+
+Airbnb Rule을 활용하기 위해 필수 종속성까지 설치해준다.
+
+```bash
+npm i -D eslint eslint-config-airbnb eslint-plugin-import eslint-plugin-jsx-a11y eslint-plugin-react eslint-plugin-react-hooks
+# or
+npx install-peerdeps --dev eslint-config-airbnb
+```
+
+추가적으로 TypeScript도 활용하기 위해 필수 종속성까지 설치해준다.
+
+```bash
+npm install --save-dev typescript eslint-config-airbnb-typescript @typescript-eslint/eslint-plugin @typescript-eslint/parser
+
+npm install --save-dev @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint-import-resolver-typescript
+```
+
+이후 기본적인 설정을 하면 쉽게 사용할 수 있다.
+
+```json
+// .eslintrc.json
+
+{
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "airbnb",
+    "plugin:prettier/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": ["react", "react-hooks", "@typescript-eslint", "prettier"],
+  "rules": {
+    "react/react-in-jsx-scope": 0,
+    "react/prefer-stateless-function": 0,
+    "react/jsx-filename-extension": 0,
+    "react/jsx-one-expression-per-line": 0,
+    "no-nested-ternary": 0
+  }
+}
+```
+
+다만, 주로 화살표 함수를 많이 사용하기 때문에 관련 설정을 추가해준다.
+
+```json
+"rules": {
+	"react/function-component-definition": [
+    2,
+    {
+      "namedComponents": "arrow-function",
+      "unnamedComponents": "arrow-function"
+    }
+  ]
+}
+```
+
+## Prettier 설정
+
+Prettier는 기존 사용하던 설정을 가져와 추가했다.
+
+```json
+// .prettierrc
+
+{
+  "singleQuote": true,
+  "semi": true,
+  "useTabs": false,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "printWidth": 80,
+  "bracketSpacing": true
+}
+```
+
+이후 다음 명령어로 Lint를 한 번 테스트해봤다.
+
+```bash
+npm run lint
+```
+
+```bash
+> nextjs_boilerplate@0.1.0 lint
+> next lint
+
+warn  - The Next.js plugin was not detected in your ESLint configuration. See https://nextjs.org/docs/basic-features/eslint#migrating-existing-config
+
+./pages/api/hello.ts
+2:60  Error: Insert `;`  prettier/prettier
+5:15  Error: Insert `;`  prettier/prettier
+6:2  Error: Insert `;`  prettier/prettier
+10:29  Error: Insert `,`  prettier/prettier
+12:45  Error: Insert `;`  prettier/prettier
+
+./pages/index.tsx
+1:37  Error: Insert `;`  prettier/prettier
+2:29  Error: Insert `;`  prettier/prettier
+3:31  Error: Insert `;`  prettier/prettier
+4:47  Error: Insert `;`  prettier/prettier
+69:4  Error: Insert `;`  prettier/prettier
+70:2  Error: Insert `;`  prettier/prettier
+72:20  Error: Insert `;`  prettier/prettier
+
+./pages/_app.tsx
+1:31  Error: Insert `;`  prettier/prettier
+2:41  Error: Insert `;`  prettier/prettier
+5:21  Error: Prop spreading is forbidden  react/jsx-props-no-spreading
+5:38  Error: Insert `;`  prettier/prettier
+8:21  Error: Insert `;`  prettier/prettier
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+```
+
+초기 파일 중 Lint 에러가 있는 부분을 확인해보니, 주로 Prettier 설정에서 `"semi": true`로 설정한 부분이 반영되어 있지 않기 때문이다.
+
+추가적으로 `_app.tsx`에 기본 코드가 다음과 같이 설정되어 있다.
+
+```tsx
+// _app.tsx
+
+import "../styles/globals.css";
+import type { AppProps } from "next/app";
+
+const MyApp = ({ Component, pageProps }: AppProps) => {
+  return <Component {...pageProps} />;
+};
+
+export default MyApp;
+```
+
+이때 spread operator로 작성된 `pageProps`로 인해 발생한 에러이므로, 해당 설정을 꺼줘야 한다.
+
+```json
+"react/jsx-props-no-spreading": 0,
+```
+
+수정한 뒤 다시 Lint를 확인하면 다음과 같은 경고만 확인할 수 있다.
+
+```bash
+> nextjs_boilerplate@0.1.0 lint
+> next lint
+
+warn  - The Next.js plugin was not detected in your ESLint configuration. See https://nextjs.org/docs/basic-features/eslint#migrating-existing-config
+✔ No ESLint warnings or errors
+```
+
+해당 경고는 Next 플러그인을 추가하지 않아서 그런 것인데, airbnb 규칙을 활용하면 많은 사람들이 사용하지 않는 것 같아 제거해서 발생한 경고인듯 하다.(관련된 [공식 문서](https://nextjs.org/docs/basic-features/eslint#migrating-existing-config))
+
+## Husky로 Lint 강제 적용하기
+
+코드 컨벤션 등을 설정하더라도 이를 팀원 개개인이 코드를 작성할 때마다 고민하면서 작성하는 것은 비효율적이고 DX를 낮추는 문제가 발생할 수 있다. 따라서, Husky와 Git Hook을 활용해 Commit, Push 이전에 ESLint와 Prettier를 자동적으로 실행하게끔 할 수 있다.
+
+### Husky 의존성 설치 및 실행
+
+```bash
+npm install husky --save-dev
+
+npx husky install
+```
+
+이후 관련 스크립트를 추가해주어야 한다.
+
+```json
+// package.json
+
+{
+  "scripts": {
+    "postinstall": "husky install",
+    "format": "prettier --cache --write .",
+    "lint": "eslint --cache ."
+  }
+}
+```
+
+이러한 스크립트를 기반으로 Git Hook을 추가해주면 된다.
+
+```bash
+npx husky add .husky/pre-commit "npm run format"
+
+npx husky add .husky/pre-push "npm run lint"
+```
+
+이러한 코드를 GitHub에 올리려고 하니 바로 에러가 발생했다.
+
+```bash
+> nextjs_boilerplate@0.1.0 lint
+> eslint --cache .
+
+Oops! Something went wrong! :(
+
+ESLint: 8.25.0
+
+Error: Error while loading rule '@typescript-eslint/dot-notation': You have used a rule which requires parserServices to be generated. You must therefore provide a value for the "parserOptions.project" property for @typescript-eslint/parser.
+Occurred while linting C:\Users\hyoun\Programming\nextjs_boilerplate\next-env.d.ts
+    at getParserServices (C:\Users\hyoun\Programming\nextjs_boilerplate\node_modules\@typescript-eslint\utils\dist\eslint-utils\getParserServices.js:22:15)
+    at create (C:\Users\hyoun\Programming\nextjs_boilerplate\node_modules\@typescript-eslint\eslint-plugin\dist\rules\dot-notation.js:85:81)
+    at Object.create (C:\Users\hyoun\Programming\nextjs_boilerplate\node_modules\@typescript-eslint\utils\dist\eslint-utils\RuleCreator.js:41:20)
+    at createRuleListeners (C:\Users\hyoun\Programming\nextjs_boilerplate\node_modules\eslint\lib\linter\linter.js:922:21)
+    at C:\Users\hyoun\Programming\nextjs_boilerplate\node_modules\eslint\lib\linter\linter.js:1104:110
+    at Array.forEach (<anonymous>)
+    at runRules (C:\Users\hyoun\Programming\nextjs_boilerplate\node_modules\eslint\lib\linter\linter.js:1041:34)
+    at Linter._verifyWithoutProcessors (C:\Users\hyoun\Programming\nextjs_boilerplate\node_modules\eslint\lib\linter\linter.js:1393:31)
+    at Linter._verifyWithConfigArray (C:\Users\hyoun\Programming\nextjs_boilerplate\node_modules\eslint\lib\linter\linter.js:1768:21)
+    at Linter.verify (C:\Users\hyoun\Programming\nextjs_boilerplate\node_modules\eslint\lib\linter\linter.js:1475:65)
+husky - pre-push hook exited with code 2 (error)
+```
+
+에러를 검색해보니, ESLint config 파일에서 `parserOption`에 `project`의 `tsconfig.json`을 추가해주어야 한다는 해결책을 확인했다.
+
+```bash
+"parserOptions": {
+    "project": ["tsconfig.json"]
+  },
+```
+
+다만 다른 config 파일들에서 Parsing Error가 발생하는 것을 확인했다.
+
+```bash
+> nextjs_boilerplate@0.1.0 lint
+> eslint --cache .
+
+C:\Users\hyoun\Programming\nextjs_boilerplate\next.config.js
+  0:0  error  Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser.
+The file does not match your project config: next.config.js.
+The file must be included in at least one of the projects provided
+
+C:\Users\hyoun\Programming\nextjs_boilerplate\postcss.config.js
+  0:0  error  Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser.
+The file does not match your project config: postcss.config.js.
+The file must be included in at least one of the projects provided
+
+C:\Users\hyoun\Programming\nextjs_boilerplate\tailwind.config.js
+  0:0  error  Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser.
+The file does not match your project config: tailwind.config.js.
+The file must be included in at least one of the projects provided
+
+✖ 3 problems (3 errors, 0 warnings)
+```
+
+![Untitled](/Nextjs-Boilerplate/ESLint.png)
+
+config 파일의 Lint 규칙은 불필요하다고 생각하여 생략할 수 있게 설정했다.
+
+```json
+// .eslintignore
+
+next.config.js
+postcss.config.js
+tailwind.config.js
+```
+
+## 마무리
+
+확실히, 각 설정을 확인하면서 보일러 플레이트를 생성하니 어떤 부분이 어떻게 설정되는 지에 대해 이해할 수 있어서 좋았다. 자동적으로 ESLint를 처리하는 점이 가장 만족스럽고, 이를 활용해 여러 개인 프로젝트를 진행해야 겠다! 지속적인 업데이트로 계속 활용해야겠다! 🙋🏻‍♂️
+
+### 참고자료
+
+- **[Enforce a specific function type for function components (react/function-component-definition)](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/function-component-definition.md)**
+- **[Disallow JSX prop spreading (react/jsx-props-no-spreading)](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-props-no-spreading.md)**

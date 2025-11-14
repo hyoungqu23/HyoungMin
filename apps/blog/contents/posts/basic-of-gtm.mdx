@@ -1,0 +1,57 @@
+---
+title: GTM 기본 알아보기
+description: GTM은 무엇일까?
+createdAt: 2023-02-05
+category: SEO
+tags:
+  - Google Tag Manager
+  - GTM
+  - GA4
+  - SEO
+---
+
+## Google Tag Manager
+
+웹사이트, 모바일 앱에서 프로젝트에 직접 추가하지 않고 [웹페이지](https://tagmanager.google.com/)에서 구성하고, 게시하고, 해당 태그를 실행할 방법을 지정할 수 있는 도구
+
+추적 태그를 설정하고, 이벤트 발생 시 해당 태그가 실행되게 하는 트리거를 설정하면 쉽게 이벤트를 추적할 수 있다.
+
+관리할 계정에 컨테이너를 만들어서 시작할 수 있다.
+
+# 태그 설정하기
+
+기본적으로 Tag Manager는 다양한 태그를 지원하고 지원하지 않는 태그는 맞춤 태그로 생성할 수 있다. 또한, 태그의 우선순위, 실행 옵션(이벤트 당 한번, 페이지당 한번 등)을 설정할 수 있다.
+
+웹 기준으로 태그 유형과 구성 태그를 설정하고, GA4 Id와 이벤트 이름을 작성해주면 가장 간단하게 태그를 생성할 수 있다.
+
+태그를 생성한 후에는 미리보기를 통해 해당 태그가 제대로 적용되었는지 확인할 수 있다.
+
+![Tag.png](/images/articles/Basic-of-GTM/Tag.png)
+
+# 트리거
+
+[Trigger types](https://support.google.com/tagmanager/topic/7679108)
+
+트리거의 경우, 웹 페이지, 모바일 앱에서의 특정 유형의 이벤트를 수신하고, 해당 이벤트가 감지되는 경우에 태그를 실행시키게 된다.
+
+다양한 유형이 있으며, 정규 표현식이나 CSS `id`, `className` 등을 활용할 수도 있다.
+
+만약 `className`이 `kuTaGy`로 설정된 버튼의 클릭 이벤트를 수집하고자 한다면 다음과 같이 트리거를 구성해주면 된다.
+
+![Trigger.png](/images/articles/Basic-of-GTM/Trigger.png)
+
+만약 스크롤 깊이를 통해 `50%`이상 스크롤을 한 사람을 체크하기 위해서는 다음과 같이 트리거를 구성해줄 수 있다.
+
+![Scroll-Trigger.png](/images/articles/Basic-of-GTM/Scroll-Trigger.png)
+
+# 변수
+
+변수의 경우 웹이나 앱이 실행될 때의 해당 값을 의미한다. 즉, Page URL의 경우 해당 페이지에 진입했을 때 그 페이지의 URL을 반환한다.
+
+![Variables.png](/images/articles/Basic-of-GTM/Variables.png)
+
+기본적으로 이러한 변수를 지원하며, 사용자 정의 변수를 활용해 커스텀할 수 있다.
+
+[웹용 사용자 정의 변수 유형](https://support.google.com/tagmanager/answer/7683362?hl=ko&ref_topic=9125128)
+
+[모바일용 사용자 정의 변수 유형](https://support.google.com/tagmanager/answer/7683157?hl=ko&ref_topic=9125128)

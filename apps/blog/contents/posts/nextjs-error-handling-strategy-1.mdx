@@ -1,0 +1,518 @@
+---
+title: "Next.js Error Handling Strategy 1 - 경계와 책임"
+date:
+summary: ""
+tags: []
+draft: false
+---
+
+> **TL;DR**
+>
+> - Next.js는 에러를 **‘의도한(expected)’** 과 **‘의도하지 않은(uncaught)’** 두 범주([Next.js Error Handling](https://nextjs.org/docs/app/getting-started/error-handling))로 명확히 나눠요. 의도한 에러는 사용자에게 명확한 피드백을 주고, 의도하지 않은 에러는 시스템을 보호하고 개발자에게 알려야해요.
+> - 우리는 에러를 처리할 경계를 명확히 정의할 거에요. 서버 경계는 에러를 변환해 안전한 신호로 클라이언트에 전달하고, 클라이언트 경계는 이 신호를 받아 최종적인 UX를 책임져요.
+> - Error Boundary는 렌더링 과정의 에러만 포착하는 일종의 렌더링 경계에요. 사용자 인터렉션이나 네트워크 통신 등에서 발생하는 에러를 처리하기 위해서는 별도의 경계를 설정하고 각자의 역할을 부여해야 해요.
+
+[예제 코드 보기](https://github.com/hyoungqu23/examples-nextjs)
+
+## 0. 왜 이런 고민을 하나요?
+
+실제로 업무를 진행하며 Next.js 프로젝트를 만들다 보면, 기능 구현 일정의 압박에 따라 다음과 같은 스파게티 코드가 난무해요.(물론 저만 그럴 수도 있겠지만요..)
+
+- 화면마다 제각각 `try ... catch`, 임의의 문자열로 던지는 에러, 서로 다른 분기 로직.
+- 각 이벤트 핸들러에서 처리되는 각각의 에러에 대한 Toast와 Alert.
+- Error Boundary만 믿다가 이벤트/비동기에서 터지는 예외 방치.
+- 서버가 주는 에러 Body가 제각각이라 클라이언트 조건문 폭발.
+
+Next.js 에러 처리 전략은 이러한 어려움에 질서를 부여하기 위한 최소 규칙을 정리하는 것에서 시작했어요.
+
+## 1. 에러 분석: 적을 알아야 이긴다
+
+먼저, 에러 처리 전략을 세우기 전에 에러를 분류하는 것부터 시작할 거에요. 에러는 어떤 관점에서 보는 지에 따라 다양하게 분류할 수 있어요.
+
+1. 발생 시점에 따른 분류
+   - 컴파일 에러
+     코드 변환 과정에서 발생하는 에러로, 실행 이전에 파악할 수 있어요.
+   - 런타임 에러
+     실제 환경에서 실행되는 도중에 발생하는 에러로, 사용자가 마주칠 수 있으니 적절히 처리해야 해요.
+2. 의도에 따른 분류
+   - 의도하지 않은 에러(시스템 에러)
+     개발자의 실수나 예측 불가능한 시스템 이슈로 발생하는 에러로, 예상하지 못한 예외 상황에서 발생해요. 대부분의 런타임 에러를 포함해요.
+   - 의도한 에러(도메인 에러)
+     개발자가 예상한 상황에서 설계된 정상적인 실패 흐름에서 발생하는 에러로, 로그인 시 비밀번호 불일치, 회원가입 시 이메일 중복, Form 제출 시 유효성 검사 실패 등이 있어요. 이렇게 설계하여 `throw`하는 에러는 에러의 Code 등을 기반으로 구체적이고 친절한 피드백을 사용자에게 제공해야 해요.
+3. 발생 위치에 따른 분류
+   - 클라이언트 에러
+     사용자의 브라우저 환경에서 발생하는 에러로, DOM 조작 에러, 브라우저 호환성 에러 등이 있어요.
+   - 네트워크 에러
+     클라이언트와 서버 간의 통신 과정에서 발생하는 에러로, CORS 에러, DNS 조회 실패, 타임아웃 등이 있어요.
+   - 서버 에러
+     백엔드 서버에서 발생하는 에러로, 데이터베이스 연결 실패, API 로직 에러 등이 있어요.
+4. 에러 전파 방식에 따른 분류
+   - 동기 에러
+     Call Stack을 통해 직접 전파되는 에러로, `try … catch`로 처리할 수 있어요.
+   - 비동기 에러
+     현재의 Call Stack이 비워진 뒤, 미래의 어느 시점에 Event Loop에 의해 실행되는 에러로, Promise의 `rejected` 상태로 전파되는 에러에요. 이러한 에러는 Promise의 `.catch()` 혹은 `async/await`와 함께 `try … catch`를 활용해서 처리할 수 있어요.
+
+모든 구분 방식에 대해 에러를 처리할 필요는 없어요. 이 모든 에러를 항상 고려하면서 코딩하기는 어려워요. 우리는 의도와 위치라는 기준을 바탕으로 실용적인 전략을 세울 거에요.
+
+## 2. **전략 수립:** 경계를 정의하고, 책임을 부여하기
+
+앞으로 설정할 모든 에러 처리 전략은 ‘경계’라는 개념 위에서 펼쳐져요. 따라서 에러의 책임, 처리 방식을 나누기 전에 Next.js 애플리케이션 내에서 어떤 부분이 ‘경계’가 되는지에 대해서 먼저 정의해볼게요.
+
+Next.js 애플리케이션에는 클라이언트와 서버 로직이 공존해요. 기본적으로 모든 애플리케이션이 그렇듯이 클라이언트에서 서버에 요청을 보내면, 서버는 약속된 작업을 수행해서 다시 응답하는 구조를 가져요.
+
+### 1) 서버 경계
+
+클라이언트 요청이 도달하는 진입점이자, 응답을 보내는 전송점이 되는 경계에요. 서버 경계는 서버 내부에서 발생한 에러가 그대로 클라이언트에 노출되지 않게 보호하고, RFC 9457의 Problem Details([참고](https://www.rfc-editor.org/rfc/rfc9457.html))로 HTTP 실패를 한 번 표준화(변환)해 응답을 클라이언트에 보내는 역할을 해요.
+
+특히, Next.js에서는 Route Handler, Server Actions가 정확히 그 역할을 해요.
+
+```tsx
+// app/api/users/route.ts
+export const GET = (request: Request) => {
+  /* 서버 경계 */
+};
+
+// app/actions/user.ts
+export const updateUser = (userData: User) => {
+  /* 서버 경계 */
+};
+```
+
+### 2) 네트워크 경계
+
+클라이언트가 서버와 통신하는 경계에요. 서버가 보낸 표준화된 응답으로 구성된 에러나 네트워크 에러 등을 클라이언트가 일관되게 처리할 수 있도록 정규화해하는 역할을 해요. fetch 함수의 래퍼 함수로 공통화할 수 있어요.
+
+```tsx
+// network-boundary.ts
+export const networkBoundary = async <T,>() => {
+  /* 네트워크 경계 */
+};
+
+// usage.ts
+const user = await networkBoundary("/api/users/1");
+```
+
+### 3) 인터렉션 경계
+
+사용자 인터렉션이 시작되는 최전선으로, 인터렉션으로 발생하는 모든 에러에 대한 경계에요. 의도한 에러에 대해 중앙화된 에러 처리기를 통해 즉각적이고 구체적인 UX 피드백을 제공하고, 의도하지 않은 에러를 포착해 사용자에게 일관된 실패 메시지를 보여줄 수 있어요.
+
+```tsx
+// components/SignInForm.tsx
+const SignInForm = () => {
+  const onSubmit = async (data) => {
+    /* 인터랙션 경계 */
+  };
+
+  return <form onSubmit={onSubmit}>{/* ... */}</form>;
+};
+```
+
+### 4) 렌더링 경계
+
+데이터가 UI로 렌더링되는 과정에서 발생하는 에러로부터 애플리케이션 전체가 멈추는 것을 방지하는 경계에요. Next.js의 `error.tsx`와 `global-error.tsx`나 컴포넌트별 Error Boundary가 React의 렌더링 사이클에서 발생하는 에러를 포착해 해당 부분, 페이지를 대체 UI로 처리할 수 있어요. 즉, 에러의 영향을 국소적으로 격리하는 역할을 해요.
+
+```tsx
+// app/users/[id]/page.tsx
+<ErrorBoundary fallback={<FallBackUI />}>
+  {" "}
+  {/* 렌더링 경계 */}
+  <UserProfile />
+</ErrorBoundary>
+```
+
+### 5) 브라우저 경계
+
+다른 경계에서 포착하지 못하는 의도하지 않은 에러를 포착하는 애플리케이션의 마지막 경계에요. `window.onerror`, `window.onunhandledrejection`를 활용해 JavaScript 런타임 에러를 포착할 수 있어요.
+
+```tsx
+// app/components/browser-boundary.tsx
+useEffect(() => {
+  window.addEventListener("error" /* 브라우저 경계 */);
+}, []);
+```
+
+### 2.1 역할 부여: '변환'과 '처리'의 책임 분담
+
+우리는 이렇게 나눈 경계에 '에러 처리'라는 큰 개념을 두 가지 행동으로 나눠 각 경계에 역할을 부여할 거에요.
+
+- 변환(Transforming): 다양한 원본 에러를, 시스템이 이해할 수 있는 일관된 표준 형식으로 가공하는 작업.
+- 처리(Handling): 변환된 에러를 바탕으로, 사용자에게 피드백을 주거나 시스템에 기록하는 실질적인 액션.
+
+## 3. 실전 시나리오: 에러는 어떻게 경계를 여행하는가?
+
+이제 위에서 정의한 경계의 책임이 실제 상황에서는 어떻게 동작하는지 4가지 시나리오를 통해 따라가면서 확인해볼게요.
+
+### 시나리오 1 - 서버에서 예기치 못한 데이터베이스 에러가 발생했을 때
+
+상황: 사용자가 프로필 페이지에 접근(`GET /api/users/1`)했지만, 데이터베이스 연결에 문제가 발생했어요.
+
+1. 에러 발생: 서버 경계(Route Handler)
+
+   `db.users.find`가 실패하며 예측하지 못한 에러를 `throw` 해요.
+
+   ```tsx
+   // app/api/users/[userId]/route.ts
+   export const GET = async (...) => {
+     try {
+       const user = await db.users.find(params.userId); // 데이터베이스 연결 실패 에러 발생
+       // ...
+     } catch (error) {
+   	  // ...
+     }
+   }
+   ```
+
+2. 에러 변환: 서버 경계(Route Handler)
+
+   서버 경계는 민감한 원본 에러를 클라이언트가 받을 수 있는 안전한 형태로 ‘변환’해요.
+
+   발생한 에러를 의도에 따라 구분하고, 의도한 에러는 표준화된 응답 형태로 ‘변환’해 전달하고, 의도하지 않은 에러는 먼저 ‘처리’(로깅)하고 클라이언트에 표준화된 응답 형태로 ‘변환’해 전달해요.
+
+   ```tsx
+   // app/api/users/[userId]/route.ts
+   export const GET = async (
+     req: Request,
+     { params }: { params: { userId: string } },
+   ) => {
+     try {
+       const user = await db.users.find(params.userId); // 💥 데이터베이스 연결 실패 에러 발생
+
+       if (!user) {
+         // [의도한 에러]
+         // 1. 변환: 클라이언트에는 표준화된 응답으로 변환하여 전달
+         return NextResponse.json(
+           { code: "NOT_FOUND", message: "사용자를 찾을 수 없습니다." },
+           { status: 404 },
+         );
+       }
+
+       return NextResponse.json(user);
+     } catch (error) {
+       // [의도하지 않은 에러 발생]
+       // 1. 처리(로깅): 민감 정보는 서버에서만 기록
+       console.error("Database Error:", error);
+       Sentry.captureException(error);
+
+       // 2. 변환: 클라이언트에는 안전한 신호로 변환하여 전달
+       return NextResponse.json(
+         {
+           code: "INTERNAL_SERVER_ERROR",
+           message: "서버에 문제가 발생했습니다.",
+         },
+         { status: 500 },
+       );
+     }
+   };
+   ```
+
+3. 에러 변환: 네트워크 경계(fetch)
+
+   네트워크 경계에서는 표준화된 응답을 의도한 에러, 즉 `DomainError`로 정규화 ‘변환’해요. 물론 의도하지 않은 에러, 발생하는 네트워크 에러도 정규화 ‘변환’해요.
+
+   ```tsx
+   // network-boundary.ts
+   export const networkBoundary = async (...) => {
+     try {
+       const response = await fetch(...);
+
+       if (!response.ok) {
+         const body = await response.json().catch(() => ({})); // JSON 파싱 실패 대비
+
+         // 3. 변환: HTTP 에러를 내부 표준 에러 객체로 변환하여 throw
+         throw makeError(body.code || 'UNKNOWN_NETWORK_ERROR', body, body.message);
+       }
+
+       return response.json();
+     } catch (error) {
+   	  // 이미 변환된 에러는 그대로 전달
+       if (isDomainError(error)) throw error;
+
+       // 4. 변환: fetch 자체가 실패한 경우(네트워크 단절 등)
+       throw makeError('NETWORK_ERROR', undefined, '네트워크 연결을 확인해주세요.', error);
+     }
+   }
+   ```
+
+4. 렌더링 경계
+   1. Tanstack Query 사용 시
+
+      `useUser`는 `networkBoundary`가 `throw`한 `DomainError`를 `onError` 콜백으로 받아 중앙 에러 처리기인 `handleError`에 넘겨져 ‘처리’돼요.
+
+      ```tsx
+      // hooks/use-user.ts
+      export const useUser = (userId: string) => {
+        return useQuery({
+          queryKey: ["user", userId],
+          queryFn: () => networkBoundary(`/api/users/${userId}`),
+          onError: (error) => {
+            // 4. 처리 (UX): 에러 처리를 중앙 처리기에 위임
+            handleError(error);
+            // handleError 내부에서는 'INTERNAL_SERVER_ERROR' 정책에 따라
+            // toast.error('서버에 문제가 발생했습니다.')가 호출됨
+          },
+        });
+      };
+      ```
+
+   2. `useEffect` 사용 시
+
+      `useEffect` 내에서 비동기 함수를 호출하고 `try … catch`로 에러를 직접 포착해 ‘처리’해요
+
+      ```tsx
+      // components/UserProfile.tsx
+      "use client";
+
+      export const UserProfile = ({ userId }) => {
+        const [user, setUser] = useState(null);
+
+        useEffect(() => {
+          const fetchUser = async () => {
+            try {
+              const userData = await networkBoundary(`/api/users/${userId}`);
+              setUser(userData);
+            } catch (error) {
+              // 4. 최종 처리(UX)
+              handleError(error);
+            }
+          };
+          fetchUser();
+        }, [userId, handleError]);
+
+        if (!user) return <div>로딩 중...</div>;
+        return <div>{user.name}</div>;
+      };
+      ```
+
+### 시나리오 2 - 인터렉션 중 유효성 검사 에러가 발생했을 때
+
+상황: 사용자가 로그인 폼을 제출했지만, 비밀번호가 너무 짧아 유효성 검사에 실패했어요.
+
+1. 에러 발생, 에러 변환: 서버 경계(Server Action)
+
+   `safeAction` 래퍼 함수가 `VALIDATION` 코드를 가진 `DomainError`를 `throw`해요. 이렇게 throw된 에러는 `safeAction` 내부에서 `{ ok: false, … }` 형태의 `Result` 객체로 ‘변환’되어 클라이언트에 반환돼요.
+
+   ```tsx
+   // app/actions/common.ts
+   'use server';
+
+   export const safeAction = async (...) => {
+   	const result = z.safeParse(...);
+
+   	if (!result.success) {
+   		throw makeError('VALIDATION', ...);
+   	}
+   }
+   ```
+
+   ```tsx
+   // app/actions/auth.ts
+   "use server";
+
+   const signInSchema = z.object({
+     email: z.string().email("올바른 이메일을 입력해주세요."),
+     password: z.string().min(8, "비밀번호는 8자 이상이어야 합니다."),
+   });
+
+   export const signIn = safeAction(signInSchema, async (data) => {
+     // Zod 유효성 검사는 safeAction 래퍼 내부에서 자동으로 처리되고
+     // 실패 시 'VALIDATION' 에러를 throw함.
+
+     const user = await db.users.findByEmail(data.email);
+
+     if (!user || !isPasswordValid(data.password, user.password)) {
+       // 1. 변환: 의도한 도메인 에러를 throw
+       throw makeError(
+         "AUTH_FAILURE",
+         undefined,
+         "이메일 또는 비밀번호가 일치하지 않습니다.",
+       );
+     }
+
+     // 로그인 성공 로직
+     return { success: true };
+   });
+   ```
+
+2. 에러 처리: 인터렉션 경계(Event Handler)
+
+   `onSubmit` 함수는 `signIn` 액션으로부터 실패 `Result` 객체를 전달받아요. 이 객체는 중앙 에러 처리기 `handleError`로 전달되어 최종적으로 ‘처리’돼요. 이 때, 일반적인 토스트 메시지 대신 폼 필드에 직접 에러를 표시하기 위해 `uxMode` 옵션을 커스텀해요.
+
+   ```tsx
+   // components/SignInForm.tsx
+   "use client";
+
+   export function SignInForm() {
+     const form = useForm();
+
+     const onSubmit = form.handleSubmit(async (data) => {
+       const result = await signIn(data); // { ok: false, code: 'VALIDATION', ... } 반환
+
+       if (!result.ok) {
+         // 2. 처리 (UX): 중앙 처리기를 사용하되, 특수한 폼 에러 처리를 위해 uxMode를 오버라이드
+         handleError(result, {
+           uxMode: (error) => {
+             // Zod 유효성 검사 실패 시, react-hook-form의 setError를 사용해 필드별 에러 표시
+             if (
+               isDomainError(error, "VALIDATION") &&
+               error.details?.fieldErrors
+             ) {
+               for (const [field, messages] of Object.entries(
+                 error.details.fieldErrors,
+               )) {
+                 form.setError(field as any, { message: messages[0] });
+               }
+             } else {
+               // 그 외의 의도한 에러(예: AUTH_FAILURE)는 기본 토스트 메시지로 처리
+               toast.error(error.message);
+             }
+           },
+           // 이 에러는 로깅할 필요가 없으므로 logLevel을 'none'으로 설정
+           logLevel: "none",
+         });
+       }
+     });
+
+     return <form onSubmit={onSubmit}>{/* ... */}</form>;
+   }
+   ```
+
+### 시나리오 3 - 렌더링 중 예기치 못한 데이터 에러가 발생했을 때
+
+상황: 사용자 프로필을 렌더하는 컴포넌트가 API로부터 예상과 다른 구조의 데이터를 받아 에러가 발생해요.
+
+1. 에러 발생: 컴포넌트 렌더링
+
+   `user.profile`이 `undefined`인 상태에서 `user.profile.avatarUrl`에 접근하면 `TypeError`가 `throw`돼요.
+
+   ```tsx
+   // components/UserProfile.tsx
+   export const UserProfile = ({ userId }: { userId: string }) => {
+     const { data: user, isLoading, error } = useUser(userId);
+
+     // ...
+
+     return (
+       <div>
+         <h1>{user.name}</h1>
+         {/* 1. 발생: user.profile이 undefined이므로 TypeError 발생! */}
+         <img src={user.profile.avatarUrl} alt={user.name} />
+       </div>
+     );
+   };
+   ```
+
+2. 에러 처리: 렌더링 경계(Error Boundary)
+
+   하위 컴포넌트 렌더링 중 `throw`된 에러는 React 컴포넌트 트리를 따라 가장 가까운 렌더링 경계(Error Boundary)에 의해 포착돼요. 이 예기치 못한 에러를 받아 렌더링 경계가 ‘처리’해요.
+
+   ```tsx
+   // app/users/[userId]/page.tsx
+   import { ErrorBoundary } from 'react-error-boundary';
+
+   export const UserProfilePage = () => {
+   	// ...
+   	return (
+   		<UserProfilePageErrorBoundary
+   			FallbackComponent={UserProfileErrorFallback}
+         onReset={...}
+       >
+   			<UserProfile userId={userId} />
+   		</UserProfilePageErrorBoundary>
+   	);
+   };
+   ```
+
+### 시나리오 4 - 서버 사이드 렌더링 중 예기치 못한 에러가 발생했을 때
+
+상황: 서버 컴포넌트가 페이지를 렌더링하기 위해 데이터를 fetch하는 중, 예기치 못한 에러가 발생해요.
+
+1. 에러 발생, 에러 변환: 네트워크 경계
+
+   서버 컴포넌트 내부에서 호출된 데이터 `fetch` 로직이 네트워크 경계에서 네트워크 에러가 발생하고, 이를 `DomainError`로 변환하여 다시 `throw`해요.
+
+   ```tsx
+   // network-boundary.ts
+   export const networkBoundary = async (...) => {
+     try {
+       // ...
+     } catch (error) {
+       // if (isDomainError(error)) throw error;
+
+       // 1. 발생: fetch 자체가 실패한 경우(네트워크 단절 등)
+       // 2. 변환: makeError 함수를 통해 NetworkError를 DomainError로 변환
+       throw makeError('NETWORK_ERROR', undefined, '네트워크 연결을 확인해주세요.', error);
+     }
+   }
+   ```
+
+   ```tsx
+   // app/users/page.tsx - 서버 컴포넌트
+   export const UsersPage = async () => {
+     // 1-1, 2-1. 에러 발생 및 변환
+     const users = await networkBoundary("/api/users");
+
+     // 에러가 throw되어 이 아래 코드는 실행되지 않음
+     return <UserTable users={users} />;
+   };
+   ```
+
+2. 에러 처리: 렌더링 경계(`error.tsx`)
+
+   서버 컴포넌트 렌더링 중에 `throw`된 `DomainError`는 Next.js의 `error.tsx`에 의해 포착되고, 최종적으로 ‘처리’돼요. 이 또한 여전히 중앙 에러 처리기인 `handleError`에 의해 ‘처리’돼요.
+
+   ```tsx
+   // app/users/error.tsx
+   "use client";
+
+   import { useEffect } from "react";
+   import { handleError } from "@/services/error-handler";
+
+   const UsersPageErrorBoundary = ({
+     error,
+     reset,
+   }: {
+     error: Error & { digest?: string };
+     reset: () => void;
+   }) => {
+     useEffect(() => {
+       // 3. 포착: RSC에서 발생한 에러는 여기서 포착하여 로깅해요. 서버에서 throw된 DomainError가 이 error prop으로 전달돼요.
+       // 4. 처리(로깅)
+       handleError(error, {
+         uxMode: "none", // UX는 아래 JSX에서 직접 처리하므로 'none'으로 설정
+       });
+     }, [error]);
+
+     return (
+       // 5. 처리(UX)
+       <div>
+         <h2>사용자 목록을 불러올 수 없습니다.</h2>
+         <p>
+           데이터를 가져오는 중 문제가 발생했습니다. 네트워크 연결을 확인하고
+           다시 시도해주세요.
+         </p>
+         <button onClick={() => reset()}>다시 시도</button>
+       </div>
+     );
+   };
+
+   export default UsersPageErrorBoundary;
+   ```
+
+## 4. 결론: **모든 길은 handleError로, 모든 책임은 경계로**
+
+지금까지 우리는 복잡한 에러의 종류를 분류하고, 애플리케이션에 5개의 명확한 경계를 세웠습니다. 그리고 각 경계에 ‘변환’과 ‘처리’라는 구체적인 책임을 부여하여 에러가 어디서 발생하든 예측 가능하고 일관된 방식으로 다룰 수 있는 시스템의 청사진을 그렸습니다.
+
+- 서버 경계, 네트워크 경계는 외부 세계의 문제를 내부에서 사용할 단일 에러 모델(`DomainError`)로 변환하는 책임을 가져요.
+- 인터렉션 경계, 렌더링 경계, 브라우저 경계는 변환된 에러를 받아 중앙 에러 처리기(`handleError`)를 통해 처리하는 책임을 가져요.
+
+이러한 에러 아키텍처의 핵심은 ‘에러가 발생하는 곳’과 ‘에러를 어떻게 처리할 지에 대한 정책’을 완벽히 분리했다는 점에 있어요.
+
+이제 현실에 적용하기 위해 다음 아티클에서는 이 모든 에러를 담을 단일 그릇인 `DomainError` 객체와 중앙 에러 처리기 `handleError`를 실제로 구현해볼게요.
+
+## 참고자료
+
+- https://www.rfc-editor.org/rfc/rfc9457.html#name-the-problem-details-json-ob
+- https://nextjs.org/docs/app/getting-started/error-handling
+- https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary
+- https://legacy.reactjs.org/docs/error-boundaries.html
+- https://tech.kakaoent.com/front-end/2022/221110-error-boundary/#react-16%EC%97%90%EC%84%9C-%EB%8F%84%EC%9E%85%EB%90%9C-error-boundary%EB%A1%9C-%EC%97%90%EB%9F%AC-%EC%B2%98%EB%A6%AC%ED%95%98%EA%B8%B0

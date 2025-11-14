@@ -1,0 +1,50 @@
+---
+title: PDF 다운로드 기능 제작(with html2canvas, html-to-image)
+description: html2canvas, html-to-image와 jsPDF를 활용해 PDF 다운로드 기능을 만들어보자
+createdAt: 2023-01-11
+category: React
+tags:
+  - React
+  - TypeScript
+  - html2canvas
+  - html-to-image
+  - jsPDF
+  - PDF Download
+  - Feature
+---
+
+## `html2canvas`와 `jsPDF` 라이브러리를 활용해 PDF 다운로드 기능 추가
+
+```tsx
+const pdf = new jsPDF();
+const imgProperties = pdf.getImageProperties(imageUrl);
+const pdfWidth = pdf.internal.pageSize.getWidth();
+const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
+
+pdf.addImage(imageUrl, "JPG", 0, 0, pdfWidth, pdfHeight);
+pdf.save(`Certificate(${nickname}).pdf`);
+```
+
+## `html-to-image`와 `jsPDF` 라이브러리를 활용해 PDF 다운로드 기능 추가
+
+```tsx
+toJpeg(imageRef.current as HTMLElement, { backgroundColor: "#F3F3F3" })
+  .then((dataUrl) => {
+    const pdf = new jsPDF();
+    const imgProperties = pdf.getImageProperties(dataUrl);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
+
+    pdf.addImage(dataUrl, "JPG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`Certificate(${nickname}).pdf`);
+    setIsLoading(false);
+    saveDownloadLog({
+      data,
+      mode: mode as Mode,
+      userAgent: navigator.userAgent,
+    });
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+```
