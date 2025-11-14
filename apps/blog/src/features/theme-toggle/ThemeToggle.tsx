@@ -3,11 +3,22 @@
 import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 import { Button } from "@hyoungmin/ui";
 import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 const ThemeToggle = () => {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
+  // 서버와 클라이언트 모두에서 동일한 초기값 사용 (hydration 일치)
+  const [isDark, setIsDark] = useState(false);
 
-  const isDark = theme === "dark";
+  // 클라이언트에서만 resolvedTheme에 따라 상태 업데이트
+  useEffect(() => {
+    setIsDark(resolvedTheme === "dark");
+  }, [resolvedTheme]);
+
+  const handleToggle = () => {
+    const currentTheme = resolvedTheme || "light";
+    setTheme(currentTheme === "dark" ? "light" : "dark");
+  };
 
   return (
     <Button
@@ -15,7 +26,7 @@ const ThemeToggle = () => {
       variant="ghost"
       size="icon"
       aria-label="Toggle theme"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
+      onClick={handleToggle}
       className="text-gray-700 dark:text-gray-300"
     >
       {isDark ? (
