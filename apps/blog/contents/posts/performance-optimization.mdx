@@ -1,9 +1,26 @@
 ---
-title: "FCP 85% 개선, 데이터 스케일링이 초래한 렌더링 병목 해결하기"
-date:
-summary: ""
-tags: []
-draft: false
+title: FCP 85% 개선, 데이터 스케일링이 초래한 렌더링 병목 해결하기
+description: FCP 85%, DCL 89.5% 개선하기
+createdAt: 2025-11-11
+category: Next.js
+tags:
+  - Next.js
+  - Web Vitals
+  - FCP
+  - LCP
+  - DCL
+  - Server Timing
+  - Optimization
+  - Rendering Optimization
+  - Performance Optimization
+  - Performance
+  - 웹 바이탈 개선
+  - 웹 퍼포먼스 개선
+  - 렌더링 최적화
+  - 퍼포먼스 최적화
+  - 성능 최적화
+  - 웹 성능 최적화
+  - 웹 성능 개선
 ---
 
 CPR cloud 리뉴얼 업데이트 이후 데이터가 쌓이면서 전체 데이터를 확인할 수 있는 어드민 계정에게 치명적인 성능 저하가 발생했어요. 특히 대시보드 페이지에서는 약 10개의 차트를 그리기 위한 데이터를 쿼리해야 했기 때문에 페이지 로드가 최대 20초 가량 걸리는 상황이 발생했어요. 이는 단순한 버그가 아니라, 데이터 스케일이 커짐에 따라 아키텍처가 한계에 다다랐다는 신호였어요.
