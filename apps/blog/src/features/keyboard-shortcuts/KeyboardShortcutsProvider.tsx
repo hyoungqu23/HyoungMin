@@ -1,12 +1,13 @@
-'use client';
+"use client";
 
-import { PropsWithChildren } from 'react';
-import useKeyboardShortcuts from './useKeyboardShortcuts';
+import type { PropsWithChildren } from "react";
+
+import useKeyboardShortcuts from "./useKeyboardShortcuts";
 
 const KeyboardShortcutsProvider = ({ children }: PropsWithChildren) => {
   useKeyboardShortcuts();
+
   return <>{children}</>;
 };
 
 export default KeyboardShortcutsProvider;
-
