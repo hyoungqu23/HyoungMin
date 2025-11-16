@@ -1,7 +1,6 @@
 "use client";
 
-import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
-import { Button } from "@hyoungmin/ui";
+import { Button, ListBulletIcon, Squares2X2Icon } from "@hyoungmin/ui";
 
 export type LayoutType = "list" | "card";
 

@@ -1,6 +1,7 @@
 "use client";
 import type { ComponentProps } from "react";
 import { useRef, useState } from "react";
+import { Check, Copy } from "./icons";
 
 export const CodeBlock = (props: ComponentProps<"pre">) => {
   const preRef = useRef<HTMLPreElement>(null);
@@ -23,11 +24,11 @@ export const CodeBlock = (props: ComponentProps<"pre">) => {
         type="button"
         aria-label={copied ? "Copied" : "Copy code"}
         onClick={handleCopy}
-        className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition rounded px-2 py-1 text-lg bg-black/70 text-white hover:bg-black/80"
+        className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity rounded p-2 bg-black/70 text-white hover:bg-black/80"
       >
-        {copied ? "✅" : "📋"}
+        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
       </button>
-      <pre ref={preRef} {...props} />
+      <pre ref={preRef} className="p-4 rounded-xl box-shadow-lg" {...props} />
     </div>
   );
 };

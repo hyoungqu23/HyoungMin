@@ -1,7 +1,6 @@
 "use client";
 
-import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
-import { Button } from "@hyoungmin/ui";
+import { Button, Sun, Moon } from "@hyoungmin/ui";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
@@ -29,11 +28,7 @@ const ThemeToggle = () => {
       onClick={handleToggle}
       className="text-primary-800"
     >
-      {isDark ? (
-        <SunIcon className="h-6 w-6" />
-      ) : (
-        <MoonIcon className="h-6 w-6" />
-      )}
+      {isDark ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
     </Button>
   );
 };
