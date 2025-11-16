@@ -82,11 +82,11 @@ const ShareButton = ({ url, title, description }: ShareButtonProps) => {
         size="icon"
         aria-label={copied ? "Link copied" : "Copy link"}
         onClick={handleCopyLink}
-        className="text-gray-700 dark:text-gray-300"
+        className="text-primary-800"
         title={copied ? "Copied!" : "Copy link"}
       >
         {copied ? (
-          <CheckIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
+          <CheckIcon className="h-6 w-6 text-primary-500" />
         ) : (
           <LinkIcon className="h-6 w-6" />
         )}
@@ -99,7 +99,7 @@ const ShareButton = ({ url, title, description }: ShareButtonProps) => {
         size="icon"
         aria-label="Share on LinkedIn"
         onClick={() => shareToSocial("linkedin")}
-        className="text-gray-700 dark:text-gray-300"
+        className="text-primary-800"
         title="Share on LinkedIn"
       >
         <svg
@@ -119,7 +119,7 @@ const ShareButton = ({ url, title, description }: ShareButtonProps) => {
         size="icon"
         aria-label="Share on Twitter / X"
         onClick={() => shareToSocial("twitter")}
-        className="text-gray-700 dark:text-gray-300"
+        className="text-primary-800"
         title="Share on Twitter / X"
       >
         <svg
@@ -139,7 +139,7 @@ const ShareButton = ({ url, title, description }: ShareButtonProps) => {
         size="icon"
         aria-label="Share on Facebook"
         onClick={() => shareToSocial("facebook")}
-        className="text-gray-700 dark:text-gray-300"
+        className="text-primary-800"
         title="Share on Facebook"
       >
         <svg

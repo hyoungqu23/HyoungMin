@@ -1,0 +1,26 @@
+{
+  "name": "@hyoungmin/design-system",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./tailwind.config.ts",
+  "types": "./tailwind.config.d.ts",
+  "exports": {
+    ".": {
+      "types": "./tailwind.config.d.ts",
+      "default": "./tailwind.config.ts"
+    },
+    "./tailwind": {
+      "types": "./tailwind.config.d.ts",
+      "default": "./tailwind.config.ts"
+    },
+    "./tokens": "./src/tokens.css"
+  },
+  "files": [
+    "tailwind.config.ts",
+    "tailwind.config.d.ts",
+    "src"
+  ],
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

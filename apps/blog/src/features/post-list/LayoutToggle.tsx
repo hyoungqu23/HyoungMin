@@ -12,7 +12,7 @@ interface LayoutToggleProps {
 
 export const LayoutToggle = ({ layout, onLayoutChange }: LayoutToggleProps) => {
   return (
-    <div className="flex items-center gap-2 border border-gray-200 dark:border-gray-800 rounded-md p-1">
+    <div className="flex items-center gap-2 border border-primary-200 rounded-md p-1">
       <Button
         type="button"
         variant={layout === "list" ? "default" : "ghost"}

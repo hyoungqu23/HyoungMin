@@ -27,7 +27,7 @@ const ThemeToggle = () => {
       size="icon"
       aria-label="Toggle theme"
       onClick={handleToggle}
-      className="text-gray-700 dark:text-gray-300"
+      className="text-primary-800"
     >
       {isDark ? (
         <SunIcon className="h-6 w-6" />

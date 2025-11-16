@@ -168,10 +168,8 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
                   />
                 </div>
               </div>
-              <p className="text-lg text-gray-600 dark:text-gray-400">
-                {meta.description}
-              </p>
-              <div className="flex flex-wrap items-center gap-4 my-4 text-sm text-gray-500 dark:text-gray-500">
+              <p className="text-lg text-primary-700">{meta.description}</p>
+              <div className="flex flex-wrap items-center gap-4 my-4 text-sm text-primary-600">
                 <time>
                   {meta.createdAt.toLocaleDateString("ko-KR", {
                     year: "numeric",
@@ -188,7 +186,7 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
                       {meta.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 rounded"
+                          className="px-2 py-1 text-xs bg-primary-100 rounded"
                         >
                           {tag}
                         </span>
@@ -204,7 +202,7 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
 
         {/* 관련 포스트 섹션 */}
         {relatedPosts.length > 0 && (
-          <section className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">
+          <section className="mt-16 pt-8 border-t border-primary-200">
             <h2 className="text-2xl font-bold mb-6">
               😎 &nbsp; 다른 글도 읽어보세요!
             </h2>
@@ -213,16 +211,16 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
                 <Link
                   key={relatedPost.slug}
                   href={`/${relatedPost.slug}`}
-                  className="group block p-6 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
+                  className="group block p-6 rounded-lg border border-primary-200 hover:border-primary-300 transition-colors"
                 >
-                  <h3 className="text-lg font-semibold mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  <h3 className="text-lg font-semibold mb-2 group-hover:text-secondary-400 transition-colors">
                     {relatedPost.meta.title}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                  <p className="text-sm text-primary-700 line-clamp-2 mb-3">
                     {relatedPost.meta.description}
                   </p>
                   <div className="flex items-center justify-between">
-                    <time className="text-xs text-gray-500 dark:text-gray-500">
+                    <time className="text-xs text-primary-600">
                       {relatedPost.meta.createdAt.toLocaleDateString("ko-KR", {
                         year: "numeric",
                         month: "long",
@@ -234,7 +232,7 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
                         {relatedPost.meta.tags.slice(0, 2).map((tag) => (
                           <span
                             key={tag}
-                            className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-800 rounded"
+                            className="px-2 py-0.5 text-xs bg-primary-100 rounded"
                           >
                             {tag}
                           </span>

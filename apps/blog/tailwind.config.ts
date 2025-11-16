@@ -1,3 +1,4 @@
+import { designSystemConfig } from "@hyoungmin/design-system";
 import typography from "@tailwindcss/typography";
 import type { Config } from "tailwindcss";
 
@@ -9,4 +10,11 @@ export default {
     "../../packages/ui/src/**/*.{ts,tsx}",
   ],
   plugins: [typography],
+  theme: {
+    extend: {
+      colors: {
+        ...designSystemConfig.theme?.extend?.colors,
+      },
+    },
+  },
 } satisfies Config;

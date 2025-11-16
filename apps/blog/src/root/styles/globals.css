@@ -86,7 +86,7 @@ code[data-highlighted-chars] {
 }
 
 .prose thead {
-  @apply border-b border-gray-300 dark:border-gray-700;
+  @apply border-b border-primary-300;
 }
 
 .prose th {
@@ -94,14 +94,94 @@ code[data-highlighted-chars] {
 }
 
 .prose td {
-  @apply px-4 py-2 border-b border-gray-200 dark:border-gray-800;
+  @apply px-4 py-2 border-b border-primary-200;
 }
 
 .prose tbody tr:hover {
-  @apply bg-gray-50 dark:bg-gray-900/50;
+  @apply bg-primary-50;
+}
+
+@layer base {
+  :root {
+    /* Primary Color Palette - Light Mode (Prestige Green) */
+    --primary-50: #f0fdf4;
+    --primary-100: #dcfce7;
+    --primary-200: #bbf7d0;
+    --primary-300: #86efac;
+    --primary-400: #4ade80;
+    --primary-500: #22c55e;
+    --primary-600: #16a34a;
+    --primary-700: #15803d;
+    --primary-800: #166534;
+    --primary-900: #052e16;
+
+    /* Secondary Color Palette - Light Mode (Impact Gold) */
+    --secondary-50: #fefce8;
+    --secondary-100: #fef9c3;
+    --secondary-200: #fef08a;
+    --secondary-300: #fde047;
+    --secondary-400: #facc15;
+    --secondary-500: #eab308;
+    --secondary-600: #ca8a04;
+    --secondary-700: #a16207;
+    --secondary-800: #854d0e;
+    --secondary-900: #713f12;
+  }
+
+  .dark {
+    /* Primary Color Palette - Dark Mode (Prestige Green) */
+    /* 다크 모드: 배경은 어두운 그린, 텍스트는 밝은 그린 */
+    --primary-50: #052e16;  /* 가장 어두운 배경 */
+    --primary-100: #dcfce7; /* 본문 텍스트용 밝은 그린 */
+    --primary-200: #bbf7d0;
+    --primary-300: #86efac;  /* 소제목, 강조용 */
+    --primary-400: #4ade80;
+    --primary-500: #22c55e;
+    --primary-600: #16a34a;
+    --primary-700: #15803d;
+    --primary-800: #166534; /* 다크 모드 배경 대안 */
+    --primary-900: #052e16; /* 다크 모드 배경 (가장 어두운 그린) */
+
+    /* Secondary Color Palette - Dark Mode (Impact Gold) */
+    /* 다크 모드: 타이틀과 강조는 밝은 골드 */
+    --secondary-50: #713f12;
+    --secondary-100: #854d0e;
+    --secondary-200: #a16207;
+    --secondary-300: #ca8a04;
+    --secondary-400: #facc15; /* 핵심 타이틀, 이름용 (가장 밝은 골드) */
+    --secondary-500: #eab308;  /* 링크 호버 효과용 */
+    --secondary-600: #ca8a04;
+    --secondary-700: #a16207;
+    --secondary-800: #854d0e;
+    --secondary-900: #713f12;
+  }
 }
 
 @theme {
+  /* Primary Color Palette - Tailwind에서 CSS 변수 참조 */
+  --color-primary-50: var(--primary-50);
+  --color-primary-100: var(--primary-100);
+  --color-primary-200: var(--primary-200);
+  --color-primary-300: var(--primary-300);
+  --color-primary-400: var(--primary-400);
+  --color-primary-500: var(--primary-500);
+  --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
+  --color-primary-800: var(--primary-800);
+  --color-primary-900: var(--primary-900);
+
+  /* Secondary Color Palette - Tailwind에서 CSS 변수 참조 */
+  --color-secondary-50: var(--secondary-50);
+  --color-secondary-100: var(--secondary-100);
+  --color-secondary-200: var(--secondary-200);
+  --color-secondary-300: var(--secondary-300);
+  --color-secondary-400: var(--secondary-400);
+  --color-secondary-500: var(--secondary-500);
+  --color-secondary-600: var(--secondary-600);
+  --color-secondary-700: var(--secondary-700);
+  --color-secondary-800: var(--secondary-800);
+  --color-secondary-900: var(--secondary-900);
+
   /* Footer infinite scroll animation */
   --animate-infinite-carousel: infinite-carousel 60s linear infinite;
   @keyframes infinite-carousel {
@@ -112,4 +192,16 @@ code[data-highlighted-chars] {
       left: -100%;
     }
   }
+}
+
+/* 다크 모드 기본 색상 설정 */
+.dark body {
+  background-color: var(--primary-900);
+  color: var(--primary-100);
+}
+
+/* 라이트 모드 기본 색상 설정 */
+body {
+  background-color: #ffffff;
+  color: var(--primary-800);
 }

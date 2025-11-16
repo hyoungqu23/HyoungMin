@@ -31,9 +31,9 @@ export const PostCard = ({ slug, meta, firstImage }: PostCardProps) => {
   return (
     <Link
       href={`/${slug}`}
-      className="group block h-full rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden hover:border-gray-300 dark:hover:border-gray-700 transition-colors bg-white dark:bg-gray-900"
+      className="group block h-full rounded-lg border border-primary-200 overflow-hidden hover:border-primary-300 transition-colors bg-white"
     >
-      <div className="relative w-full h-48 overflow-hidden bg-gray-100 dark:bg-gray-800">
+      <div className="relative w-full h-48 overflow-hidden bg-primary-100">
         {thumbnailImage ? (
           <Image
             src={thumbnailImage}
@@ -47,13 +47,13 @@ export const PostCard = ({ slug, meta, firstImage }: PostCardProps) => {
         )}
       </div>
       <div className="p-6">
-        <h2 className="text-xl font-semibold mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+        <h2 className="text-xl font-semibold mb-2 line-clamp-2 group-hover:text-secondary-400 transition-colors">
           {meta.title}
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-4">
+        <p className="text-primary-700 text-sm line-clamp-2 mb-4">
           {meta.description}
         </p>
-        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500">
+        <div className="flex items-center justify-between text-xs text-primary-600">
           <time>
             {meta.createdAt.toLocaleDateString("ko-KR", {
               year: "numeric",
@@ -64,10 +64,7 @@ export const PostCard = ({ slug, meta, firstImage }: PostCardProps) => {
           {meta.tags.length > 0 && (
             <div className="flex gap-1">
               {meta.tags.slice(0, 2).map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded"
-                >
+                <span key={tag} className="px-2 py-0.5 bg-primary-100 rounded">
                   {tag}
                 </span>
               ))}

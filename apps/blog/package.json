@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@hyoungmin/design-system": "workspace:*",
     "@hyoungmin/schema": "workspace:*",
     "@hyoungmin/ui": "workspace:*",
     "@next/third-parties": "^16.0.3",

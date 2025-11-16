@@ -1,0 +1,9 @@
+{
+  "extends": "@hyoungmin/typescript-config/base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./"
+  },
+  "include": ["tailwind.config.ts", "src/**/*"]
+}
+

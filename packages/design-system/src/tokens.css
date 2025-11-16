@@ -1,0 +1,38 @@
+/**
+ * 디자인 시스템 색상 토큰 구조 정의
+ * 
+ * 이 파일은 CSS 변수의 구조만 정의합니다.
+ * 실제 색상 값은 각 앱의 globals.css에서 정의해야 합니다.
+ * 
+ * 사용 방법:
+ * 1. 각 앱의 globals.css에서 이 파일을 import
+ * 2. :root와 .dark에서 실제 색상 값 정의
+ * 
+ * 예시 (apps/blog/src/root/styles/globals.css):
+ * 
+ * @import '@hyoungmin/design-system/tokens';
+ * 
+ * @layer base {
+ *   :root {
+ *     --primary-50: #f0fdf4;
+ *     --primary-100: #dcfce7;
+ *     ...
+ *   }
+ *   .dark {
+ *     --primary-50: #052e16;
+ *     ...
+ *   }
+ * }
+ */
+
+@layer base {
+  /* 
+   * CSS 변수는 각 앱에서 정의해야 합니다.
+   * 여기서는 구조만 문서화합니다.
+   * 
+   * 필수 CSS 변수:
+   * - --primary-50 ~ --primary-900
+   * - --secondary-50 ~ --secondary-900
+   */
+}
+

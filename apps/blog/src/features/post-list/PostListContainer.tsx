@@ -82,7 +82,7 @@ export const PostListContainer = ({
           ref={observerTarget}
           className="h-20 flex items-center justify-center"
         >
-          <div className="text-sm text-gray-500 dark:text-gray-500">
+          <div className="text-sm text-primary-600">
             더 많은 포스트를 불러오는 중...
           </div>
         </div>
@@ -90,7 +90,7 @@ export const PostListContainer = ({
 
       {/* 모든 포스트 로드 완료 */}
       {!hasMore && initialPosts.length > 0 && (
-        <div className="text-center text-sm text-gray-500 dark:text-gray-500 py-8">
+        <div className="text-center text-sm text-primary-600 py-8">
           모든 포스트를 불러왔습니다.
         </div>
       )}

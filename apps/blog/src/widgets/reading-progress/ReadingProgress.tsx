@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 const ReadingProgress = () => {
   const [progress, setProgress] = useState(0);
@@ -16,7 +16,8 @@ const ReadingProgress = () => {
       const scrolled = scrollTop;
 
       // 진행률 계산 (0-100)
-      const percentage = scrollableHeight > 0 ? (scrolled / scrollableHeight) * 100 : 0;
+      const percentage =
+        scrollableHeight > 0 ? (scrolled / scrollableHeight) * 100 : 0;
       setProgress(Math.min(100, Math.max(0, percentage)));
     };
 
@@ -35,26 +36,26 @@ const ReadingProgress = () => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', updateProgress, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", updateProgress, { passive: true });
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', updateProgress);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", updateProgress);
     };
   }, []);
 
   return (
     <div
-      className='fixed top-16 left-0 right-0 z-50 h-1 bg-gray-200 dark:bg-gray-800'
-      role='progressbar'
-      aria-label='Reading progress'
+      className="fixed top-16 left-0 right-0 z-50 h-1 bg-primary-200"
+      role="progressbar"
+      aria-label="Reading progress"
       aria-valuenow={Math.round(progress)}
       aria-valuemin={0}
       aria-valuemax={100}
     >
       <div
-        className='h-full bg-blue-600 dark:bg-blue-500 transition-all duration-150 ease-out'
+        className="h-full bg-secondary-400 transition-all duration-150 ease-out"
         style={{ width: `${progress}%` }}
       />
     </div>
@@ -62,4 +63,3 @@ const ReadingProgress = () => {
 };
 
 export default ReadingProgress;
-

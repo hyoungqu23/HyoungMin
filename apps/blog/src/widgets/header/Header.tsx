@@ -4,11 +4,11 @@ import ThemeToggle from "@/features/theme-toggle/ThemeToggle";
 
 const Header = () => {
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+    <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-white border-b border-primary-200 backdrop-blur-sm bg-opacity-95">
       {/* Skip link - 접근성 필수 */}
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-secondary-400 focus:text-primary-900 focus:rounded focus:outline-none focus:ring-2 focus:ring-secondary-400 focus:ring-offset-2"
       >
         Skip to main content
       </a>
@@ -17,7 +17,7 @@ const Header = () => {
         {/* 로고/사이트명 */}
         <Link
           href="/"
-          className="text-xl font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          className="text-xl font-bold text-primary-900 hover:text-secondary-400 transition-colors"
         >
           Blog
         </Link>
