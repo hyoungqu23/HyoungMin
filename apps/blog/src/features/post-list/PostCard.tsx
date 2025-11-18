@@ -31,7 +31,7 @@ export const PostCard = ({ slug, meta, firstImage }: PostCardProps) => {
   return (
     <Link
       href={`/${slug}`}
-      className="group block h-full rounded-lg border border-primary-200 overflow-hidden hover:border-primary-300 transition-colors bg-white"
+      className="group block h-full rounded-lg border border-primary-200 overflow-hidden hover:border-primary-300 transition-colors bg-primary-50"
     >
       <div className="relative w-full h-48 overflow-hidden bg-primary-100">
         {thumbnailImage ? (

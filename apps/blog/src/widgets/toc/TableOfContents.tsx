@@ -1,5 +1,6 @@
-import type { TocItem } from "@/shared/lib/rehype-extract-headings";
 import Link from "next/link";
+
+import type { TocItem } from "@/shared/lib/rehype-extract-headings";
 
 type TableOfContentsProps = {
   headings: TocItem[];
@@ -14,9 +15,9 @@ const TableOfContents = ({ headings }: TableOfContentsProps) => {
   return (
     <nav
       aria-label="Table of contents"
-      className="hidden lg:block lg:w-64 lg:shrink-0"
+      className="hidden lg:block lg:w-64 lg:shrink-0 sticky top-20"
     >
-      <div className="sticky top-20 space-y-2">
+      <div className="space-y-2">
         <h2 className="text-sm font-semibold text-primary-900 mb-4">목차</h2>
         <ul className="space-y-1 text-sm">
           {headings.map((heading) => {

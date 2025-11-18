@@ -177,22 +177,19 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
                     day: "numeric",
                   })}
                 </time>
-                <span>·</span>
+                <span>|</span>
                 <span>{readingTime}분 읽기</span>
                 {meta.tags.length > 0 && (
-                  <>
-                    <span>·</span>
-                    <div className="flex flex-wrap gap-2">
-                      {meta.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-1 text-xs bg-primary-100 rounded"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </>
+                  <div className="flex flex-wrap gap-2">
+                    {meta.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-1 text-xs bg-primary-100 rounded"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
               {content}

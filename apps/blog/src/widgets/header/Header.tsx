@@ -4,7 +4,7 @@ import ThemeToggle from "@/features/theme-toggle/ThemeToggle";
 
 const Header = () => {
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-white border-b border-primary-200 backdrop-blur-sm bg-opacity-95">
+    <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-primary-500 border-b border-primary-200 backdrop-blur-sm bg-opacity-95">
       {/* Skip link - 접근성 필수 */}
       <a
         href="#main"
