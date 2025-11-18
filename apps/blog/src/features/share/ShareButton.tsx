@@ -1,22 +1,19 @@
 "use client";
 
-import {
-  Button,
-  Check,
-  LinkIcon,
-  Linkedin,
-  Twitter,
-  Facebook,
-} from "@hyoungmin/ui";
+import { Button, Check, Link } from "@hyoungmin/ui";
 import { useMemo, useState } from "react";
 
 type ShareButtonProps = {
   url?: string;
-  title?: string;
-  description?: string;
+  // title?: string;
+  // description?: string;
 };
 
-const ShareButton = ({ url, title, description }: ShareButtonProps) => {
+const ShareButton = ({
+  url,
+  //  title,
+  //   description
+}: ShareButtonProps) => {
   const [copied, setCopied] = useState(false);
 
   // url prop이 있으면 서버에서도 사용 가능, 없으면 클라이언트에서만 계산
@@ -28,9 +25,9 @@ const ShareButton = ({ url, title, description }: ShareButtonProps) => {
     return window.location.href;
   }, [url]);
 
-  const shareTitle =
-    title || (typeof document !== "undefined" ? document.title : "");
-  const shareText = description || shareTitle;
+  // const shareTitle =
+  //   title || (typeof document !== "undefined" ? document.title : "");
+  // const shareText = description || shareTitle;
 
   const handleCopyLink = async () => {
     try {
@@ -53,27 +50,27 @@ const ShareButton = ({ url, title, description }: ShareButtonProps) => {
     }
   };
 
-  const shareToSocial = (platform: string) => {
-    if (!currentUrl || typeof window === "undefined") return;
+  // const shareToSocial = (platform: string) => {
+  //   if (!currentUrl || typeof window === "undefined") return;
 
-    let shareUrl = "";
+  //   let shareUrl = "";
 
-    switch (platform) {
-      case "twitter":
-        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(shareText)}`;
-        break;
-      case "facebook":
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
-        break;
-      case "linkedin":
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`;
-        break;
-      default:
-        return;
-    }
+  //   switch (platform) {
+  //     case "twitter":
+  //       shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(shareText)}`;
+  //       break;
+  //     case "facebook":
+  //       shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
+  //       break;
+  //     case "linkedin":
+  //       shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`;
+  //       break;
+  //     default:
+  //       return;
+  //   }
 
-    window.open(shareUrl, "_blank", "width=600,height=400,noopener,noreferrer");
-  };
+  //   window.open(shareUrl, "_blank", "width=600,height=400,noopener,noreferrer");
+  // };
 
   if (!currentUrl) {
     return null;
@@ -94,12 +91,12 @@ const ShareButton = ({ url, title, description }: ShareButtonProps) => {
         {copied ? (
           <Check className="h-6 w-6 text-primary-500" />
         ) : (
-          <LinkIcon className="h-6 w-6" />
+          <Link className="h-6 w-6" />
         )}
       </Button>
 
       {/* LinkedIn 공유 버튼 */}
-      <Button
+      {/* <Button
         type="button"
         variant="ghost"
         size="icon"
@@ -109,10 +106,10 @@ const ShareButton = ({ url, title, description }: ShareButtonProps) => {
         title="Share on LinkedIn"
       >
         <Linkedin className="h-6 w-6" />
-      </Button>
+      </Button> */}
 
       {/* Twitter/X 공유 버튼 */}
-      <Button
+      {/* <Button
         type="button"
         variant="ghost"
         size="icon"
@@ -121,11 +118,11 @@ const ShareButton = ({ url, title, description }: ShareButtonProps) => {
         className="text-primary-800"
         title="Share on Twitter / X"
       >
-        <Twitter className="h-6 w-6" />
-      </Button>
+        <TwitterIcon className="h-6 w-6" />
+      </Button> */}
 
       {/* Facebook 공유 버튼 */}
-      <Button
+      {/* <Button
         type="button"
         variant="ghost"
         size="icon"
@@ -134,8 +131,8 @@ const ShareButton = ({ url, title, description }: ShareButtonProps) => {
         className="text-primary-800"
         title="Share on Facebook"
       >
-        <Facebook className="h-6 w-6" />
-      </Button>
+        <FacebookIcon className="h-6 w-6" />
+      </Button> */}
     </div>
   );
 };

@@ -1,7 +1,6 @@
 "use client";
 
-import { Button, ListBulletIcon, Squares2X2Icon } from "@hyoungmin/ui";
-
+import { Button, cn, Grid, List } from "@hyoungmin/ui";
 export type LayoutType = "list" | "card";
 
 interface LayoutToggleProps {
@@ -18,9 +17,14 @@ export const LayoutToggle = ({ layout, onLayoutChange }: LayoutToggleProps) => {
         size="icon"
         aria-label="List layout"
         onClick={() => onLayoutChange("list")}
-        className="h-8 w-8"
+        className={cn(
+          "h-8 w-8 text-primary-500 hover:text-primary-100 flex items-center justify-center",
+          layout === "list"
+            ? "bg-primary-500 text-primary-100"
+            : "bg-transparent",
+        )}
       >
-        <ListBulletIcon className="h-4 w-4" />
+        <List className="h-4 w-4" />
       </Button>
       <Button
         type="button"
@@ -28,9 +32,14 @@ export const LayoutToggle = ({ layout, onLayoutChange }: LayoutToggleProps) => {
         size="icon"
         aria-label="Card layout"
         onClick={() => onLayoutChange("card")}
-        className="h-8 w-8"
+        className={cn(
+          "h-8 w-8 text-primary-500 hover:text-primary-100 flex items-center justify-center",
+          layout === "card"
+            ? "bg-primary-500 text-primary-100"
+            : "bg-transparent",
+        )}
       >
-        <Squares2X2Icon className="h-4 w-4" />
+        <Grid className="h-4 w-4" />
       </Button>
     </div>
   );

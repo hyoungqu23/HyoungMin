@@ -163,8 +163,8 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
                 <div className="shrink-0">
                   <ShareButton
                     url={`${siteUrl}/${slug}`}
-                    title={meta.title}
-                    description={meta.description}
+                    // title={meta.title}
+                    // description={meta.description}
                   />
                 </div>
               </div>
