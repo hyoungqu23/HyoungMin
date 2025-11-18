@@ -8,7 +8,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest",
     "test:ci": "vitest run --coverage",
-    "build": "echo no-op"
+    "build": "echo no-op",
+    "generate:icons": "node scripts/generate-icons.ts",
+    "prebuild": "pnpm generate:icons"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
