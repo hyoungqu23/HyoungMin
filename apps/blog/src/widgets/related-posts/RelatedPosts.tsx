@@ -10,7 +10,7 @@ export const RelatedPosts = ({
   if (relatedPosts.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-2">
+    <section className="flex flex-col gap-2 py-8 lg:hidden">
       <h2 className="text-sm font-semibold tracking-tight text-primary-900 flex items-center gap-1">
         <span className="text-base">😎</span>
         <span>다른 글도 읽어보세요</span>
@@ -39,22 +39,19 @@ export const RelatedPosts = ({
                 })}
               </time>
 
-              {relatedPost.meta.tags.length > 0 && (
+              {relatedPost.meta.tags.length > 0 ? (
                 <div className="flex flex-wrap gap-1 justify-end">
                   {relatedPost.meta.tags.slice(0, 2).map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-0.5 text-[0.7rem] bg-primary-100 rounded-full text-primary-800"
-                    >
+                    <span key={tag} className="px-2 py-1 text-xs rounded">
                       {tag}
                     </span>
                   ))}
                 </div>
-              )}
+              ) : null}
             </div>
           </Link>
         ))}
       </div>
-    </div>
+    </section>
   );
 };

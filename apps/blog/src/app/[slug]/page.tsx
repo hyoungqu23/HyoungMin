@@ -2,7 +2,9 @@ import type { PostMeta } from "@hyoungmin/schema";
 import { Prose } from "@hyoungmin/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Script from "next/script";
 
+import { TagList } from "@/features/post-list/TagList";
 import ShareButton from "@/features/share/ShareButton";
 import { listSlugs, readArticle } from "@/shared/lib/fs";
 import { compilePostMDX } from "@/shared/lib/mdx";
@@ -12,7 +14,6 @@ import { getRelatedPosts } from "@/shared/lib/related-posts";
 import ReadingProgress from "@/widgets/reading-progress/ReadingProgress";
 import { RelatedPosts } from "@/widgets/related-posts/RelatedPosts";
 import TableOfContents from "@/widgets/toc/TableOfContents";
-import Script from "next/script";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
 const siteName = "Blog";
@@ -178,27 +179,14 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
               <span>|</span>
               <span>{readingTime}분 읽기</span>
               <ShareButton url={`${siteUrl}/${slug}`} />
-              {meta.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {meta.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-1 text-xs border border-primary-200! bg-primary-50! rounded"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
+              <TagList tags={meta.tags} />
             </div>
             {content}
           </Prose>
         </article>
 
         {/* 모바일 관련 포스트 */}
-        <section className="mt-16 pt-8 border-t border-primary-200 lg:hidden">
-          <RelatedPosts relatedPosts={relatedPosts} />
-        </section>
+        <RelatedPosts relatedPosts={relatedPosts} />
       </div>
     </>
   );

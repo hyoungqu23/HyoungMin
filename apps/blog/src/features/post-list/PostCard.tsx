@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { GeneratedThumbnail } from "./GeneratedThumbnail";
+import { TagList } from "./TagList";
 
 interface PostCardProps {
   slug: string;
@@ -27,8 +28,6 @@ export const PostCard = ({ slug, meta, firstImage }: PostCardProps) => {
     : firstImage
       ? normalizeImageUrl(firstImage)
       : null;
-
-  console.log(thumbnailImage);
 
   return (
     <div className="perspective-distant">
@@ -56,7 +55,7 @@ export const PostCard = ({ slug, meta, firstImage }: PostCardProps) => {
           <p className="text-primary-700 text-sm line-clamp-1 mb-4">
             {meta.description}
           </p>
-          <div className="flex items-center justify-between text-xs text-primary-600">
+          <div className="flex flex-col md:flex-row gap-2 items-end md:items-center justify-between text-xs text-primary-600">
             <time>
               {meta.createdAt.toLocaleDateString("ko-KR", {
                 year: "numeric",
@@ -64,18 +63,7 @@ export const PostCard = ({ slug, meta, firstImage }: PostCardProps) => {
                 day: "numeric",
               })}
             </time>
-            {meta.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1 text-primary-600">
-                {meta.tags.slice(0, 3).map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2 py-1 text-xs bg-primary-100 rounded"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
+            <TagList tags={meta.tags} limit={2} />
           </div>
         </div>
       </Link>

@@ -20,7 +20,7 @@ export const LayoutToggle = ({ layout, onLayoutChange }: LayoutToggleProps) => {
         className={cn(
           "h-8 w-8 text-primary-500 hover:text-primary-100 flex items-center justify-center",
           layout === "list"
-            ? "bg-primary-500 text-primary-100"
+            ? "bg-primary-900 text-primary-100"
             : "bg-transparent",
         )}
       >
@@ -35,7 +35,7 @@ export const LayoutToggle = ({ layout, onLayoutChange }: LayoutToggleProps) => {
         className={cn(
           "h-8 w-8 text-primary-500 hover:text-primary-100 flex items-center justify-center",
           layout === "card"
-            ? "bg-primary-500 text-primary-100"
+            ? "bg-primary-900 text-primary-100"
             : "bg-transparent",
         )}
       >
