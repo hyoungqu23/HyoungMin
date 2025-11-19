@@ -1,7 +1,6 @@
 import type { PostMeta } from "@hyoungmin/schema";
 import { Prose } from "@hyoungmin/ui";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import ShareButton from "@/features/share/ShareButton";
@@ -11,7 +10,9 @@ import { mdxComponents } from "@/shared/lib/mdx-components";
 import { calculateReadingTime } from "@/shared/lib/reading-time";
 import { getRelatedPosts } from "@/shared/lib/related-posts";
 import ReadingProgress from "@/widgets/reading-progress/ReadingProgress";
+import { RelatedPosts } from "@/widgets/related-posts/RelatedPosts";
 import TableOfContents from "@/widgets/toc/TableOfContents";
+import Script from "next/script";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
 const siteName = "Blog";
@@ -144,104 +145,60 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
 
   return (
     <>
-      <ReadingProgress />
-      <script
+      <Script
+        strategy="beforeInteractive"
+        id="json-ld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-12">
-          {/* TOC 사이드바 (데스크톱만 표시) */}
+
+      <ReadingProgress />
+
+      <div className="container px-4 h-full flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-12">
+        {/* 사이드바 (데스크톱만 표시) */}
+        <aside className="hidden sticky top-24 md:flex w-72 shrink-0 h-full flex-col gap-12">
           <TableOfContents headings={headings} />
+          <RelatedPosts relatedPosts={relatedPosts} />
+        </aside>
 
-          {/* 본문 */}
-          <article className="flex-1 min-w-0 lg:max-w-3xl lg:mx-auto">
-            <Prose>
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <h1 className="flex-1">{meta.title}</h1>
-                {/* 공유하기 버튼 (포스트 페이지에서만 표시) */}
-                <div className="shrink-0">
-                  <ShareButton
-                    url={`${siteUrl}/${slug}`}
-                    // title={meta.title}
-                    // description={meta.description}
-                  />
+        {/* 본문 */}
+        <article className="relative flex-1 min-w-0 max-w-screen overflow-x-auto md:border-l-2 md:border-primary-200 px-4 md:px-12">
+          <Prose>
+            <h1>{meta.title}</h1>
+
+            <p className="text-lg text-primary-700">{meta.description}</p>
+            <div className="flex flex-wrap items-center gap-4 my-4 text-sm text-primary-600">
+              <time>
+                {meta.createdAt.toLocaleDateString("ko-KR", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </time>
+              <span>|</span>
+              <span>{readingTime}분 읽기</span>
+              <ShareButton url={`${siteUrl}/${slug}`} />
+              {meta.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {meta.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2 py-1 text-xs border border-primary-200! bg-primary-50! rounded"
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
-              </div>
-              <p className="text-lg text-primary-700">{meta.description}</p>
-              <div className="flex flex-wrap items-center gap-4 my-4 text-sm text-primary-600">
-                <time>
-                  {meta.createdAt.toLocaleDateString("ko-KR", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </time>
-                <span>|</span>
-                <span>{readingTime}분 읽기</span>
-                {meta.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {meta.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-1 text-xs bg-primary-100 rounded"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {content}
-            </Prose>
-          </article>
-        </div>
-
-        {/* 관련 포스트 섹션 */}
-        {relatedPosts.length > 0 && (
-          <section className="mt-16 pt-8 border-t border-primary-200">
-            <h2 className="text-2xl font-bold mb-6">
-              😎 &nbsp; 다른 글도 읽어보세요!
-            </h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {relatedPosts.map((relatedPost) => (
-                <Link
-                  key={relatedPost.slug}
-                  href={`/${relatedPost.slug}`}
-                  className="group block p-6 rounded-lg border border-primary-200 hover:border-primary-300 transition-colors"
-                >
-                  <h3 className="text-lg font-semibold mb-2 group-hover:text-secondary-400 transition-colors">
-                    {relatedPost.meta.title}
-                  </h3>
-                  <p className="text-sm text-primary-700 line-clamp-2 mb-3">
-                    {relatedPost.meta.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <time className="text-xs text-primary-600">
-                      {relatedPost.meta.createdAt.toLocaleDateString("ko-KR", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </time>
-                    {relatedPost.meta.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {relatedPost.meta.tags.slice(0, 2).map((tag) => (
-                          <span
-                            key={tag}
-                            className="px-2 py-0.5 text-xs bg-primary-100 rounded"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              ))}
+              )}
             </div>
-          </section>
-        )}
+            {content}
+          </Prose>
+        </article>
+
+        {/* 모바일 관련 포스트 */}
+        <section className="mt-16 pt-8 border-t border-primary-200 lg:hidden">
+          <RelatedPosts relatedPosts={relatedPosts} />
+        </section>
       </div>
     </>
   );

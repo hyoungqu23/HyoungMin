@@ -7,6 +7,7 @@ import "@/root/styles/globals.css";
 import { Analytics } from "@/root/analytics/ui/Anayltics";
 import Footer from "@/widgets/footer/Footer";
 import Header from "@/widgets/header/Header";
+import { cn } from "@hyoungmin/ui";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
 const siteName = "Blog";
@@ -47,18 +48,21 @@ const RootLayout = ({
 }>) => {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body className={pretendardFont.variable}>
+      <body
+        className={cn(pretendardFont.variable, "flex flex-col min-h-screen")}
+      >
         <Analytics />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <KeyboardShortcutsProvider>
             <Header />
-            {/* 헤더 높이만큼 패딩 추가 (h-16 = 64px) */}
-            <div className="pt-16 min-h-[calc(100vh-64px)] flex flex-col">
-              <main id="main" className="flex-1">
-                {children}
-              </main>
-              <Footer />
-            </div>
+            <main
+              id="main"
+              role="main"
+              className="flex-1 flex flex-col items-center"
+            >
+              {children}
+            </main>
+            <Footer />
           </KeyboardShortcutsProvider>
         </ThemeProvider>
       </body>

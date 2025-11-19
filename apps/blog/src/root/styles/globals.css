@@ -1,5 +1,62 @@
 @import "tailwindcss";
 
+:root {
+  /* Primary Color Palette - Light Mode (Prestige Green) */
+  --primary-50: #f0fdf4;
+  --primary-100: #dcfce7;
+  --primary-200: #bbf7d0;
+  --primary-300: #86efac;
+  --primary-400: #4ade80;
+  --primary-500: #22c55e;
+  --primary-600: #16a34a;
+  --primary-700: #15803d;
+  --primary-800: #166534;
+  --primary-900: #052e16;
+
+  /* Secondary Color Palette - Light Mode (Impact Gold) */
+  --secondary-50: #fefce8;
+  --secondary-100: #fef9c3;
+  --secondary-200: #fef08a;
+  --secondary-300: #fde047;
+  --secondary-400: #facc15;
+  --secondary-500: #eab308;
+  --secondary-600: #ca8a04;
+  --secondary-700: #a16207;
+  --secondary-800: #854d0e;
+  --secondary-900: #713f12;
+}
+
+:root.dark {
+  /* Primary Color Palette - Dark Mode (Prestige Green) */
+  --primary-900: #f0fdf4;
+  --primary-800: #dcfce7;
+  --primary-700: #bbf7d0;
+  --primary-600: #86efac;
+  --primary-500: #4ade80;
+  --primary-400: #22c55e;
+  --primary-300: #16a34a;
+  --primary-200: #15803d;
+  --primary-100: #166534;
+  --primary-50: #052e16;
+
+  /* Secondary Color Palette - Light Mode (Impact Gold) */
+  --secondary-900: #fefce8;
+  --secondary-800: #fef9c3;
+  --secondary-700: #fef08a;
+  --secondary-600: #fde047;
+  --secondary-500: #facc15;
+  --secondary-400: #eab308;
+  --secondary-300: #ca8a04;
+  --secondary-200: #a16207;
+  --secondary-100: #854d0e;
+  --secondary-50: #713f12;
+}
+
+body {
+  background-color: var(--primary-50);
+  color: var(--primary-900);
+}
+
 /* Code block syntax highlighting (rehype-pretty-code) */
 pre[data-theme] {
   background-color: var(--shiki-light-bg, #fff);
@@ -22,8 +79,6 @@ pre code {
   line-height: 1.75;
 }
 
-/* rehype-pretty-code가 생성한 각 토큰의 색상 적용 */
-/* 각 span에 인라인 스타일로 설정된 CSS 변수를 사용 */
 pre code span[style*="--shiki-light"],
 pre code span[style*="--shiki-dark"] {
   color: var(--shiki-light);
@@ -80,11 +135,6 @@ code[data-highlighted-chars] {
   background-color: rgba(59, 130, 246, 0.2);
 }
 
-/* Prose 요소 간격 조정 */
-.prose > * + * {
-  margin-top: 1.5rem;
-}
-
 /* Prose Heading 스타일 */
 .prose h1 {
   font-size: 2.25rem;
@@ -107,7 +157,7 @@ code[data-highlighted-chars] {
 .prose h3 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--primary-900);
+  color: var(--primary-800);
   margin-top: 2rem;
   margin-bottom: 1rem;
   line-height: 1.4;
@@ -116,7 +166,7 @@ code[data-highlighted-chars] {
 .prose h4 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--primary-900);
+  color: var(--primary-800);
   margin-top: 2rem;
   margin-bottom: 1rem;
   line-height: 1.4;
@@ -125,7 +175,7 @@ code[data-highlighted-chars] {
 .prose h5 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--primary-900);
+  color: var(--primary-700);
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
   line-height: 1.5;
@@ -134,19 +184,10 @@ code[data-highlighted-chars] {
 .prose h6 {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--primary-900);
+  color: var(--primary-700);
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
   line-height: 1.5;
-}
-
-.dark .prose h1,
-.dark .prose h2,
-.dark .prose h3,
-.dark .prose h4,
-.dark .prose h5,
-.dark .prose h6 {
-  color: var(--primary-100);
 }
 
 /* Paragraph 간격 */
@@ -162,6 +203,7 @@ code[data-highlighted-chars] {
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   padding-left: 1.5rem;
+  list-style-type: disc;
 }
 
 .prose ul > li + li,
@@ -195,10 +237,6 @@ code[data-highlighted-chars] {
   font-style: italic;
 }
 
-.dark .prose blockquote {
-  border-left-color: var(--primary-600);
-}
-
 /* Code block 간격 */
 .prose pre {
   margin-top: 2rem;
@@ -213,16 +251,6 @@ code[data-highlighted-chars] {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   background-color: var(--primary-100);
   color: var(--primary-900);
-}
-
-.dark .prose code:not(pre code) {
-  background-color: var(--primary-800);
-  color: var(--primary-100);
-}
-
-/* 블록 코드는 패딩 제거 (CodeBlock 컴포넌트에서 처리) */
-.prose pre code {
-  padding: 0;
 }
 
 /* Image 간격 */
@@ -241,10 +269,6 @@ code[data-highlighted-chars] {
   border-width: 1px 0 0 0;
 }
 
-.dark .prose hr {
-  border-color: var(--primary-700);
-}
-
 /* Link 스타일 */
 .prose a {
   color: var(--primary-600);
@@ -257,76 +281,70 @@ code[data-highlighted-chars] {
   color: var(--primary-800);
 }
 
-.dark .prose a {
-  color: var(--primary-300);
-}
-
-.dark .prose a:hover {
-  color: var(--primary-100);
-}
-
+/* 테이블 스타일 */
 /* 테이블 스타일 */
 .prose table {
   width: 100%;
+  max-width: 100%;
   border-collapse: collapse;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-  border-radius: 0.5rem;
+  margin: 2rem 0;
+  border-radius: 0.75rem;
   overflow: hidden;
-  border: 1px solid var(--primary-200);
+  /* 살짝 톤 다운된 보더 + 카드 느낌 배경 */
+  border: 1px solid color-mix(in srgb, var(--primary-200) 70%, transparent);
+  background-color: color-mix(in srgb, var(--primary-50) 60%, transparent);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
 }
 
-.dark .prose table {
-  border-color: var(--primary-700);
-}
-
-/* 테이블 헤더 배경색 */
+/* 테이블 헤더 */
 .prose thead {
-  background-color: var(--primary-50);
-  border-bottom: 2px solid var(--primary-300);
-}
-
-.dark .prose thead {
-  background-color: var(--primary-800);
-  border-bottom-color: var(--primary-600);
+  /* primary/secondary 톤을 아주 은은하게 섞은 그라데이션 */
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--primary-50) 85%, transparent),
+    color-mix(in srgb, var(--secondary-50) 70%, transparent)
+  );
+  border-bottom: 1px solid color-mix(in srgb, var(--primary-200) 70%, transparent);
 }
 
 .prose th {
   padding: 0.75rem 1rem;
   text-align: left;
+  font-size: 0.8rem;
   font-weight: 600;
+  letter-spacing: 0.04em;
   color: var(--primary-900);
   white-space: nowrap;
-  word-wrap: break-word;
 }
 
-.dark .prose th {
-  color: var(--primary-100);
-}
-
+/* 바디 셀 */
 .prose td {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--primary-200);
-  white-space: nowrap;
-  word-wrap: break-word;
+  border-top: 1px solid color-mix(in srgb, var(--primary-200) 60%, transparent);
+  font-size: 0.875rem;
   color: var(--primary-800);
+  line-height: 1.7;
+  /* 내용은 줄바꿈 허용해서 가독성 ↑ */
+  white-space: normal;
+  word-break: keep-all;
 }
 
-.dark .prose td {
-  border-bottom-color: var(--primary-700);
-  color: var(--primary-200);
+/* 지브라 스트라이프 */
+.prose tbody tr:nth-child(odd) {
+  background-color: color-mix(in srgb, var(--primary-50) 40%, transparent);
 }
 
+.prose tbody tr:nth-child(even) {
+  background-color: transparent;
+}
+
+/* Hover 상태 */
 .prose tbody tr:hover {
-  background-color: var(--primary-50);
+  background-color: color-mix(in srgb, var(--primary-100) 70%, transparent);
   transition: background-color 0.15s ease-in-out;
 }
 
-.dark .prose tbody tr:hover {
-  background-color: color-mix(in srgb, var(--primary-800) 50%, transparent);
-}
-
-/* 테이블 첫 번째/마지막 열 스타일링 */
+/* 테이블 첫 번째/마지막 열 패딩 보정 */
 .prose th:first-child,
 .prose td:first-child {
   padding-left: 1.5rem;
@@ -335,109 +353,4 @@ code[data-highlighted-chars] {
 .prose th:last-child,
 .prose td:last-child {
   padding-right: 1.5rem;
-}
-
-@layer base {
-  :root {
-    /* Primary Color Palette - Light Mode (Prestige Green) */
-    --primary-50: #f0fdf4;
-    --primary-100: #dcfce7;
-    --primary-200: #bbf7d0;
-    --primary-300: #86efac;
-    --primary-400: #4ade80;
-    --primary-500: #22c55e;
-    --primary-600: #16a34a;
-    --primary-700: #15803d;
-    --primary-800: #166534;
-    --primary-900: #052e16;
-
-    /* Secondary Color Palette - Light Mode (Impact Gold) */
-    --secondary-50: #fefce8;
-    --secondary-100: #fef9c3;
-    --secondary-200: #fef08a;
-    --secondary-300: #fde047;
-    --secondary-400: #facc15;
-    --secondary-500: #eab308;
-    --secondary-600: #ca8a04;
-    --secondary-700: #a16207;
-    --secondary-800: #854d0e;
-    --secondary-900: #713f12;
-  }
-
-  .dark {
-    /* Primary Color Palette - Dark Mode (Prestige Green) */
-    /* 다크 모드: 배경은 어두운 그린, 텍스트는 밝은 그린 */
-    --primary-50: #052e16; /* 가장 어두운 배경 */
-    --primary-100: #dcfce7; /* 본문 텍스트용 밝은 그린 */
-    --primary-200: #bbf7d0;
-    --primary-300: #86efac; /* 소제목, 강조용 */
-    --primary-400: #4ade80;
-    --primary-500: #22c55e;
-    --primary-600: #16a34a;
-    --primary-700: #15803d;
-    --primary-800: #166534; /* 다크 모드 배경 대안 */
-    --primary-900: #052e16; /* 다크 모드 배경 (가장 어두운 그린) */
-
-    /* Secondary Color Palette - Dark Mode (Impact Gold) */
-    /* 다크 모드: 타이틀과 강조는 밝은 골드 */
-    --secondary-50: #713f12;
-    --secondary-100: #854d0e;
-    --secondary-200: #a16207;
-    --secondary-300: #ca8a04;
-    --secondary-400: #facc15; /* 핵심 타이틀, 이름용 (가장 밝은 골드) */
-    --secondary-500: #eab308; /* 링크 호버 효과용 */
-    --secondary-600: #ca8a04;
-    --secondary-700: #a16207;
-    --secondary-800: #854d0e;
-    --secondary-900: #713f12;
-  }
-}
-
-@theme {
-  /* Primary Color Palette - Tailwind에서 CSS 변수 참조 */
-  --color-primary-50: var(--primary-50);
-  --color-primary-100: var(--primary-100);
-  --color-primary-200: var(--primary-200);
-  --color-primary-300: var(--primary-300);
-  --color-primary-400: var(--primary-400);
-  --color-primary-500: var(--primary-500);
-  --color-primary-600: var(--primary-600);
-  --color-primary-700: var(--primary-700);
-  --color-primary-800: var(--primary-800);
-  --color-primary-900: var(--primary-900);
-
-  /* Secondary Color Palette - Tailwind에서 CSS 변수 참조 */
-  --color-secondary-50: var(--secondary-50);
-  --color-secondary-100: var(--secondary-100);
-  --color-secondary-200: var(--secondary-200);
-  --color-secondary-300: var(--secondary-300);
-  --color-secondary-400: var(--secondary-400);
-  --color-secondary-500: var(--secondary-500);
-  --color-secondary-600: var(--secondary-600);
-  --color-secondary-700: var(--secondary-700);
-  --color-secondary-800: var(--secondary-800);
-  --color-secondary-900: var(--secondary-900);
-
-  /* Footer infinite scroll animation */
-  --animate-infinite-carousel: infinite-carousel 60s linear infinite;
-  @keyframes infinite-carousel {
-    0% {
-      left: 0;
-    }
-    100% {
-      left: -100%;
-    }
-  }
-}
-
-/* 다크 모드 기본 색상 설정 */
-.dark body {
-  background-color: var(--primary-900);
-  color: var(--primary-100);
-}
-
-/* 라이트 모드 기본 색상 설정 */
-body {
-  background-color: #ffffff;
-  color: var(--primary-800);
 }

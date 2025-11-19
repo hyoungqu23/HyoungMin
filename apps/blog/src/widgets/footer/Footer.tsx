@@ -6,7 +6,7 @@ const INFINITE_CAROUSEL_ITEMS = INFORMATION.concat(SKILLS);
 
 const Footer = () => {
   return (
-    <footer className="w-full bg-primary-900 border-t border-primary-800">
+    <footer className="w-full bg-primary-900 border-t border-primary-800 flex justify-center items-center">
       <div className="container px-4 py-8 flex flex-col gap-1 justify-end items-end">
         <ul className="flex gap-2 w-fit">
           {INFINITE_CAROUSEL_ITEMS.map((item) => (

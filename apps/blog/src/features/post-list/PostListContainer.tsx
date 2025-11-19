@@ -23,7 +23,7 @@ export const PostListContainer = ({
   initialPosts,
   postsPerPage = 12,
 }: PostListContainerProps) => {
-  const [layout, setLayout] = useState<LayoutType>("list");
+  const [layout, setLayout] = useState<LayoutType>("card");
   const [displayedCount, setDisplayedCount] = useState(postsPerPage);
 
   const handleLayoutChange = (newLayout: LayoutType) => {

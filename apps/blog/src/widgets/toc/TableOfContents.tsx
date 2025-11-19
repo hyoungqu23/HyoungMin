@@ -13,12 +13,9 @@ const TableOfContents = ({ headings }: TableOfContentsProps) => {
   }
 
   return (
-    <nav
-      aria-label="Table of contents"
-      className="hidden lg:block lg:w-64 lg:shrink-0 sticky top-20"
-    >
-      <div className="space-y-2">
-        <h2 className="text-sm font-semibold text-primary-900 mb-4">목차</h2>
+    <nav aria-label="Table of contents" className="p-4">
+      <div className="flex flex-col gap-2">
+        <h2 className="font-bold text-primary-100">목차</h2>
         <ul className="space-y-1 text-sm">
           {headings.map((heading) => {
             const indentClass = heading.level === 3 ? "ml-4" : "ml-0";
@@ -27,7 +24,7 @@ const TableOfContents = ({ headings }: TableOfContentsProps) => {
               <li key={heading.id}>
                 <Link
                   href={`#${heading.id}`}
-                  className={`block py-1 px-2 rounded transition-colors text-primary-700 hover:text-primary-900 hover:bg-primary-100 ${indentClass}`}
+                  className={`block py-1 px-2 rounded transition-colors text-primary-400 hover:text-primary-900 hover:bg-primary-100 ${indentClass}`}
                 >
                   {heading.text}
                 </Link>

@@ -24,7 +24,7 @@ export const CodeBlock = (props: ComponentProps<"pre">) => {
         type="button"
         aria-label={copied ? "Copied" : "Copy code"}
         onClick={handleCopy}
-        className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity rounded p-2 bg-black/70 text-white hover:bg-black/80"
+        className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity rounded p-2 bg-black/70 text-primary-500 hover:bg-black/80"
       >
         {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
       </button>

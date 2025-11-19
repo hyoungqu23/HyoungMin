@@ -47,7 +47,7 @@ const ReadingProgress = () => {
 
   return (
     <div
-      className="fixed top-16 left-0 right-0 z-50 h-1 bg-primary-200"
+      className="fixed top-20 left-0 right-0 z-50 h-8 bg-secondary-200"
       role="progressbar"
       aria-label="Reading progress"
       aria-valuenow={Math.round(progress)}
@@ -55,7 +55,7 @@ const ReadingProgress = () => {
       aria-valuemax={100}
     >
       <div
-        className="h-full bg-secondary-400 transition-all duration-150 ease-out"
+        className="h-full bg-secondary-500 transition-all duration-150 ease-out"
         style={{ width: `${progress}%` }}
       />
     </div>

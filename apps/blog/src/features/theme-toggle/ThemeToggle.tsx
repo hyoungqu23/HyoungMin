@@ -28,7 +28,11 @@ const ThemeToggle = () => {
       onClick={handleToggle}
       className="text-primary-800"
     >
-      {isDark ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
+      {isDark ? (
+        <Sun className="h-6 w-6 text-primary-100" />
+      ) : (
+        <Moon className="h-6 w-6 text-primary-100" />
+      )}
     </Button>
   );
 };
