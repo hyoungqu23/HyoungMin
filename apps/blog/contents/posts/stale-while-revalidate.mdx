@@ -35,7 +35,7 @@ Goggle Workbox의 문서에 따르면 `Cache-First`, `Network-First`, `Network-O
 
 브라우저는 Cache의 응답이 오래된 것인지, 즉, stale한 것인지 여부를 응답 헤더에 포함된 `max-age`를 기반으로 판단한다. `max-age`보다 새로운 응답은 stale하지 않은 것으로 간주되고, 더 오래된 응답은 stale한 것으로 판단된다.
 
-![Untitled](/images/Stale-While-Revalidate/SWR.png)
+![Untitled](/images/posts/stale-while-revalidate_swr.png)
 
 결국, 브라우저는 Cache-Control의 `max-age`를 기준으로 최신성을 판단하는데, `stale-while-revalidate` 전략이 Caching된 응답이 stale되었을 때에 대한 확장된 지시를 설정한다.
 

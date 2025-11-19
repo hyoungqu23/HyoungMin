@@ -3,7 +3,7 @@ title: Core Web Vitals
 description: Core Web Vitals에 대해 알아보기
 createdAt: 2023-10-03
 category: Next.js
-thumbnail: "/images/articles/Core-Web-Vitals/LCP.png"
+thumbnail: "/images/posts/core-web-vitals_lcp.png"
 isRecommended: true
 tags:
   - Core Web Vitals
@@ -71,11 +71,11 @@ Core Web Vitals에 대해 이야기하기 전에 그렇다면, Web Vitals는 무
 
 ### Core Web Vitals
 
-![LCP](/images/articles/Core-Web-Vitals/LCP.png)
+![LCP](/images/posts/core-web-vitals_lcp.png)
 
-![FID](/images/articles/Core-Web-Vitals/FID.png)
+![FID](/images/posts/core-web-vitals_fid.png)
 
-![CLS](/images/articles/Core-Web-Vitals/CLS.png)
+![CLS](/images/posts/core-web-vitals_cls.png)
 
 각각 로딩 시간, 상호작용, 시각적 안정성을 위한 측정 지표이다.
 
@@ -111,7 +111,7 @@ LCP의 경우, 주로 다음 4가지 요인에 의해 영향을 받는다.
 
 Chrome 확장 프로그램이나 개발자 도구에서 확인할 수 있는 Lighthouse는 가장 쉽게 웹 사이트의 Core Web Vitals를 측정할 수 있는 도구이다.
 
-![Chrome 개발자 도구의 Lighthouse](/images/articles/Core-Web-Vitals/Lighthouse-in-Chrome-Developer-Tool.png)
+![Chrome 개발자 도구의 Lighthouse](/images/posts/core-web-vitals_lighthouse-in-chrome-developer-tool.png)
 
 보통 Lighthouse를 활용해서 Core Web Vitals를 측정할 때, 배포한 웹 사이트의 경우 Webpack의 번들링 시 압축 과정 등으로 인해 최적화가 조금 더 되어 있기 때문에 개발 서버에서 진행하지 않고, 배포한 이후에 측정을 진행하게 된다. 추가적으로 설치된 확장 프로그램이 Lighthouse 측정에 영향을 미칠 수 있기 때문에, [시크릿 탭에서 측정](https://nextjs.org/learn/seo/improve/lighthouse)을 진행한다. 이는 다음 Google 개발자 문서에서도 언급하는 편차 처리 전략 중 하나이다.
 
@@ -121,7 +121,7 @@ Chrome 확장 프로그램이나 개발자 도구에서 확인할 수 있는 Lig
 
 웹 사이트의 성능 지표를 확인하기 위한 환경이 설정된 이후에는 실제로 페이지 로드 분석을 진행하여 웹 사이트의 능 지표에 대한 점수를 측정할 수 있다.
 
-![Lighthouse 총 점수](/images/articles/Core-Web-Vitals/Lighthouse-Scores.png)
+![Lighthouse 총 점수](/images/posts/core-web-vitals_lighthouse-scores.png)
 
 다만 Lighthouse의 경우 제한된 환경(캐시 제거, 느린 네트워크, 느린 CPU 등)에서 측정하는 Synthetic Monotoring 방식으로 웹 사이트의 성능 지표를 측정한다. 게다가 로컬에서 측정을 진행하므로 현재 측정을 진행하는 기기의 성능과 상황, 네트워크 라우팅, 게시된 광고 등의 변경에 따라 다른 측정 값을 가져올 수도 있다. 다음 Google 개발자 문서에서도 확인할 수 있듯이 로컬 네트워크, 클라이언트 하드웨어나 리소스 등이 영향을 높게 미친다고 말하고 있다.
 
@@ -131,7 +131,7 @@ Chrome 확장 프로그램이나 개발자 도구에서 확인할 수 있는 Lig
 
 실제로 우리가 궁금한 성능 지표에 대한 측정 항목을 살펴보면, Lighthouse 버전에 따라 측정 항목이 다르지만, 현재 10버전에서는 총 5가지의 측정 지표를 기반으로한 점수의 가중 평균으로 웹 사이트의 성능 점수를 계산하고 있다. Core Web Vitals에 포함되는 LCP(Largest Contentful Paint), CLS(Cumulative Layout Shift)에 대해 측정된 결과도 존재하고, 추가적으로 FCP(First Contentful Paint), TBT(Total Blocking Time), SI(Speed Index)에 대한 측정 결과도 확인할 수 있다. 이전 버전에서는 TTI(Time To Interactive), FMP(First Meaningful Paint) 등의 측정 지표도 존재했으나, 현재 버전에서는 측정 지표로 활용되지 않는다.
 
-![Lighthouse 성능 측정 결과](/images/articles/Core-Web-Vitals/Lighthouse-Performance-Metrics.png)
+![Lighthouse 성능 측정 결과](/images/posts/core-web-vitals_lighthouse-performance-metrics.png)
 
 [Lighthouse Scoring calculator](https://googlechrome.github.io/lighthouse/scorecalc/#FCP=258&LCP=1280&TBT=0&CLS=0&SI=399&TTI=258&FMP=258&device=desktop&version=10.3.0)
 
@@ -141,17 +141,17 @@ Lighthouse의 성능 측정 지표는 다음 글에서 정리한다.
 
 보다 자세한 결과를 확인하기 위해서는 진단 및 통과한 감사에 어떤 리소스가 어떤 문제를 가지고 있는지 상세하게 확인할 수 있으며, 이를 기반으로 웹 사이트를 개선할 수 있다.
 
-![진단 및 통과한 감사, Lighthouse 성능 측정 결과](/images/articles/Core-Web-Vitals/Lighthouse-Performance-Diagnostics.png)
+![진단 및 통과한 감사, Lighthouse 성능 측정 결과](/images/posts/core-web-vitals_lighthouse-performance-diagnostics.png)
 
 2021년 이후로 추가된 트리맵 결과를 통해 전체 리소스의 크기와 사용하지 않는 리소스의 크기를 확인할 수 있어서 어떤 부분을 최적화해야 할 지를 알 수 있다.
 
-![트리맵 보기, Lighthouse 성능 측정 결과](/images/articles/Core-Web-Vitals/Lighthouse-Treemap.png)
+![트리맵 보기, Lighthouse 성능 측정 결과](/images/posts/core-web-vitals_lighthouse-treemap.png)
 
-![사용하지 않은 바이트, 트리맵 보기, Lighthouse 성능 측정 결과](/images/articles/Core-Web-Vitals/Lighthouse-Treemap-Unused-Bytes.png)
+![사용하지 않은 바이트, 트리맵 보기, Lighthouse 성능 측정 결과](/images/posts/core-web-vitals_lighthouse-treemap-unused-bytes.png)
 
 출처 흔적은 Performance 탭에 기록되며, DOMContentLoaded, Onload 이벤트나 FP(First Paint), FCP, LCP, LS(Layout Shift)가 언제 발생했는지에 대해서 확인할 수 있다.
 
-![출처 흔적 보기, Lighthouse 성능 측정 결과](/images/articles/Core-Web-Vitals/Performance-Tab-in-Chrome-Developer-Tool.png)
+![출처 흔적 보기, Lighthouse 성능 측정 결과](/images/posts/core-web-vitals_performance-tab-in-chrome-developer-tool.png)
 
 ### Google PageSpeed Insights
 
@@ -161,7 +161,7 @@ PageSpeed Insights의 Core Web Vitals 평가는 RUM(Real User Monitoring, 실제
 
 다만, RUM이 불가능한 경우 실험실 데이터, 즉, 잠재적인 사용자가 웹 사이트를 어떻게 경험할 것인지에 대한 통찰력을 제공하고 디버깅을 위한 **재현 가능한 결과**를 활용해 Core Web Vitals 평가를 진행하게 된다.
 
-![[LCP, Core Web Vitals, Google PageSpeed Insights](https://web.dev/vitals-tools/)](/images/articles/Core-Web-Vitals/LCP-in-Google-PageSpeed-Insight.png)
+![[LCP, Core Web Vitals, Google PageSpeed Insights](https://web.dev/vitals-tools/)](/images/posts/core-web-vitals_lcp-in-google-pagespeed-insight.png)
 
 [LCP, Core Web Vitals, Google PageSpeed Insights](https://web.dev/vitals-tools/)
 
@@ -169,6 +169,6 @@ PageSpeed Insights의 Core Web Vitals 평가는 RUM(Real User Monitoring, 실제
 
 Google Search Console에서는 CrUX의 실제 데이터를 기반으로 측정된 Core Web Vitals를 확인할 수 있다. 다만, 개선 사항이나 권장 사항 등을 보여주지는 않는다는 점에서 Lighthouse나 PageSpeed Insights를 함께 활용해야 한다.
 
-![[Core Web Vitals, Google Search Console](https://web.dev/vitals-tools/)](/images/articles/Core-Web-Vitals/Core-Web-Vitals-in-Google-Search-Console.png)
+![[Core Web Vitals, Google Search Console](https://web.dev/vitals-tools/)](/images/posts/core-web-vitals_core-web-vitals-in-google-search-console.png)
 
 [Core Web Vitals, Google Search Console](https://web.dev/vitals-tools/)

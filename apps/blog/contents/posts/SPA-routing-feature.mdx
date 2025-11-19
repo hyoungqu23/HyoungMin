@@ -106,7 +106,7 @@ export default About;
 
 브라우저의 전역 객체인 `window` 객체는 JavaScript에 기본적으로 포함되어 있는 빌트인 객체, 함수 등을 포함하고 있다. 그 중 하나인 `history` 객체는 브라우저의 세션 기록에 접근할 수 있는 방법을 제공한다.
 
-![브라우저의 console에 window.history를 출력.](/images/SPA-Routing/History-API.png)
+![브라우저의 console에 window.history를 출력.](/images/posts/spa-routing-feature_history-api.png)
 
 `back`, `forward`, `go` 등의 메서드로 사용자의 방문 기록, 즉 브라우저의 세션 기록을 기반으로 앞으로가기, 뒤로가기, 혹은 특정 지점으로 이동하기 등의 동작을 할 수 있다. 또한, `length` 속성으로 방문 기록 스택의 크기를 알 수 있으며, `state` 속성으로 방문 기록 스택의 최상단을 확인할 수도 있다.( → [History의 더 많은 속성과 메서드 보러가기](https://developer.mozilla.org/ko/docs/Web/API/History) )
 
@@ -170,7 +170,7 @@ export default App;
 
 - 관련 동영상 보기
 
-[Errors](/images/SPA-Routing/Error.mp4)
+[Errors](/images/posts/spa-routing-feature_error.mp4)
 
 ### URL에 따라 다른 컴포넌트 렌더링하기 - `pathname`을 State로 처리
 
@@ -725,7 +725,7 @@ export const useRouter = () => {
 
 모두 잘 작동하는 것을 확인할 수 있다.
 
-[SPA_Routing](/images/SPA-Routing/SPA-Routing.mp4)
+[SPA_Routing](/images/posts/spa-routing-feature_spa-routing.mp4)
 
 - 데모 영상을 촬영하는 중 뒤로가기와 앞으로가기가 동작했다가 동작하지 않다가 하는 이슈를 발견했으나 `history.state`는 제대로 쌓이고 있어서 어떤 부분이 문제인지 모르겠음.
 

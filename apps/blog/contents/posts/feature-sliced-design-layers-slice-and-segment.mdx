@@ -45,20 +45,13 @@ tags:
 
 슬라이스 구조를 가지지 않는 `App`, `Shared` 레이어에서는 세그먼트를 커스텀하여 가질 수 있다. 다만, 세그먼트 이름은 해당 모듈의 본질적인 목적을 설명할 수 있어야 한다. 즉, `components`, `types`, `hooks` 등의 세그먼트는 지양해야 한다.
 
-- ~~숨기기~~
-  |                 | `ui`   | `model`                  | `lib`                             | `api` |
-  | --------------- | ------ | ------------------------ | --------------------------------- | ----- |
-  | `Shared` 레이어 | UI kit | 일반적으로 사용되지 않음 | 관련된 여러 파일의 유틸리티 모듈. |
-  개별적인 헬퍼 사용이 필요한 경우, [`lodash-es`](https://lodash.com/)와 같은 유틸리티 라이브러리를 고려하는 것을 권장. | 인증 또는 캐싱과 같은 추가 기능이 포함된 기본 API 클라이언트 |
-  | `Entities` 레이어 | 비즈니스 엔티티의 기본 구성 요소와 상호작용 요소 슬롯 | 이 엔티티 인스턴스의 데이터 저장소 및 데이터 조작을 위한 함수.
-  이 세그먼트는 서버 측 데이터를 저장하기에 적합합니다.
-  [TanStack Query](https://tanstack.com/query)나 기타 간접 저장소 방식을 사용하는 경우, 이 세그먼트를 생략할 수도 있습니다. | 저장과 관련 없는 엔티티 인스턴스 조작 함수 | 백엔드와의 원활한 통신을 위해 `Shared` 레이어의 API 클라이언트를 사용하는 API 메서드 |
-  | `Features` 레이어 | 사용자가 이 기능을 활용할 수 있는 상호작용 요소 | 비즈니스 로직 및 필요한 경우 인프라 데이터 저장소(예: 현재 앱 테마). 사용자에게 실제로 가치를 제공하는 코드. | `model` 세그먼트의 비즈니스 로직을 간결하게 설명하는 인프라 코드 | 백엔드에서 이 기능을 나타내는 API 메서드.
-  Entities의 API 메서드를 조합할 수 있습니다. |
-  | `Widgets` 레이어 | Entities 및 Features를 구성하여 독립적인 UI 블록으로 구성.
-  에러 경계 및 로딩 상태도 포함 가능 | 필요한 경우 인프라 데이터 저장소 | 비즈니스와 관련 없는 상호작용(예: 제스처) 및 페이지에서 블록이 작동하는 데 필요한 기타 코드 | 일반적으로 사용되지 않지만, 중첩된 라우팅 컨텍스트(예: [Remix](https://remix.run/))에서 데이터 로더를 포함할 수 있습니다. |
-  | `Pages` 레이어 | `Entities`, `Features`, `Widgets` 레이어를 구성하여 완성된 페이지로 구성.
-  에러 경계 및 로딩 상태도 포함 가능 | 일반적으로 사용되지 않음 | 비즈니스와 관련 없는 상호작용(예: 제스처) 및 페이지에서 완전한 사용자 경험을 제공하기 위한 기타 코드 | SSR 지향 프레임워크용 데이터 로더 |
+| Layer             | `ui`                                                                                                         | `model`                                                                                                                                                                                                         | `lib`                                                                                                | `api`                                                                                                                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Shared` 레이어   | UI kit                                                                                                       | 일반적으로 사용되지 않음                                                                                                                                                                                        | 관련된 여러 파일의 유틸리티 모듈.                                                                    | 개별적인 헬퍼 사용이 필요한 경우, [`lodash-es`](https://lodash.com/)와 같은 유틸리티 라이브러리를 고려하는 것을 권장. 인증 또는 캐싱과 같은 추가 기능이 포함된 기본 API 클라이언트 |
+| `Entities` 레이어 | 비즈니스 엔티티의 기본 구성 요소와 상호작용 요소 슬롯                                                        | 이 엔티티 인스턴스의 데이터 저장소 및 데이터 조작을 위한 함수. 이 세그먼트는 서버 측 데이터를 저장하기에 적합. [TanStack Query](https://tanstack.com/query)나 기타 간접 저장소 방식을 사용하는 경우, 생략 가능. | 저장과 관련 없는 엔티티 인스턴스 조작 함수                                                           | 백엔드와의 원활한 통신을 위해 `Shared` 레이어의 API 클라이언트를 사용하는 API 메서드                                                                                               |
+| `Features` 레이어 | 사용자가 이 기능을 활용할 수 있는 상호작용 요소                                                              | 비즈니스 로직 및 필요한 경우 인프라 데이터 저장소(예: 현재 앱 테마). 사용자에게 실제로 가치를 제공하는 코드.                                                                                                    | `model` 세그먼트의 비즈니스 로직을 간결하게 설명하는 인프라 코드                                     | 백엔드에서 이 기능을 나타내는 API 메서드. Entities의 API 메서드를 조합 가능.                                                                                                       |
+| `Widgets` 레이어  | Entities 및 Features를 구성하여 독립적인 UI 블록으로 구성. 에러 경계 및 로딩 상태도 포함 가능                | 필요한 경우 인프라 데이터 저장소                                                                                                                                                                                | 비즈니스와 관련 없는 상호작용(예: 제스처) 및 페이지에서 블록이 작동하는 데 필요한 기타 코드          | 일반적으로 사용되지 않지만, 중첩된 라우팅 컨텍스트(예: [Remix](https://remix.run/))에서 데이터 로더를 포함 가능.                                                                   |
+| `Pages` 레이어    | `Entities`, `Features`, `Widgets` 레이어를 구성하여 완성된 페이지로 구성. 에러 경계 및 로딩 상태도 포함 가능 | 일반적으로 사용되지 않음                                                                                                                                                                                        | 비즈니스와 관련 없는 상호작용(예: 제스처) 및 페이지에서 완전한 사용자 경험을 제공하기 위한 기타 코드 | SSR 지향 프레임워크용 데이터 로더                                                                                                                                                  |
 
 # 슬라이스
 
@@ -72,7 +65,7 @@ tags:
 
 슬라이스는 독립적이고 응집력이 높은 코드 파일의 그룹을 의미한다.
 
-![[이미지 출처](https://feature-sliced.design/img/coupling-cohesion-dark.svg#dark-mode-only)](https://feature-sliced.design/img/coupling-cohesion-dark.svg#dark-mode-only)
+![coupling-cohesion](/images/posts/feature-sliced-design-layers-slice-and-segment_coupling-cohesion.png)
 
 이상적인 슬라이스는 동일한 레이어의 다른 슬라이스로부터 독립적이고(낮은 결합도), 본질적인 주요 목적에 관련된 대부분의 코드를 포함하고 있어야 한다.(높은 응집도) 이러한 독립성은 레이어 Import 규칙에 의해 강제된다.
 
@@ -98,7 +91,7 @@ tags:
 
 밀접히 관련된 슬라이스는 디렉토리에 구조적으로 그룹화될 수 있지만, 다른 슬라이스와 마찬가지로 해당 디렉토리에 공유되는 코드가 존재하지 않아야 한다는 규칙을 준수해야 한다.
 
-![image.png](https://feature-sliced.design/kr/assets/images/graphic-nested-slices-b9c44e6cc55ecdbf3e50bf40a61e5a27.svg)
+![graphic-nested-slices](/images/posts/feature-sliced-design-layers-slice-and-segment_graphic-nested-slices.png)
 
 # 레이어
 
@@ -116,7 +109,7 @@ tags:
 - `Entities`
 - `Shared`
 
-![[이미지 출처](https://feature-sliced.design/img/layers/folders-graphic-dark.svg#dark-mode-only)](https://feature-sliced.design/img/layers/folders-graphic-dark.svg#dark-mode-only)
+![folder-graphic](/images/posts/feature-sliced-design-layers-slice-and-segment_folders-graphic.png)
 
 프로젝트에서 모든 레이어를 활용하는 것은 아니다. 프로젝트에서 필요로하는 레이어만 추가하면 된다. 일반적으로 대부분의 프론트엔드 프로젝트들에는 적어도 `Shared`, `Pages`, `App` 레이어가 존재한다.
 
@@ -160,6 +153,7 @@ import { moduleD } from "@features/aaa"; // 가능
   그룹화되지 않은 슬라이스가 20개를 초과하거나, 그룹화되어도 슬라이스가 20개를 초과하는 경우를 금지한다.
   [`forbidden-imports`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/forbidden-imports)
   상위 레이어에서 가져오기 혹은 동일한 레이어의 다른 슬라이스 간 교차 가져오기를 금지한다.
+
   ```tsx
   // pages/editor/ui/EditorPage.tsx
   import { Editor } from "./Editor";
@@ -171,13 +165,16 @@ import { moduleD } from "@features/aaa"; // 가능
   // entities/user/ui/UserAvatar.tsx
   import { Button } from "@shared/ui";
   ```
+
   [`import-locality`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/import-locality)
   동일한 슬라이스에서의 가져오기는 상대적이어야 하고, 다른 슬라이스에서의 가져오기는 절대적이어야 한다. 슬라이스 내부의 디렉토리 구조를 변경하더라도, 다른 슬라이스의 가져오기는 변경되지 않아야하기 때문이다.
+
   ```tsx
   // entities/user/ui/Avatar.tsx
   import { AvatarStatus } from "./AvatarStatus";
   import { Button } from "@shared/ui";
   ```
+
   [`inconsistent-naming`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/inconsistent-naming)
   `Entities` 레이어의 모든 이름은 복수형으로 일관되게 작성해야 한다는 규칙이다. 이 또한 대체로 개발자들은 엔티티의 명칭을 작성할 때 복수형을 활용하기에 크게 어렵지 않게 준수할 수 있다.
   [`insignificant-slice`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/insignificant-slice)
@@ -191,6 +188,7 @@ import { moduleD } from "@features/aaa"; // 가능
   [`no-public-api-sidestep`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/no-public-api-sidestep)
   슬라이스 내부 모듈에서 직접 다른 모듈을 가져오기 위해 슬라이스의 공개 API를 우회하여 모듈을 가져오는 것을 금지하는 규칙이다. 슬라이스의 공개 API는 해당 슬라이스에 대한 유일한 진입점이 되어야 하고, 공개 API가 유지되는 한 내부 구조의 자유로운 변경을 보장하므로, 코드 베이스의 안정성을 높일 수 있다.
   다만, `Shared` 레이어의 `ui`, `lib` 세그먼트의 경우에 그룹화될 수 있기 때문에 깊이가 깊어질 수 있는 점은 허용된다.
+
   ```tsx
   import { Button } from "@shared/ui";
   import { formatForHumans } from "@shared/lib/dates";
@@ -198,6 +196,7 @@ import { moduleD } from "@features/aaa"; // 가능
   import { UserAvatar } from "@entities/user";
   import { EditorPage } from "@pages/editor";
   ```
+
   [`no-reserved-folder-names`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/no-reserved-folder-names)
   표준화된 세그먼트 이름(`ui`, `model`, `api`, `lib`, `config`)는 세그먼트 하위 그룹의 이름으로 활용할 수 없다는 규칙이다.
   [`no-segmentless-slices`](https://github.com/feature-sliced/steiger/tree/master/packages/steiger-plugin-fsd/src/no-segmentless-slices)

@@ -23,7 +23,7 @@ tags:
 
 ## CSR의 정의와 장단점
 
-![CSR.png](/images/CSR-and-SSR-in-SPA/CSR.png)
+![CSR.png](/images/posts/csr-ssr-spa_csr.png)
 
 React.js, Vue.js, Angular.js 등이 나오기 이전의 초기 웹 환경에서는 서버에서 모든 페이지를 빌드하고 클라이언트(브라우저)에서는 별도의 처리 없이 웹 페이지를 노출만하는 Server Rendering 방식으로 페이지를 구성했다. 이러한 Server Rendering 방식은 서버에서 데이터를 포함하여 모든 페이지를 구성한 후 클라이언트(브라우저)에 전달하는데, 유저의 페이지 이동, 클릭, 스크롤 등으로 인해 새로운 요청이 생길 때마다 해당 과정을 반복하게 되어 서버에 부하를 주고, 불필요한 부분까지 다시 렌더링되는 성능적인 문제가 존재했다.
 
@@ -41,7 +41,7 @@ Client-Side Rendering 방식은 JavaScript를 최대한도로 활용해 HTML, CS
 
 ## SPA에서 SSR이 필요한 이유
 
-![SSR.png](/images/CSR-and-SSR-in-SPA/SSR.png)
+![SSR.png](/images/posts/csr-ssr-spa_ssr.png)
 
 > SPA(Single Page Application)는 단일 페이지 어플리케이션으로 현재의 페이지를 동적으로 작성하여 사용자와 소통하는 웹 어플리케이션이다. 연속되는 페이지 간의 UX를 향상시키고, 웹 어플리케이션이 데스크톱 어플리케이션처럼 동작하도록 도와준다.
 
@@ -103,7 +103,7 @@ getBuildId() {
 
 그렇다면, 우선 `build` 명령어로 앱을 빌드해보자.
 
-[npm build.mp4](/images/CSR-and-SSR-in-SPA/npm_build.mp4)
+[npm build.mp4](/images/posts/csr-ssr-spa_npm_build.mp4)
 
 ```jsx
 yarn run v1.22.19
@@ -136,13 +136,13 @@ Done in 18.09s.
 
 빌드가 완료된 뒤에는 빌드한 앱이 존재해야 하는 위치인 `.next` 디렉토리를 확인해보면 다음과 같다.
 
-![Untitled](/images/CSR-and-SSR-in-SPA/Build Results.png)
+![Untitled](/images/posts/csr-ssr-spa_build-results.png)
 
 즉, 이러한 `buildFile`이 존재하는 경우에는 프로덕션 서버가 정상적으로 구동된다.
 
 이제 Next.js의 실제 코드에서 `start` 명령어 입력 시에 어떤 방식으로 동작하는 지를 파악해보자.
 
-[npm start.mp4](/images/CSR-and-SSR-in-SPA/npm_start.mp4)
+[npm start.mp4](/images/posts/csr-ssr-spa_npm_start.mp4)
 
 먼저, `package/next/cli/next-start.ts`를 확인하면, start 명령어가 입력되었을 때 어떤 코드가 동작하는 지 확인할 수 있다.
 

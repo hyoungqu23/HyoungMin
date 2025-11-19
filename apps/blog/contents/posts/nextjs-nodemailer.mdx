@@ -188,7 +188,7 @@ Next.js에 존재하는 `pages/api/*`에 API를 구축할 수 있다. 따라서,
 
 먼저 Nodemailer를 활용해 메일을 전달받을 새로운 gmail 계정을 만들어주고, App Access 관련 보안을 낮춰주어야 한다.
 
-![Untitled](/images/Nextjs-Nodemailer/App-Access.png)
+![Untitled](/images/posts/nextjs-nodemailer_app-access.png)
 
 다만, 2022년 5월 30일부로 해당 설정을 수정할 수 없게 되었기에, 다른 방법을 활용해야 해서 검색을 해봤더니 친절히 나와있었다. 역시 잘 모르면 GitHub의 Issue를 확인해보면 된다.
 
@@ -234,6 +234,6 @@ export default function (req: NextApiRequest, res: NextApiResponse) {
 
 ## 마지막
 
-![Untitled](/images/Nextjs-Nodemailer/Mail.png)
+![Untitled](/images/posts/nextjs-nodemailer_mail.png)
 
 이렇게 메일이 도착하는 것을 확인했기 때문에 HTML을 추가하고, 받는 form 데이터를 잘 적용해봐야겠다.

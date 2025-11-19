@@ -94,7 +94,7 @@ const SearchInput = () => {
 export default SearchInput;
 ```
 
-![Untitled](/images/Movie-Trariler-Retrospective/API Error.png)
+![Untitled](/images/posts/retrospective-movie-trailer_api-error.png)
 
 이렇게 처리하니 API는 쿼리가 없는데 계속 요청한다고 에러를 내뱉고, 검색은 되는데 매우 느리게 반응하고, 별 이슈가 다 발생했다.
 
@@ -167,7 +167,7 @@ export default useMovieSearch;
 
 변경한 후 다시 검색을 실행해보니 첫 번째 입력 시에 input이 비어있기 때문에 searchKeyword가 `''`인 경우에 데이터를 읽지 못해 생기는 에러였다.
 
-![Untitled](/images/Movie-Trariler-Retrospective/Search Keyword Error.png)
+![Untitled](/images/posts/retrospective-movie-trailer_search-keyword-error.png)
 
 초기값을 특정 값으로 설정하는 것 말고는 해결책이 떠오르지 않아 랜덤한 값을 생성하여 초기 값으로 넣어주는 `randomKeyword` 함수로 우선 처리했다.
 

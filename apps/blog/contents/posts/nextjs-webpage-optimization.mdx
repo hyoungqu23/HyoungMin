@@ -30,7 +30,7 @@ tags:
 
 현재 사이트는 기본적인 부분만 구현되어 있기 때문에 여러 부분에서 수정과 추가가 필요하다. 다만, Lighthouse 측정 결과, `SSG`로 구현된 블로그이기 때문에 점수는 좋게 나왔다.
 
-![Untitled](/images/Nextjs-Webpage-Optimization/Lighthouse-Score.png)
+![Untitled](/images/posts/nextjs-webpage-optimization_lighthouse-score.png)
 
 개선점에 있어 추천 항목은 다음과 같다.
 
@@ -340,7 +340,7 @@ Route (pages)                                              Size     First Load J
 
 [Import Cost 익스텐션](https://marketplace.visualstudio.com/items?itemName=wix.vscode-import-cost)을 활용해 외부 라이브러리의 사이즈를 확인할 수 있는데, 상세 페이지에서 가져오는 외부 라이브러리가 특정 수준을 넘어서는 것으로 파악됐다.
 
-![Untitled](/images/Nextjs-Webpage-Optimization/Dynamic-Import.png)
+![Untitled](/images/posts/nextjs-webpage-optimization_dynamic-import.png)
 
 이들은 `NotionRenderer`의 코드 박스, 수식 등을 활용하게 해주는 라이브러리로, 사용해야만 하기 때문에 제거할 수는 없고, 다른 방법을 찾기로 했다.
 
@@ -491,7 +491,7 @@ RequestError: connect ETIMEDOUT 104.18.6.183:443
 
 결국 모두 100점으로 점수를 올려 조금 더 나은 웹 사이트를 만들 수 있었다! 모두 100점으로 만들면 폭죽도 터트려준다는걸 이제 알게되었다!
 
-![Untitled](/images/Nextjs-Webpage-Optimization/Updated-Lighthouse-Score.png)
+![Untitled](/images/posts/nextjs-webpage-optimization_updated-lighthouse-score.png)
 
 [미니로그 miniLog](https://minilog.vercel.app/)
 
