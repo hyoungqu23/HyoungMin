@@ -282,29 +282,43 @@ code[data-highlighted-chars] {
 }
 
 /* 테이블 스타일 */
-/* 테이블 스타일 */
 .prose table {
+  /* 레이아웃 */
   width: 100%;
-  max-width: 100%;
-  border-collapse: collapse;
   margin: 2rem 0;
+  border-collapse: collapse;
   border-radius: 0.75rem;
-  overflow: hidden;
+
+  /* 작은 화면에서 테이블만 가로 스크롤 되도록 */
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+
   /* 살짝 톤 다운된 보더 + 카드 느낌 배경 */
   border: 1px solid color-mix(in srgb, var(--primary-200) 70%, transparent);
   background-color: color-mix(in srgb, var(--primary-50) 60%, transparent);
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
 }
 
+/* 실제 테이블 내용은 콘텐츠 길이에 맞게 늘어나되,
+   최소 폭은 전체 화면을 차지하도록 */
+.prose table > thead,
+.prose table > tbody,
+.prose table > tfoot {
+  min-width: 100%;
+}
+
 /* 테이블 헤더 */
 .prose thead {
   /* primary/secondary 톤을 아주 은은하게 섞은 그라데이션 */
   background: linear-gradient(
-    to right,
-    color-mix(in srgb, var(--primary-50) 85%, transparent),
+    to left,
+    color-mix(in srgb, var(--primary-100) 85%, transparent),
     color-mix(in srgb, var(--secondary-50) 70%, transparent)
   );
-  border-bottom: 1px solid color-mix(in srgb, var(--primary-200) 70%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--primary-200) 70%, transparent);
 }
 
 .prose th {
@@ -324,7 +338,6 @@ code[data-highlighted-chars] {
   font-size: 0.875rem;
   color: var(--primary-800);
   line-height: 1.7;
-  /* 내용은 줄바꿈 허용해서 가독성 ↑ */
   white-space: normal;
   word-break: keep-all;
 }

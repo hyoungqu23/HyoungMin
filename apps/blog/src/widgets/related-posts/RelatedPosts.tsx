@@ -10,7 +10,7 @@ export const RelatedPosts = ({
   if (relatedPosts.length === 0) return null;
 
   return (
-    <section className="flex flex-col gap-2 py-8 lg:hidden">
+    <section className="flex flex-col gap-2 py-8">
       <h2 className="text-sm font-semibold tracking-tight text-primary-900 flex items-center gap-1">
         <span className="text-base">😎</span>
         <span>다른 글도 읽어보세요</span>

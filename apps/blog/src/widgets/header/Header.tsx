@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import ThemeToggle from "@/features/theme-toggle/ThemeToggle";
@@ -15,11 +16,21 @@ const Header = () => {
 
       <div className="container px-4 h-full flex items-center justify-between">
         {/* 로고/사이트명 */}
-        <Link
-          href="/"
-          className="text-2xl font-bold text-primary-100 hover:text-secondary-400 transition-colors"
-        >
-          HyoungMin
+        <Link href="/" className="flex relative">
+          <Image
+            src="/images/logos/logo.png"
+            alt="HyoungMin"
+            width={40}
+            height={40}
+            className="block md:hidden"
+          />
+          <Image
+            src="/images/logos/logo-text.png"
+            alt="HyoungMin"
+            width={250}
+            height={40}
+            className="hidden md:block"
+          />
         </Link>
 
         {/* 다크모드 토글 버튼 */}
@@ -30,4 +41,3 @@ const Header = () => {
 };
 
 export default Header;
-33;

@@ -50,11 +50,7 @@ export const generateMetadata = async ({
   const title = meta.title;
   const description = meta.description;
   const url = `${siteUrl}/${slug}`;
-  const image = meta.cover
-    ? meta.cover.startsWith("http")
-      ? meta.cover
-      : `${siteUrl}${meta.cover}`
-    : `${siteUrl}/og-image.png`;
+  const image = `${siteUrl}/images/logos/logo-text.png`;
 
   return {
     title,
@@ -157,7 +153,7 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
 
       <div className="container px-4 h-full flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-12">
         {/* 사이드바 (데스크톱만 표시) */}
-        <aside className="hidden sticky top-24 md:flex w-72 shrink-0 h-full flex-col gap-12">
+        <aside className="hidden sticky top-24 md:flex w-72 shrink-0 h-full flex-col gap-8">
           <TableOfContents headings={headings} />
           <RelatedPosts relatedPosts={relatedPosts} />
         </aside>
@@ -186,7 +182,9 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
         </article>
 
         {/* 모바일 관련 포스트 */}
-        <RelatedPosts relatedPosts={relatedPosts} />
+        <div className="lg:hidden">
+          <RelatedPosts relatedPosts={relatedPosts} />
+        </div>
       </div>
     </>
   );

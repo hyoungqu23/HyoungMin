@@ -1,3 +1,4 @@
+import { cn } from "@hyoungmin/ui";
 import Link from "next/link";
 
 import type { TocItem } from "@/shared/lib/rehype-extract-headings";
@@ -24,7 +25,10 @@ const TableOfContents = ({ headings }: TableOfContentsProps) => {
               <li key={heading.id}>
                 <Link
                   href={`#${heading.id}`}
-                  className={`block py-1 px-2 rounded transition-colors text-primary-400 hover:text-primary-900 hover:bg-primary-100 ${indentClass}`}
+                  className={cn(
+                    "block py-1 px-2 rounded transition-colors text-primary-400 hover:text-primary-900 hover:underline hover:bg-primary-100",
+                    indentClass,
+                  )}
                 >
                   {heading.text}
                 </Link>
