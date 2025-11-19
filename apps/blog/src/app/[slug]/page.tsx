@@ -151,9 +151,9 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
 
       <ReadingProgress />
 
-      <div className="container px-4 h-full flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-12">
+      <div className="container px-4 h-full flex flex-col md:flex-row md:items-start gap-8 md:gap-12">
         {/* 사이드바 (데스크톱만 표시) */}
-        <aside className="hidden sticky top-24 md:flex w-72 shrink-0 h-full flex-col gap-8">
+        <aside className="hidden sticky top-24 md:flex w-72 shrink-0 h-full flex-col gap-6 md:gap-8">
           <TableOfContents headings={headings} />
           <RelatedPosts relatedPosts={relatedPosts} />
         </aside>
@@ -182,7 +182,7 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
         </article>
 
         {/* 모바일 관련 포스트 */}
-        <div className="lg:hidden">
+        <div className="md:hidden">
           <RelatedPosts relatedPosts={relatedPosts} />
         </div>
       </div>
