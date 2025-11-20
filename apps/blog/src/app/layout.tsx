@@ -26,11 +26,20 @@ export const metadata: Metadata = {
     siteName,
     title: siteName,
     description: "Blog built with Next.js",
+    images: [
+      {
+        url: `${siteUrl}/images/logos/logo-text.png`,
+        width: 1200,
+        height: 630,
+        alt: siteName,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: siteName,
     description: "Blog built with Next.js",
+    images: [`${siteUrl}/images/logos/logo-text.png`],
   },
   alternates: {
     types: {

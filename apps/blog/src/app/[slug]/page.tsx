@@ -114,11 +114,7 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
     "@type": "BlogPosting",
     headline: meta.title,
     description: meta.description,
-    image: meta.cover
-      ? meta.cover.startsWith("http")
-        ? meta.cover
-        : `${siteUrl}${meta.cover}`
-      : `${siteUrl}/og-image.png`,
+    image: `${siteUrl}/images/logos/logo-text.png`,
     datePublished: meta.createdAt.toISOString(),
     dateModified: meta.createdAt.toISOString(),
     author: {
@@ -130,7 +126,7 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
       name: siteName,
       logo: {
         "@type": "ImageObject",
-        url: `${siteUrl}/logo.png`,
+        url: `${siteUrl}/images/logos/logo-text.png`,
       },
     },
     mainEntityOfPage: {
