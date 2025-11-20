@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     description: "Blog built with Next.js",
     images: [
       {
-        url: `${siteUrl}/images/logos/logo-text.png`,
+        url: `${siteUrl}/images/logos/logo-background.png`,
         width: 1200,
         height: 630,
         alt: siteName,
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: siteName,
     description: "Blog built with Next.js",
-    images: [`${siteUrl}/images/logos/logo-text.png`],
+    images: [`${siteUrl}/images/logos/logo-background.png`],
   },
   alternates: {
     types: {

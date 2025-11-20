@@ -50,7 +50,7 @@ export const generateMetadata = async ({
   const title = meta.title;
   const description = meta.description;
   const url = `${siteUrl}/${slug}`;
-  const image = `${siteUrl}/images/logos/logo-text.png`;
+  const image = `${siteUrl}/images/logos/logo-background.png`;
 
   return {
     title,
