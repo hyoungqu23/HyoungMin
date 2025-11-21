@@ -30,6 +30,8 @@ const ShareButton = ({
   // const shareText = description || shareTitle;
 
   const handleCopyLink = async () => {
+    if (!currentUrl) return;
+
     try {
       await navigator.clipboard.writeText(currentUrl);
       setCopied(true);
@@ -72,10 +74,6 @@ const ShareButton = ({
   //   window.open(shareUrl, "_blank", "width=600,height=400,noopener,noreferrer");
   // };
 
-  if (!currentUrl) {
-    return null;
-  }
-
   return (
     <div className="flex items-center gap-2">
       {/* 링크 복사 버튼 */}
@@ -86,7 +84,8 @@ const ShareButton = ({
         aria-label={copied ? "Link copied" : "Copy link"}
         onClick={handleCopyLink}
         className="text-primary-800"
-        title={copied ? "Copied!" : "Copy link"}
+        title={copied ? "Copied!" : currentUrl ? "Copy link" : "링크 준비 중"}
+        disabled={!currentUrl}
       >
         {copied ? (
           <Check className="h-6 w-6 text-primary-500" />

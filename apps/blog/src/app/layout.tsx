@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import { ThemeProvider } from "next-themes";
+import localFont from "next/font/local";
 
-import KeyboardShortcutsProvider from "@/features/keyboard-shortcuts/KeyboardShortcutsProvider";
-import "@/root/styles/globals.css";
-import { Analytics } from "@/root/analytics/ui/Anayltics";
-import Footer from "@/widgets/footer/Footer";
-import Header from "@/widgets/header/Header";
 import { cn } from "@hyoungmin/ui";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
+import KeyboardShortcutsProvider from "@/features/keyboard-shortcuts/KeyboardShortcutsProvider";
+import { Analytics } from "@/root/analytics/ui/Analytics";
+import "@/root/styles/globals.css";
+import { siteUrl } from "@/shared/config/site";
+import Footer from "@/widgets/footer/Footer";
+import Header from "@/widgets/header/Header";
+
 const siteName = "Blog";
 
 export const metadata: Metadata = {

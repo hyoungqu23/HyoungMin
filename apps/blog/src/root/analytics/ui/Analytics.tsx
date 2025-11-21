@@ -4,11 +4,18 @@ import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { ClarityAnalytics } from "./ClarityAnalytics";
 
 export const Analytics = () => {
+  const googleAnalyticsId =
+    process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_PROPERTY_ID;
+
+  const hasGoogleAnalytics = Boolean(
+    googleAnalyticsId && googleAnalyticsId.trim(),
+  );
+
   return (
     <>
-      <GoogleAnalytics
-        gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_PROPERTY_ID!}
-      />
+      {hasGoogleAnalytics ? (
+        <GoogleAnalytics gaId={googleAnalyticsId!} />
+      ) : null}
       <ClarityAnalytics />
       <VercelAnalytics />
     </>

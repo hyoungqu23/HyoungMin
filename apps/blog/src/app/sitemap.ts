@@ -1,8 +1,6 @@
-import { listSlugs, readArticle } from "@/shared/lib/fs";
-import { compilePostMDX } from "@/shared/lib/mdx";
+import { siteUrl } from "@/shared/config/site";
+import { getAllPostSummaries } from "@/shared/lib/posts";
 import type { MetadataRoute } from "next";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
 
 type SitemapEntry = {
   url: string;
@@ -12,33 +10,16 @@ type SitemapEntry = {
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const slugs = await listSlugs();
+  const posts = await getAllPostSummaries();
 
-  const posts = await Promise.all(
-    slugs.map(async (slug): Promise<SitemapEntry | null> => {
-      try {
-        const source = await readArticle(slug);
-        const { meta } = await compilePostMDX(source, {});
-
-        if (meta.draft) {
-          return null;
-        }
-
-        return {
-          url: `${siteUrl}/${slug}`,
-          lastModified: meta.createdAt,
-          changeFrequency: "monthly" as const,
-          priority: 0.8,
-        };
-      } catch {
-        return null;
-      }
-    }),
-  );
-
-  const validPosts: SitemapEntry[] = posts.filter(
-    (post): post is SitemapEntry => post !== null,
-  );
+  const validPosts: SitemapEntry[] = posts
+    .filter((post) => !post.meta.draft)
+    .map((post) => ({
+      url: `${siteUrl}/${post.slug}`,
+      lastModified: post.meta.createdAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    }));
 
   // 최신 포스트 우선순위 높게 설정 (GEO 최적화)
   const sortedPosts = validPosts.sort((a, b) => {

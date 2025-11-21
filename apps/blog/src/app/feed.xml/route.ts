@@ -1,10 +1,9 @@
 import type { PostMeta } from "@hyoungmin/schema";
 import { NextResponse } from "next/server";
 
-import { listSlugs, readArticle } from "@/shared/lib/fs";
-import { compilePostMDX } from "@/shared/lib/mdx";
+import { siteUrl } from "@/shared/config/site";
+import { getAllPostSummaries } from "@/shared/lib/posts";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
 const siteName = "Blog";
 
 type PostWithMeta = {
@@ -53,32 +52,11 @@ const escapeXml = (text: string): string => {
 
 export async function GET() {
   try {
-    const slugs = await listSlugs();
-
-    // 모든 포스트 메타데이터 가져오기
-    const posts = await Promise.all(
-      slugs.map(async (slug) => {
-        try {
-          const source = await readArticle(slug);
-          const { meta } = await compilePostMDX(source, {});
-
-          if (meta.draft) {
-            return null;
-          }
-
-          return {
-            slug,
-            meta,
-          };
-        } catch {
-          return null;
-        }
-      }),
-    );
+    const posts = await getAllPostSummaries();
 
     // 드래프트 제외 및 날짜 내림차순 정렬
     const publishedPosts: PostWithMeta[] = posts
-      .filter((post): post is PostWithMeta => post !== null)
+      .filter((post) => !post.meta.draft)
       .sort((a, b) => b.meta.createdAt.getTime() - a.meta.createdAt.getTime());
 
     // RSS 2.0 형식 생성

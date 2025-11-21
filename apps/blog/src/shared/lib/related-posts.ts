@@ -1,6 +1,7 @@
-import { listSlugs, readArticle } from "./fs";
-import { compilePostMDX } from "./mdx";
 import type { PostMeta } from "@hyoungmin/schema";
+
+import { listSlugs } from "./fs";
+import { getPostSummary } from "./posts";
 
 export type PostWithSlug = {
   slug: string;
@@ -24,8 +25,7 @@ export const getRelatedPosts = async (
     const allPosts = await Promise.all(
       slugs.map(async (slug): Promise<PostWithSlug | null> => {
         try {
-          const source = await readArticle(slug);
-          const { meta } = await compilePostMDX(source, {});
+          const { meta } = await getPostSummary(slug);
 
           // 드래프트 제외
           if (meta.draft) {

@@ -6,6 +6,7 @@ import Script from "next/script";
 
 import { TagList } from "@/features/post-list/TagList";
 import ShareButton from "@/features/share/ShareButton";
+import { siteUrl } from "@/shared/config/site";
 import { listSlugs, readArticle } from "@/shared/lib/fs";
 import { compilePostMDX } from "@/shared/lib/mdx";
 import { mdxComponents } from "@/shared/lib/mdx-components";
@@ -15,7 +16,6 @@ import ReadingProgress from "@/widgets/reading-progress/ReadingProgress";
 import { RelatedPosts } from "@/widgets/related-posts/RelatedPosts";
 import TableOfContents from "@/widgets/toc/TableOfContents";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
 const siteName = "Blog";
 
 export const generateStaticParams = async () => {
@@ -101,6 +101,10 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
     source,
     mdxComponents,
   );
+
+  if (meta.draft) {
+    notFound();
+  }
 
   // 읽기 시간 계산
   const readingTime = calculateReadingTime(source);

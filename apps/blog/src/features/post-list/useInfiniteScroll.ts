@@ -25,8 +25,7 @@ export const useInfiniteScroll = ({
         if (target && target.isIntersecting && hasMore && !isLoading) {
           setIsLoading(true);
           onLoadMore();
-          // 로딩 완료 후 상태 리셋 (부모 컴포넌트에서 처리)
-          setTimeout(() => setIsLoading(false), 100);
+          setIsLoading(false);
         }
       },
       {
