@@ -1,8 +1,7 @@
+import { cn } from "@hyoungmin/ui";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import localFont from "next/font/local";
-
-import { cn } from "@hyoungmin/ui";
 
 import KeyboardShortcutsProvider from "@/features/keyboard-shortcuts/KeyboardShortcutsProvider";
 import { Analytics } from "@/root/analytics/ui/Analytics";
@@ -53,6 +52,7 @@ export const metadata: Metadata = {
     google: "bifggwBk-paprwdgYduW7jTkn7lspxQAmuz2eQOq4Hg",
     other: {
       "naver-site-verification": "ec8dfd4425db70a51815d51de08e2c27c3a002ba",
+      "google-adsense-account": "ca-pub-2389668330704189",
     },
   },
 };
