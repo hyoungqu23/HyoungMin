@@ -1,6 +1,18 @@
 "use client";
 
-import { Button, Check, Link } from "@hyoungmin/ui";
+import {
+  Button,
+  Check,
+  Link,
+  Facebook,
+  Linkedin,
+  Reddit,
+  Threads,
+  X,
+  Chatgpt,
+  Claude,
+  Grok,
+} from "@hyoungmin/ui";
 import { useMemo, useState } from "react";
 
 type ShareButtonProps = {
@@ -25,9 +37,61 @@ const ShareButton = ({
     return window.location.href;
   }, [url]);
 
-  // const shareTitle =
-  //   title || (typeof document !== "undefined" ? document.title : "");
-  // const shareText = description || shareTitle;
+  const shareToSocial = (
+    platform: "linkedin" | "facebook" | "x" | "reddit" | "threads",
+  ) => {
+    if (!currentUrl || typeof window === "undefined") return;
+
+    const shareTitle = typeof document !== "undefined" ? document.title : "";
+
+    let shareUrl = "";
+
+    switch (platform) {
+      case "facebook":
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
+        break;
+      case "linkedin":
+        shareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(currentUrl)}`;
+        break;
+      case "x":
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(shareTitle)}`;
+        break;
+      case "reddit":
+        shareUrl = `https://www.reddit.com/submit?url=${encodeURIComponent(currentUrl)}&title=${encodeURIComponent(shareTitle)}`;
+        break;
+      case "threads":
+        shareUrl = `https://www.threads.net/intent/post?text=${encodeURIComponent(currentUrl)}`;
+        break;
+      default:
+        return;
+    }
+
+    window.open(shareUrl, "_blank", "width=600,height=400,noopener,noreferrer");
+  };
+
+  const askAiAboutContent = (provider: "chatgpt" | "claude" | "grok") => {
+    if (!currentUrl || typeof window === "undefined") return;
+
+    const prompt = `Read ${currentUrl} summarize and answer questions about the content`;
+
+    let url = "";
+
+    switch (provider) {
+      case "chatgpt":
+        url = `https://chatgpt.com/?prompt=${encodeURIComponent(prompt)}`;
+        break;
+      case "claude":
+        url = `https://claude.ai/new?q=${encodeURIComponent(prompt)}`;
+        break;
+      case "grok":
+        url = `https://grok.com?q=${encodeURIComponent(prompt)}`;
+        break;
+      default:
+        return;
+    }
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   const handleCopyLink = async () => {
     if (!currentUrl) return;
@@ -52,28 +116,6 @@ const ShareButton = ({
     }
   };
 
-  // const shareToSocial = (platform: string) => {
-  //   if (!currentUrl || typeof window === "undefined") return;
-
-  //   let shareUrl = "";
-
-  //   switch (platform) {
-  //     case "twitter":
-  //       shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(shareText)}`;
-  //       break;
-  //     case "facebook":
-  //       shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
-  //       break;
-  //     case "linkedin":
-  //       shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`;
-  //       break;
-  //     default:
-  //       return;
-  //   }
-
-  //   window.open(shareUrl, "_blank", "width=600,height=400,noopener,noreferrer");
-  // };
-
   return (
     <div className="flex items-center gap-2">
       {/* 링크 복사 버튼 */}
@@ -95,7 +137,7 @@ const ShareButton = ({
       </Button>
 
       {/* LinkedIn 공유 버튼 */}
-      {/* <Button
+      <Button
         type="button"
         variant="ghost"
         size="icon"
@@ -103,25 +145,13 @@ const ShareButton = ({
         onClick={() => shareToSocial("linkedin")}
         className="text-primary-800"
         title="Share on LinkedIn"
+        disabled={!currentUrl}
       >
         <Linkedin className="h-6 w-6" />
-      </Button> */}
-
-      {/* Twitter/X 공유 버튼 */}
-      {/* <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label="Share on Twitter / X"
-        onClick={() => shareToSocial("twitter")}
-        className="text-primary-800"
-        title="Share on Twitter / X"
-      >
-        <TwitterIcon className="h-6 w-6" />
-      </Button> */}
+      </Button>
 
       {/* Facebook 공유 버튼 */}
-      {/* <Button
+      <Button
         type="button"
         variant="ghost"
         size="icon"
@@ -129,9 +159,94 @@ const ShareButton = ({
         onClick={() => shareToSocial("facebook")}
         className="text-primary-800"
         title="Share on Facebook"
+        disabled={!currentUrl}
       >
-        <FacebookIcon className="h-6 w-6" />
-      </Button> */}
+        <Facebook className="h-6 w-6" />
+      </Button>
+
+      {/* X(Twitter) 공유 버튼 */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label="Share on X (Twitter)"
+        onClick={() => shareToSocial("x")}
+        className="text-primary-800"
+        title="Share on X (Twitter)"
+        disabled={!currentUrl}
+      >
+        <X className="h-6 w-6" />
+      </Button>
+
+      {/* Reddit 공유 버튼 */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label="Share on Reddit"
+        onClick={() => shareToSocial("reddit")}
+        className="text-primary-800"
+        title="Share on Reddit"
+        disabled={!currentUrl}
+      >
+        <Reddit className="h-6 w-6" />
+      </Button>
+
+      {/* Threads 공유 버튼 */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label="Share on Threads"
+        onClick={() => shareToSocial("threads")}
+        className="text-primary-800"
+        title="Share on Threads"
+        disabled={!currentUrl}
+      >
+        <Threads className="h-6 w-6" />
+      </Button>
+
+      {/* ChatGPT 에게 이 글 요약/질문하기 */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label="Ask ChatGPT about this content"
+        onClick={() => askAiAboutContent("chatgpt")}
+        className="text-primary-800"
+        title="Ask ChatGPT about this content"
+        disabled={!currentUrl}
+      >
+        <Chatgpt className="h-6 w-6" />
+      </Button>
+
+      {/* Claude 에게 이 글 요약/질문하기 */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label="Ask Claude about this content"
+        onClick={() => askAiAboutContent("claude")}
+        className="text-primary-800"
+        title="Ask Claude about this content"
+        disabled={!currentUrl}
+      >
+        <Claude className="h-6 w-6" />
+      </Button>
+
+      {/* Grok 에게 이 글 요약/질문하기 */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label="Ask Grok about this content"
+        onClick={() => askAiAboutContent("grok")}
+        className="text-primary-800"
+        title="Ask Grok about this content"
+        disabled={!currentUrl}
+      >
+        <Grok className="h-6 w-6" />
+      </Button>
     </div>
   );
 };
