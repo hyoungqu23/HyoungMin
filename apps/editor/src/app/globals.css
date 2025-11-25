@@ -1,0 +1,141 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --border: #2a2a2a;
+  --muted: #6b7280;
+  --accent: #3b82f6;
+  --font-sans: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Monaco Editor container */
+.monaco-editor-container {
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+/* Prose styling for MDX preview */
+.prose-editor {
+  max-width: none;
+  color: var(--foreground);
+}
+
+.prose-editor h1,
+.prose-editor h2,
+.prose-editor h3,
+.prose-editor h4,
+.prose-editor h5,
+.prose-editor h6 {
+  font-weight: bold;
+  color: var(--foreground);
+}
+
+.prose-editor p {
+  color: rgba(237, 237, 237, 0.9);
+  line-height: 1.75;
+}
+
+.prose-editor a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.prose-editor a:hover {
+  text-decoration: underline;
+}
+
+.prose-editor code {
+  color: var(--accent);
+  background-color: rgba(42, 42, 42, 0.5);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+.prose-editor pre {
+  background-color: #1e1e1e;
+  border: 1px solid var(--border);
+}
+
+.prose-editor img {
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+}
+
+.prose-editor blockquote {
+  border-left: 4px solid var(--accent);
+  padding-left: 1rem;
+  font-style: italic;
+  color: var(--muted);
+}
+
+.prose-editor ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+}
+
+.prose-editor ol {
+  list-style-type: decimal;
+  margin-left: 1.5rem;
+}
+
+/* Tag input styles */
+.tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: rgba(42, 42, 42, 0.3);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  transition: border-color 0.2s;
+}
+
+.tag-input:focus-within {
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.tag-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(59, 130, 246, 0.2);
+  color: var(--accent);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}

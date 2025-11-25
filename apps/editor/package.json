@@ -1,0 +1,46 @@
+{
+  "name": "editor",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
+  },
+  "dependencies": {
+    "@hyoungmin/design-system": "workspace:*",
+    "@hyoungmin/schema": "workspace:*",
+    "@hyoungmin/ui": "workspace:*",
+    "@monaco-editor/react": "^4.7.0",
+    "@tauri-apps/api": "^2.5.0",
+    "@tauri-apps/plugin-dialog": "^2.2.1",
+    "@tauri-apps/plugin-fs": "^2.2.0",
+    "@tauri-apps/plugin-shell": "^2.2.0",
+    "next": "^16.0.2",
+    "next-mdx-remote": "^5.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "rehype-pretty-code": "^0.14.1",
+    "rehype-slug": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "shiki": "^3.15.0",
+    "tailwindcss": "^4.1.17"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.5.0",
+    "@tailwindcss/postcss": "^4.1.17",
+    "@tailwindcss/typography": "^0.5.19",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.4",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.22",
+    "postcss": "^8.5.6",
+    "typescript": "^5.9.3"
+  }
+}
+

@@ -9,7 +9,9 @@
     "typecheck": { "outputs": [] },
     "test": { "outputs": [] },
     "test:ci": { "outputs": [] },
-    "build": { "dependsOn": ["^build"], "outputs": ["dist/**", ".next/**"] }
+    "build": { "dependsOn": ["^build"], "outputs": ["dist/**", ".next/**", "out/**"] },
+    "tauri:dev": { "cache": false, "persistent": true },
+    "tauri:build": { "dependsOn": ["build"], "outputs": ["src-tauri/target/**"] }
   }
 }
 
