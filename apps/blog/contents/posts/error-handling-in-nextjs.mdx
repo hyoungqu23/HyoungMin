@@ -133,6 +133,7 @@ Next.js App Router의 Route Handler나 Server Action에서 발생하는 에러 �
 
 - **ErrorBoundary Error**
   주로 **Render Error**이며, `ErrorBoundary`를 활용해 처리하는 에러를 의미한다.
+
   ```tsx
   import React from "react";
 
@@ -162,6 +163,7 @@ Next.js App Router의 Route Handler나 Server Action에서 발생하는 에러 �
     }
   }
   ```
+
   ```tsx
   "use client";
 
@@ -173,9 +175,11 @@ Next.js App Router의 Route Handler나 Server Action에서 발생하는 에러 �
     );
   };
   ```
+
 - **Error Routing Error**
   주로 **Render Error**이며, Next.js의 `error.tsx`를 활용해 처리하는 에러를 의미한다. 해당 방식은 보통 Server Side Rendering에서 발생한 에러를 처리하는 데 활용된다.
   Next.js의 `error.tsx`는 서버 사이드에서 발생한 에러를 클라이언트에 보여줄 때 사용하는데, 즉, SSR로 데이터를 가져와 렌더링하는 와중에 에러가 발생하면 `error.tsx`가 대신 렌더링되게 된다.
+
   ```tsx
   "use client";
 
@@ -192,6 +196,7 @@ Next.js App Router의 Route Handler나 Server Action에서 발생하는 에러 �
     );
   };
   ```
+
 - **Try Catch Error**
   주로 **Interaction Error**이며, 해당 이벤트 핸들러, 모듈, 함수 등에서 `try catch`를 활용해 처리하는 에러를 의미한다.
   ```tsx

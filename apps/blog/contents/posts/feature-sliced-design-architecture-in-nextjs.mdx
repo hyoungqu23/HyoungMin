@@ -158,6 +158,7 @@ FSD에서는 Slice와 Segment를 잘 구분하고, 이를 잘 활용하는 것�
 
    6. Page 레이어, 즉 Next.js App Router 하의 App 디렉토리는 웹 사이트의 각 페이지를 담당하고, 여러 Widget을 모아서 하나의 페이지로 구현한다.
    7. App 레이어, 즉 Next.js App Router 하의 Root 디렉토리는 잘 사용하지는 않으나 `Provider`, `Layout` 등과 관련된 컴포넌트나 GA4, Vercel Analytics, Microsoft Clarity, Channel Talk 등의 Tracking Tools와 같이 전역적으로 설정하는 모듈을 작성한다.
+
 2. Public API는 Shared와 App 레이어, 즉 슬라이스가 없는 레이어에서는 세그먼트에서 직접 `index.ts` 를 활용해 내보내지며, 이외의 슬라이스가 존재하는 레이어는 모두 슬라이스 하위에 `index.ts`를 활용해 모든 세그먼트가 한 번에 내보내지는 구조로 한다.
 3. Entity 레이어, Feature 레이어, Widget 레이어의 구분은 위 규칙을 기반으로 팀 내 합의 하에 결정한다.
 

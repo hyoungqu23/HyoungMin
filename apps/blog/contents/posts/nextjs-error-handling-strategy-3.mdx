@@ -317,6 +317,7 @@ export const networkBoundary = async <S extends z.ZodSchema>({ schema, input, in
 - 인터렉션 경계
   사용자의 모든 인터렉션에서 발생하는 에러를 포착해서 중앙 에러기에 전달해요. 이벤트 핸들러 함수 내부에서 `if … else` 또는 `try … catch`를 활용해 에러를 포착하고, `handleError`를 직접 호출해요.
   - 의도한 에러 처리
+
     ```tsx
     // components/SomeForm.tsx
     export const SomeForm = () => {
@@ -333,8 +334,10 @@ export const networkBoundary = async <S extends z.ZodSchema>({ schema, input, in
       return <form onSubmit={onSubmit}></form>;
     };
     ```
+
   - 의도하지 않은 에러 처리
     반복척인 `try … catch`를 줄이기 위해 `guarded` 헬퍼 함수를 활용해요.
+
     ```tsx
     // error/interaction-boundary-helper.ts
     import { handleError } from './handler.ts';
@@ -349,6 +352,7 @@ export const networkBoundary = async <S extends z.ZodSchema>({ schema, input, in
     	};
     };
     ```
+
     ```tsx
     // components/SomeButton.tsx
     export const SomeButton = () => {
@@ -359,8 +363,10 @@ export const networkBoundary = async <S extends z.ZodSchema>({ schema, input, in
       return <button onClick={onClick}>...</button>;
     };
     ```
+
 - 렌더링 경계
   Next.js의 `error.tsx`의 `useEffect` 내부에서 `handleError(props.error)`를 직접 호출하거나, React의 Error Boundary를 활용해요.
+
   ```tsx
   // app/some-route/error.tsx
   'use client';
@@ -383,6 +389,7 @@ export const networkBoundary = async <S extends z.ZodSchema>({ schema, input, in
 
   export default SomeRouteError;
   ```
+
   ```tsx
   // components/FallbackComponent.tsx
   "use client";
@@ -418,8 +425,10 @@ export const networkBoundary = async <S extends z.ZodSchema>({ schema, input, in
     );
   };
   ```
+
 - 브라우저 경계
   `window.onerror` 이벤트 리스너 내부에서 `handleError(event.error)`를 직접 호출해요.
+
   ```tsx
   // components/browser-boundary,tsx
   "use client";
