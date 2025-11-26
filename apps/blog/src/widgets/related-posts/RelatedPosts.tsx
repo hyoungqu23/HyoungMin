@@ -31,7 +31,10 @@ export const RelatedPosts = ({
             </p>
 
             <div className="mt-1 flex items-center justify-between gap-2">
-              <time className="text-[0.7rem] text-primary-600 whitespace-nowrap">
+              <time
+                className="text-[0.7rem] text-primary-600 whitespace-nowrap"
+                dateTime={relatedPost.meta.createdAt.toISOString()}
+              >
                 {relatedPost.meta.createdAt.toLocaleDateString("ko-KR", {
                   year: "numeric",
                   month: "long",

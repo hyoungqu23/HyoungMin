@@ -19,7 +19,10 @@ export const PostList = ({ slug, meta }: PostListProps) => {
           <h2 className="text-2xl font-semibold mb-2 hover:text-secondary-400 transition-colors">
             {meta.title}
           </h2>
-          <time className="whitespace-nowrap">
+          <time
+            className="whitespace-nowrap"
+            dateTime={meta.createdAt.toISOString()}
+          >
             {meta.createdAt.toLocaleDateString("ko-KR", {
               year: "numeric",
               month: "long",

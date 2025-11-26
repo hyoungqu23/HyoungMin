@@ -1,11 +1,11 @@
-import { FlatCompat } from '@eslint/eslintrc';
-import js from '@eslint/js';
-import typescriptEslint from '@typescript-eslint/eslint-plugin';
-import typescriptParser from '@typescript-eslint/parser';
-import importPlugin from 'eslint-plugin-import';
-import reactHooks from 'eslint-plugin-react-hooks';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { FlatCompat } from "@eslint/eslintrc";
+import js from "@eslint/js";
+import typescriptEslint from "@typescript-eslint/eslint-plugin";
+import typescriptParser from "@typescript-eslint/parser";
+import importPlugin from "eslint-plugin-import";
+import reactHooks from "eslint-plugin-react-hooks";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,38 +16,38 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ['.next/**', 'node_modules/**', 'dist/**', 'coverage/**'],
+    ignores: [".next/**", "node_modules/**", "dist/**", "coverage/**", "contents/**/*.mdx"],
   },
   js.configs.recommended,
-  ...compat.extends('plugin:@typescript-eslint/recommended', 'plugin:react-hooks/recommended'),
+  ...compat.extends("plugin:@typescript-eslint/recommended", "plugin:react-hooks/recommended"),
   {
-    files: ['**/*.{ts,tsx,mdx}'],
+    files: ["**/*.{ts,tsx,mdx}"],
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
+        ecmaVersion: "latest",
+        sourceType: "module",
         ecmaFeatures: {
           jsx: true,
         },
-        project: './tsconfig.json',
+        project: "./tsconfig.json",
       },
     },
     plugins: {
-      '@typescript-eslint': typescriptEslint,
-      'react-hooks': reactHooks,
+      "@typescript-eslint": typescriptEslint,
+      "react-hooks": reactHooks,
       import: importPlugin,
     },
     rules: {
-      '@typescript-eslint/consistent-type-imports': 'warn',
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
-      'no-console': ['warn', { allow: ['error', 'warn'] }],
-      'import/order': [
-        'warn',
+      "@typescript-eslint/consistent-type-imports": "warn",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "no-console": ["warn", { allow: ["error", "warn"] }],
+      "import/order": [
+        "warn",
         {
-          'newlines-between': 'always',
-          alphabetize: { order: 'asc' },
+          "newlines-between": "always",
+          alphabetize: { order: "asc" },
         },
       ],
     },

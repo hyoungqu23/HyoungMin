@@ -19,20 +19,18 @@ export const useInfiniteScroll = ({
   const observerTarget = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const target = entries[0];
-        if (target && target.isIntersecting && hasMore && !isLoading) {
-          setIsLoading(true);
-          onLoadMore();
-          setIsLoading(false);
-        }
-      },
-      {
-        threshold,
-        rootMargin,
-      },
-    );
+    const handleIntersect: IntersectionObserverCallback = (entries) => {
+      const [entry] = entries;
+      if (!entry?.isIntersecting || isLoading || !hasMore) return;
+
+      setIsLoading(true);
+      Promise.resolve(onLoadMore()).finally(() => setIsLoading(false));
+    };
+
+    const observer = new IntersectionObserver(handleIntersect, {
+      threshold,
+      rootMargin,
+    });
 
     const currentTarget = observerTarget.current;
     if (currentTarget) {
@@ -40,9 +38,8 @@ export const useInfiniteScroll = ({
     }
 
     return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget);
-      }
+      if (currentTarget) observer.unobserve(currentTarget);
+      observer.disconnect();
     };
   }, [hasMore, isLoading, onLoadMore, threshold, rootMargin]);
 

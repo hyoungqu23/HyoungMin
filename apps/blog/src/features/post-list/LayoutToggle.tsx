@@ -16,6 +16,7 @@ export const LayoutToggle = ({ layout, onLayoutChange }: LayoutToggleProps) => {
         variant={layout === "list" ? "default" : "ghost"}
         size="icon"
         aria-label="List layout"
+        aria-pressed={layout === "list"}
         onClick={() => onLayoutChange("list")}
         className={cn(
           "h-8 w-8 text-primary-500 hover:text-primary-100 flex items-center justify-center",
@@ -31,6 +32,7 @@ export const LayoutToggle = ({ layout, onLayoutChange }: LayoutToggleProps) => {
         variant={layout === "card" ? "default" : "ghost"}
         size="icon"
         aria-label="Card layout"
+        aria-pressed={layout === "card"}
         onClick={() => onLayoutChange("card")}
         className={cn(
           "h-8 w-8 text-primary-500 hover:text-primary-100 flex items-center justify-center",

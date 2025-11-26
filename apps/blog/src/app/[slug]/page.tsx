@@ -1,4 +1,3 @@
-import type { PostMeta } from "@hyoungmin/schema";
 import { Prose } from "@hyoungmin/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -10,6 +9,7 @@ import { siteUrl } from "@/shared/config/site";
 import { listSlugs, readArticle } from "@/shared/lib/fs";
 import { compilePostMDX } from "@/shared/lib/mdx";
 import { mdxComponents } from "@/shared/lib/mdx-components";
+import { getPostSummary } from "@/shared/lib/posts";
 import { calculateReadingTime } from "@/shared/lib/reading-time";
 import { getRelatedPosts } from "@/shared/lib/related-posts";
 import ReadingProgress from "@/widgets/reading-progress/ReadingProgress";
@@ -23,23 +23,14 @@ export const generateStaticParams = async () => {
   return slugs.map((slug) => ({ slug }));
 };
 
-const getPostMetadata = async (slug: string): Promise<PostMeta | null> => {
-  try {
-    const source = await readArticle(slug);
-    const { meta } = await compilePostMDX(source, {});
-    return meta;
-  } catch {
-    return null;
-  }
-};
-
 export const generateMetadata = async ({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> => {
   const { slug } = await params;
-  const meta = await getPostMetadata(slug);
+  const summary = await getPostSummary(slug).catch(() => null);
+  const meta = summary?.meta;
 
   if (!meta || meta.draft) {
     return {
@@ -165,7 +156,7 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
 
             <p className="text-lg text-primary-700">{meta.description}</p>
             <div className="flex flex-wrap items-center gap-4 my-4 text-sm text-primary-600">
-              <time>
+              <time dateTime={meta.createdAt.toISOString()}>
                 {meta.createdAt.toLocaleDateString("ko-KR", {
                   year: "numeric",
                   month: "long",

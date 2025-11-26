@@ -1,7 +1,7 @@
 import { cn } from "@hyoungmin/ui";
 import type { Metadata } from "next";
-import { ThemeProvider } from "next-themes";
 import localFont from "next/font/local";
+import { ThemeProvider } from "next-themes";
 
 import KeyboardShortcutsProvider from "@/features/keyboard-shortcuts/KeyboardShortcutsProvider";
 import { Analytics } from "@/root/analytics/ui/Analytics";

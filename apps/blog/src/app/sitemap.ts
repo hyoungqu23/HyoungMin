@@ -1,6 +1,7 @@
+import type { MetadataRoute } from "next";
+
 import { siteUrl } from "@/shared/config/site";
 import { getAllPostSummaries } from "@/shared/lib/posts";
-import type { MetadataRoute } from "next";
 
 type SitemapEntry = {
   url: string;

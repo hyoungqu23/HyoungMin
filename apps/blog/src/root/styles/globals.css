@@ -283,13 +283,11 @@ code[data-highlighted-chars] {
 
 /* 테이블 스타일 */
 .prose table {
-  /* 레이아웃 */
+  /* 기본: 모바일에서는 가로 스크롤 허용 */
   width: 100%;
   margin: 2rem 0;
   border-collapse: collapse;
   border-radius: 0.75rem;
-
-  /* 작은 화면에서 테이블만 가로 스크롤 되도록 */
   display: block;
   overflow-x: auto;
   max-width: 100%;
@@ -301,24 +299,38 @@ code[data-highlighted-chars] {
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
 }
 
-/* 실제 테이블 내용은 콘텐츠 길이에 맞게 늘어나되,
-   최소 폭은 전체 화면을 차지하도록 */
+/* 작은 화면에서 테이블 내용이 잘리지 않도록 최소 폭 확보 */
 .prose table > thead,
 .prose table > tbody,
 .prose table > tfoot {
   min-width: 100%;
 }
 
+/* 데스크톱: 콘텐츠 크기에 맞춰 줄이고 외곽 보더가 화면 전체로 늘어나지 않게 */
+@media (min-width: 768px) {
+  .prose table {
+    display: table;
+    width: auto;
+    max-width: 100%;
+    overflow: visible;
+  }
+
+  .prose table > thead,
+  .prose table > tbody,
+  .prose table > tfoot {
+    min-width: auto;
+  }
+}
+
 /* 테이블 헤더 */
 .prose thead {
   /* primary/secondary 톤을 아주 은은하게 섞은 그라데이션 */
   background: linear-gradient(
-    to left,
-    color-mix(in srgb, var(--primary-100) 85%, transparent),
-    color-mix(in srgb, var(--secondary-50) 70%, transparent)
+    to right,
+    color-mix(in srgb, var(--primary-300) 85%, transparent),
+    color-mix(in srgb, var(--primary-900) 70%, transparent)
   );
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--primary-200) 70%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--primary-200) 70%, transparent);
 }
 
 .prose th {

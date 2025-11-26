@@ -56,7 +56,7 @@ export const PostCard = ({ slug, meta, firstImage }: PostCardProps) => {
             {meta.description}
           </p>
           <div className="flex flex-col md:flex-row gap-2 items-end md:items-center justify-between text-xs text-primary-600">
-            <time>
+            <time dateTime={meta.createdAt.toISOString()}>
               {meta.createdAt.toLocaleDateString("ko-KR", {
                 year: "numeric",
                 month: "long",
