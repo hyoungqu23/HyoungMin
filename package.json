@@ -17,6 +17,10 @@
       "cd apps/blog && eslint --fix",
       "prettier --write"
     ],
+    "apps/wedding/**/*.{ts,tsx,mdx}": [
+      "cd apps/wedding && eslint --fix",
+      "prettier --write"
+    ],
     "packages/**/*.{ts,tsx,mdx}": [
       "prettier --write"
     ],

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useLayoutEffect, useState } from "react";
+import { useState } from "react";
 import { Ribbon } from "./Ribbon";
 
 type RibbonConfig = {
@@ -16,10 +16,8 @@ type RibbonConfig = {
 };
 
 export const FallingRibbons = () => {
-  const [ribbons, setRibbons] = useState<RibbonConfig[]>([]);
-
-  useLayoutEffect(() => {
-    const newRibbons = Array.from({ length: 100 }).map((_, i) => ({
+  const [ribbons] = useState<RibbonConfig[]>(() =>
+    Array.from({ length: 100 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
       delay: Math.random() * 5,
@@ -35,10 +33,8 @@ export const FallingRibbons = () => {
           : Math.random() > 0.3
             ? "text-pink-300/80"
             : "text-rose-200/90",
-    }));
-
-    setRibbons(newRibbons);
-  }, []);
+    })),
+  );
 
   return (
     <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden">
