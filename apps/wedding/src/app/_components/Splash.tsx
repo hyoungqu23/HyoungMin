@@ -104,7 +104,7 @@ export const Splash = () => {
         style={{
           transformOrigin: "top right",
           background:
-            "linear-gradient(-90deg, #FFF0F5 0%, #FBCFE8 10%, #FFF0F5 20%, #F9A8D4 30%, #FFF0F5 50%, #FBCFE8 60%, #FFF0F5 80%, #F9A8D4 95%, #FFF0F5 100%)",
+            "linear-gradient(-90deg, #FFF0F5 0%, #FF87AB20 10%, #FFF0F5 20%, #FF87AB50 30%, #FFF0F5 50%, #FF87AB20 60%, #FFF0F5 80%, #FF87AB50 95%, #FFF0F5 100%)",
         }}
         initial={{ x: 0, scaleX: 1, skewX: 0 }}
         animate={
@@ -112,7 +112,7 @@ export const Splash = () => {
             ? { x: "-100%", scaleX: 0.2, skewX: -15 }
             : { x: 0, scaleX: 1, skewX: 0 }
         }
-        transition={{ duration: 2.5, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 5, ease: [0.22, 1, 0.36, 1] }}
       >
         <motion.div
           className="absolute inset-0 bg-[#FFF5F7] z-10"
@@ -128,7 +128,7 @@ export const Splash = () => {
         style={{
           transformOrigin: "top left",
           background:
-            "linear-gradient(-90deg, #FFF0F5 0%, #FBCFE8 10%, #FFF0F5 20%, #F9A8D4 30%, #FFF0F5 50%, #FBCFE8 60%, #FFF0F5 80%, #F9A8D4 95%, #FFF0F5 100%)",
+            "linear-gradient(-90deg, #FFF0F5 0%, #FF87AB20 10%, #FFF0F5 20%, #FF87AB50 30%, #FFF0F5 50%, #FF87AB20 60%, #FFF0F5 80%, #FF87AB50 95%, #FFF0F5 100%)",
         }}
         initial={{ x: 0, scaleX: 1, skewX: 0 }}
         animate={
@@ -136,7 +136,7 @@ export const Splash = () => {
             ? { x: "100%", scaleX: 0.2, skewX: 15 }
             : { x: 0, scaleX: 1, skewX: 0 }
         }
-        transition={{ duration: 2.5, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 5, ease: [0.22, 1, 0.36, 1] }}
       >
         <motion.div
           className="absolute inset-0 bg-[#FFF5F7] z-10"
