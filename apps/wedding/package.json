@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@next/third-parties": "^16.0.3",
+    "@vercel/analytics": "^1.5.0",
     "google-auth-library": "^9.0.0",
     "googleapis": "^144.0.0",
     "motion": "^12.23.24",

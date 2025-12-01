@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Splash } from "./_components/Splash";
 import { FloatingButton } from "./_components/FloatingButton";
+import { Analytics } from "./_components/Analytics";
 
 export const metadata: Metadata = {
   title: "Wedding Day",
@@ -16,6 +17,7 @@ const RootLayout = ({ children }: LayoutProps) => {
   return (
     <html lang="ko">
       <body className="antialiased">
+        <Analytics />
         <Splash />
         {children}
         <FloatingButton />
