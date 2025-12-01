@@ -1,8 +1,17 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import { FallingRibbons } from "./FallingRibbons";
+import {
+  clearAllBodyScrollLocks,
+  disableBodyScroll,
+} from "../_lib/scroll-lock";
+
+const FallingRibbons = dynamic(
+  () => import("./FallingRibbons").then((mod) => mod.FallingRibbons),
+  { ssr: false },
+);
 
 const easeInOutCubic = (x: number): number => {
   return x < 0.5 ? 4 * Math.pow(x, 3) : 1 - Math.pow(-2 * x + 2, 3) / 2;
@@ -22,7 +31,6 @@ export const Splash = () => {
   const END_DATE = "2026-04-19";
 
   useEffect(() => {
-    document.body.style.overflow = "hidden";
     const startTimestamp = new Date(START_DATE).getTime();
     const endTimestamp = new Date(END_DATE).getTime();
     const totalDiff = endTimestamp - startTimestamp;
@@ -30,6 +38,8 @@ export const Splash = () => {
     let animationFrameId: number;
 
     const animate = (time: number) => {
+      disableBodyScroll(document.body);
+
       if (!startTime) startTime = time;
       const timeElapsed = time - startTime;
       const progress = Math.min(timeElapsed / DURATION, 1);
@@ -72,7 +82,7 @@ export const Splash = () => {
   const handleOpen = () => {
     setIsOpening(true);
     setTimeout(() => {
-      document.body.style.overflow = "";
+      clearAllBodyScrollLocks();
       setShowSplash(false);
     }, 2400);
   };

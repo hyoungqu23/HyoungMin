@@ -15,26 +15,29 @@ type RibbonConfig = {
   colorClass: string;
 };
 
-export const FallingRibbons = () => {
-  const [ribbons] = useState<RibbonConfig[]>(() =>
-    Array.from({ length: 100 }).map((_, i) => ({
+const generateRibbons = (): RibbonConfig[] =>
+  Array.from({ length: 100 }).map((_, i) => {
+    const colorRandom = Math.random();
+    return {
       id: i,
       left: Math.random() * 100,
       delay: Math.random() * 5,
       duration: 4 + Math.random() * 3,
       scale: 0.5 + Math.random() * 0.5,
       rotate: Math.random() * 360,
-
       variant: Math.floor(Math.random() * 9),
-
       colorClass:
-        Math.random() > 0.6
+        colorRandom > 0.6
           ? "text-rose-400/70"
-          : Math.random() > 0.3
+          : colorRandom > 0.3
             ? "text-pink-300/80"
             : "text-rose-200/90",
-    })),
-  );
+    };
+  });
+
+// SSR이 비활성화된 상태에서만 렌더링되므로 useState 초기값에서 직접 생성 가능
+export const FallingRibbons = () => {
+  const [ribbons] = useState<RibbonConfig[]>(generateRibbons);
 
   return (
     <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden">

@@ -1,7 +1,12 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useCallback, useEffect, useState } from "react";
+import {
+  clearAllBodyScrollLocks,
+  disableBodyScroll,
+  enableBodyScroll,
+} from "../_lib/scroll-lock";
 import { AttendanceForm } from "./AttendanceForm";
 
 const ChevronUp = ({ className }: { className?: string }) => (
@@ -21,13 +26,13 @@ export const FloatingButton = () => {
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      disableBodyScroll(document.body);
     } else {
-      document.body.style.overflow = "";
+      enableBodyScroll(document.body);
     }
 
     return () => {
-      document.body.style.overflow = "";
+      clearAllBodyScrollLocks();
     };
   }, [isOpen]);
 
@@ -38,7 +43,7 @@ export const FloatingButton = () => {
       {!isOpen ? (
         <div
           key="floating-button"
-          className="fixed bottom-0 left-0 right-0 z-50 p-4 flex justify-end pointer-events-none"
+          className="fixed bottom-0 w-fit right-0 z-50 p-4 flex justify-end pointer-events-none"
         >
           <motion.button
             initial={{ y: 100, opacity: 0 }}
