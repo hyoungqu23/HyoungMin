@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Splash } from "./_components/Splash";
+import { FloatingButton } from "./_components/FloatingButton";
 
 export const metadata: Metadata = {
   title: "Wedding Day",
@@ -17,6 +18,7 @@ const RootLayout = ({ children }: LayoutProps) => {
       <body className="antialiased">
         <Splash />
         {children}
+        <FloatingButton />
       </body>
     </html>
   );

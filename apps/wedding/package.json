@@ -9,12 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "google-auth-library": "^9.0.0",
+    "googleapis": "^144.0.0",
     "motion": "^12.23.24",
     "next": "16.0.6",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
   "devDependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -22,7 +25,9 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.6",
+    "react-hook-form": "^7.67.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "zod": "^4.1.12"
   }
 }
