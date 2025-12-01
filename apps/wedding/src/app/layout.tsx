@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Splash } from "./_components/Splash";
 
 export const metadata: Metadata = {
   title: "Wedding Day",
@@ -13,7 +14,10 @@ type LayoutProps = Readonly<{
 const RootLayout = ({ children }: LayoutProps) => {
   return (
     <html lang="ko">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <Splash />
+        {children}
+      </body>
     </html>
   );
 };
