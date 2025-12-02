@@ -10,7 +10,9 @@ import {
 
 const FallingRibbons = dynamic(
   () => import("./FallingRibbons").then((mod) => mod.FallingRibbons),
-  { ssr: false },
+  {
+    ssr: false,
+  },
 );
 
 const easeInOutCubic = (x: number): number => {
@@ -26,11 +28,13 @@ export const Splash = () => {
   const monthRef = useRef<HTMLSpanElement>(null);
   const dayRef = useRef<HTMLSpanElement>(null);
 
-  const DURATION = 3000;
+  const DURATION = 2500;
   const START_DATE = "2015-12-26";
   const END_DATE = "2026-04-19";
 
   useEffect(() => {
+    disableBodyScroll(document.body);
+
     const startTimestamp = new Date(START_DATE).getTime();
     const endTimestamp = new Date(END_DATE).getTime();
     const totalDiff = endTimestamp - startTimestamp;
@@ -38,8 +42,6 @@ export const Splash = () => {
     let animationFrameId: number;
 
     const animate = (time: number) => {
-      disableBodyScroll(document.body);
-
       if (!startTime) startTime = time;
       const timeElapsed = time - startTime;
       const progress = Math.min(timeElapsed / DURATION, 1);
@@ -76,13 +78,17 @@ export const Splash = () => {
       }
     };
     animationFrameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationFrameId);
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      clearAllBodyScrollLocks();
+    };
   }, []);
 
   const handleOpen = () => {
     setIsOpening(true);
+    clearAllBodyScrollLocks();
+
     setTimeout(() => {
-      clearAllBodyScrollLocks();
       setShowSplash(false);
     }, 2400);
   };
@@ -100,7 +106,7 @@ export const Splash = () => {
       </motion.div>
 
       <motion.div
-        className="absolute left-0 top-0 h-full w-1/2 z-20 overflow-hidden"
+        className="absolute left-0 top-0 h-full w-1/2 z-20 overflow-hidden will-change-transform"
         style={{
           transformOrigin: "top right",
           background:
@@ -112,7 +118,7 @@ export const Splash = () => {
             ? { x: "-100%", scaleX: 0.2, skewX: -15 }
             : { x: 0, scaleX: 1, skewX: 0 }
         }
-        transition={{ duration: 5, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 3, ease: [0.22, 1, 0.36, 1] }}
       >
         <motion.div
           className="absolute inset-0 bg-[#FFF5F7] z-10"
@@ -124,7 +130,7 @@ export const Splash = () => {
       </motion.div>
 
       <motion.div
-        className="absolute right-0 top-0 h-full w-1/2 z-20 overflow-hidden"
+        className="absolute right-0 top-0 h-full w-1/2 z-20 overflow-hidden will-change-transform"
         style={{
           transformOrigin: "top left",
           background:
@@ -136,7 +142,7 @@ export const Splash = () => {
             ? { x: "100%", scaleX: 0.2, skewX: 15 }
             : { x: 0, scaleX: 1, skewX: 0 }
         }
-        transition={{ duration: 5, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 3, ease: [0.22, 1, 0.36, 1] }}
       >
         <motion.div
           className="absolute inset-0 bg-[#FFF5F7] z-10"
