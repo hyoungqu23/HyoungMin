@@ -1,6 +1,5 @@
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
-
 import { ClarityAnalytics } from "./ClarityAnalytics";
 
 export const Analytics = () => {
@@ -16,8 +15,8 @@ export const Analytics = () => {
       {hasGoogleAnalytics ? (
         <GoogleAnalytics gaId={googleAnalyticsId!} />
       ) : null}
-      <ClarityAnalytics />
       <VercelAnalytics />
+      <ClarityAnalytics />
     </>
   );
 };
