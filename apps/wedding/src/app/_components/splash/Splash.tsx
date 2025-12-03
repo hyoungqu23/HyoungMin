@@ -86,11 +86,10 @@ export const Splash = () => {
 
   const handleOpen = () => {
     setIsOpening(true);
-    clearAllBodyScrollLocks();
-
     setTimeout(() => {
       setShowSplash(false);
     }, 2400);
+    clearAllBodyScrollLocks();
   };
 
   if (!showSplash) return null;
