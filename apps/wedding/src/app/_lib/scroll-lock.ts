@@ -278,8 +278,12 @@ export const enableBodyScroll = (targetElement: HTMLElement | null): void => {
       documentListenerAdded = false;
     }
 
-    restorePositionSetting();
+    if (locks.length === 0) {
+      restorePositionSetting();
+    }
   } else {
-    restoreOverflowSetting();
+    if (locks.length === 0) {
+      restoreOverflowSetting();
+    }
   }
 };
