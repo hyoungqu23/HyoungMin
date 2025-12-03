@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   clearAllBodyScrollLocks,
   disableBodyScroll,
-} from "../_lib/scroll-lock";
+} from "../../_lib/scroll-lock";
 
 const FallingRibbons = dynamic(
   () => import("./FallingRibbons").then((mod) => mod.FallingRibbons),

@@ -7,8 +7,8 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   attendanceFormSchema,
   type AttendanceForm as AttendanceFormType,
-} from "../_schemas/attendance-form";
-import { submitAttendance } from "../_actions/submit-attendance";
+} from "../../_schemas/attendance-form";
+import { submitAttendance } from "../../_actions/submit-attendance";
 
 const sideOptions = [
   { value: "groom" as const, label: "신랑측" },

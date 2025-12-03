@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Calendar } from "../_icons/Calendar";
-import { Google } from "../_icons/Google";
+import { Calendar } from "../../_icons/Calendar";
+import { Google } from "../../_icons/Google";
 
 interface AddToCalendarProps {
   title: string; // 예: 김철수 & 이영희 결혼식

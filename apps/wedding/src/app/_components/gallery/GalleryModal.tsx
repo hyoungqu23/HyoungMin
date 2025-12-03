@@ -2,9 +2,9 @@
 
 import { AnimatePresence, motion, type PanInfo } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
-import { ChevronLeft } from "../_icons/ChevronLeft";
-import { ChevronRight } from "../_icons/ChevronRight";
-import { Close } from "../_icons/Close";
+import { ChevronLeft } from "../../_icons/ChevronLeft";
+import { ChevronRight } from "../../_icons/ChevronRight";
+import { Close } from "../../_icons/Close";
 
 // 이미지 타입 정의
 export type GalleryItem = {

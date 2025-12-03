@@ -6,7 +6,7 @@ import {
   clearAllBodyScrollLocks,
   disableBodyScroll,
   enableBodyScroll,
-} from "../_lib/scroll-lock";
+} from "../../_lib/scroll-lock";
 import { AttendanceForm } from "./AttendanceForm";
 
 const ChevronUp = ({ className }: { className?: string }) => (

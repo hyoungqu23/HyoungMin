@@ -2,18 +2,18 @@
 
 import { motion } from "motion/react";
 import { ComponentType, useState } from "react";
-import { Ribbon01 } from "../_icons/Ribbon01";
-import { Ribbon02 } from "../_icons/Ribbon02";
-import { Ribbon03 } from "../_icons/Ribbon03";
-import { Ribbon04 } from "../_icons/Ribbon04";
-import { Ribbon05 } from "../_icons/Ribbon05";
-import { Ribbon06 } from "../_icons/Ribbon06";
-import { Ribbon07 } from "../_icons/Ribbon07";
-import { Ribbon08 } from "../_icons/Ribbon08";
-import { Ribbon09 } from "../_icons/Ribbon09";
-import { Ribbon10 } from "../_icons/Ribbon10";
-import { Ribbon11 } from "../_icons/Ribbon11";
-import { Ribbon12 } from "../_icons/Ribbon12";
+import { Ribbon01 } from "../../_icons/Ribbon01";
+import { Ribbon02 } from "../../_icons/Ribbon02";
+import { Ribbon03 } from "../../_icons/Ribbon03";
+import { Ribbon04 } from "../../_icons/Ribbon04";
+import { Ribbon05 } from "../../_icons/Ribbon05";
+import { Ribbon06 } from "../../_icons/Ribbon06";
+import { Ribbon07 } from "../../_icons/Ribbon07";
+import { Ribbon08 } from "../../_icons/Ribbon08";
+import { Ribbon09 } from "../../_icons/Ribbon09";
+import { Ribbon10 } from "../../_icons/Ribbon10";
+import { Ribbon11 } from "../../_icons/Ribbon11";
+import { Ribbon12 } from "../../_icons/Ribbon12";
 
 const RibbonComponents: ComponentType[] = [
   Ribbon01,
@@ -41,7 +41,7 @@ type RibbonConfig = {
 };
 
 const generateRibbons = (): RibbonConfig[] =>
-  Array.from({ length: 100 }).map((_, i) => ({
+  Array.from({ length: 40 }).map((_, i) => ({
     id: i,
     left: Math.random() * 100,
     delay: Math.random() * 5,

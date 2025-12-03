@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Analytics } from "./_components/Analytics";
-import { FloatingButton } from "./_components/FloatingButton";
-import { Splash } from "./_components/Splash";
+import { Analytics } from "./_components/analytics/Analytics";
+import { FloatingButton } from "./_components/floating/FloatingButton";
+import { Splash } from "./_components/splash/Splash";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_URL!),
   title: "이형민 ♥ 임희재 결혼식",
   description: "형민이와 희재의 결혼식에 초대합니다.",
   openGraph: {
@@ -37,7 +38,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
-  // verification: {},
 };
 
 type LayoutProps = Readonly<{

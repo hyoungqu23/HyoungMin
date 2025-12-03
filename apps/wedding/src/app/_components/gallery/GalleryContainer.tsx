@@ -3,7 +3,7 @@
 import { AnimatePresence } from "motion/react";
 import { useState } from "react";
 import GalleryModal, { GalleryItem } from "./GalleryModal";
-import { ScrollMasonry } from "./ScrollMasonry";
+import { ScrollMasonry } from "../common/ScrollMasonry";
 
 // 테스트 데이터 (src 필드에 색상 클래스를 넣어서 테스트 중)
 const GALLERY_ITEMS: GalleryItem[] = [
@@ -27,7 +27,7 @@ export const GalleryContainer = () => {
           <div
             key={item.id}
             className={`
-              relative w-full ${item.ratio} overflow-hidden rounded-xl shadow-sm ${item.src} 
+              relative w-full ${item.ratio} overflow-hidden rounded shadow-sm ${item.src} 
               group cursor-pointer
             `}
             // 클릭 시 해당 인덱스로 모달 열기

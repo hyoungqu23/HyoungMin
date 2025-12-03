@@ -23,7 +23,7 @@ const HandDrawnCircle = () => {
           strokeLinejoin="round"
           initial={{ pathLength: 0, opacity: 0 }}
           whileInView={{ pathLength: 1, opacity: 1 }}
-          viewport={{ once: true, amount: 0.8 }} // 화면에 보이면 그려짐
+          viewport={{ once: false, amount: 0.8 }} // 화면에 보이면 그려짐
           transition={{
             duration: 1.2,
             ease: "easeInOut",
