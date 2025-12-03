@@ -1,34 +1,14 @@
 "use client";
 
 import { motion, Variants } from "motion/react";
-import {
-  Children,
-  cloneElement,
-  isValidElement,
-  ReactElement,
-  ReactNode,
-  useMemo,
-  useRef,
-  PropsWithChildren,
-} from "react";
+import { useMemo } from "react";
 
 type TypingAnimationProps = {
-  children: ReactNode;
+  children: string;
   speed?: number;
   delay?: number;
   className?: string;
   once?: boolean;
-};
-
-const isReactElementWithChildren = (
-  node: ReactNode,
-): node is ReactElement<PropsWithChildren> => {
-  return (
-    isValidElement(node) &&
-    typeof node.props === "object" &&
-    node.props !== null &&
-    "children" in node.props
-  );
 };
 
 const childVariants: Variants = {
@@ -55,63 +35,30 @@ export const TypingAnimation = ({
   className = "",
   once = false,
 }: TypingAnimationProps) => {
-  const extractText = (node: ReactNode): string => {
-    if (typeof node === "string" || typeof node === "number") {
-      return String(node);
-    }
-    if (isReactElementWithChildren(node)) {
-      return Children.map(node.props.children, extractText)?.join("") || "";
-    }
-    if (Array.isArray(node)) {
-      return node.map(extractText).join("");
-    }
-    return "";
-  };
+  const fullText = useMemo(() => children, [children]);
 
-  const fullText = useMemo(() => extractText(children), [children]);
-  const counterRef = useRef(0);
+  // charCounter 변수 제거됨 (불필요)
 
-  const renderAnimatedChildren = (node: ReactNode): ReactNode => {
-    if (typeof node === "string" || typeof node === "number") {
-      const text = String(node);
-      return text.split("").map((char, index) => {
-        const currentDelay = delay + counterRef.current * speed;
-        counterRef.current += 1;
+  const renderText = (text: string) =>
+    text.split("").map((char, index) => {
+      // charCounter 대신 map이 제공하는 index를 사용
+      const order = index;
+      const currentDelay = delay + order * speed;
 
-        if (char === "\n") return <br key={`br-${index}`} />;
+      if (char === "\n") return <br key={`br-${index}`} />;
 
-        return (
-          <motion.span
-            key={`char-${counterRef.current}-${index}`}
-            custom={currentDelay}
-            variants={childVariants}
-            className="inline-block whitespace-pre"
-            aria-hidden="true"
-          >
-            {char}
-          </motion.span>
-        );
-      });
-    }
-
-    if (isReactElementWithChildren(node)) {
-      return cloneElement(
-        node,
-        { ...node.props, key: undefined },
-        Children.map(node.props.children, (child) =>
-          renderAnimatedChildren(child),
-        ),
+      return (
+        <motion.span
+          key={`char-${index}`} // key도 index 기반으로 변경
+          custom={currentDelay}
+          variants={childVariants}
+          className="inline-block whitespace-pre"
+          aria-hidden="true"
+        >
+          {char}
+        </motion.span>
       );
-    }
-
-    if (Array.isArray(node)) {
-      return node.map((child) => renderAnimatedChildren(child));
-    }
-
-    return node;
-  };
-
-  counterRef.current = 0;
+    });
 
   return (
     <motion.div
@@ -121,7 +68,7 @@ export const TypingAnimation = ({
       viewport={{ once, amount: 0.3 }}
       aria-label={fullText}
     >
-      {renderAnimatedChildren(children)}
+      {renderText(children)}
     </motion.div>
   );
 };
