@@ -3,44 +3,45 @@
 import { motion } from "motion/react";
 import Image from "next/image";
 import { useId } from "react"; // 고유 ID 생성을 위해 추가
+import { Section } from "../common/Section";
 
 // --- 데이터 ---
 const EPISODES = [
   {
     year: "2015",
     title: "첫 OO, 겨울",
-    desc: "와인색 코트를 입고 만나,\n함꼐 웃으며 이야기했던 날.",
-    image: "/images/story_1.jpg",
+    desc: "어쩌고 저쩌고\n어쩌고 저쩌고",
+    image: "/images/sample.jpg",
   },
   {
     year: "2016",
     title: "첫 OO, 봄",
     desc: "어쩌고 저쩌고\n어쩌고 저쩌고",
-    image: "/images/story_2.jpg",
+    image: "/images/sample.jpg",
   },
   {
     year: "2018",
     title: "첫 OO, 봄",
     desc: "어쩌고 저쩌고\n어쩌고 저쩌고",
-    image: "/images/story_2.jpg",
+    image: "/images/sample.jpg",
   },
   {
     year: "2020",
     title: "첫 OO, 봄",
     desc: "어쩌고 저쩌고\n어쩌고 저쩌고",
-    image: "/images/story_2.jpg",
+    image: "/images/sample.jpg",
   },
   {
     year: "2025",
     title: "첫 OO, 여름",
     desc: "어쩌고 저쩌고\n어쩌고 저쩌고",
-    image: "/images/story_3.jpg",
+    image: "/images/sample.jpg",
   },
   {
     year: "2026",
     title: "새로운 시작, 봄",
-    desc: "11년의 연애를 마치고,\n평생의 연인이 되기로 한 날.",
-    image: "/images/story_4.jpg",
+    desc: "어쩌고 저쩌고\n어쩌고 저쩌고",
+    image: "/images/sample.jpg",
   },
 ];
 
@@ -80,10 +81,6 @@ const AnimatedPath = ({ d }: { d: string }) => {
         </mask>
       </defs>
 
-      {/* 2. 실제 발자국: 마스크를 적용하여 애니메이션 효과 냄 */}
-      {/* 배경용 연한 선 (선택사항: 발자국 길을 미리 연하게 보여주고 싶으면 주석 해제) */}
-      {/* <path d={d} {...FOOTPRINT_STYLE} stroke="#FFF1F2" /> */}
-
       {/* 애니메이션 되는 발자국 */}
       <path
         d={d}
@@ -122,7 +119,7 @@ const FlashImage = ({ src, alt }: { src: string; alt: string }) => {
         className="absolute inset-0 bg-white z-20 pointer-events-none"
         initial={{ opacity: 1 }}
         whileInView={{ opacity: 0 }}
-        viewport={{ once: true, margin: "-20%" }}
+        viewport={{ once: false, margin: "-20%" }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
       />
       {/* Developing Effect */}
@@ -130,7 +127,7 @@ const FlashImage = ({ src, alt }: { src: string; alt: string }) => {
         className="relative w-full h-full"
         initial={{ scale: 1.2, filter: "blur(5px) grayscale(100%)" }}
         whileInView={{ scale: 1, filter: "blur(0px) grayscale(0%)" }}
-        viewport={{ once: true, margin: "-20%" }}
+        viewport={{ once: false, margin: "-20%" }}
         transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
       >
         <Image
@@ -148,15 +145,9 @@ const FlashImage = ({ src, alt }: { src: string; alt: string }) => {
 export const Story = () => {
   return (
     <div className="w-full max-w-lg mx-auto px-4 py-20 overflow-hidden bg-stone-50/50">
-      <div className="flex flex-col items-center">
-        {/* Start Point */}
-        <div className="flex flex-col items-center mb-0">
-          <div className="w-2 h-2 rounded-full bg-rose-300 mb-1 animate-bounce" />
-          <div className="px-4 py-1.5 bg-white text-rose-500 text-xs font-bold rounded-full shadow-sm border border-rose-100">
-            Our Story Start
-          </div>
-        </div>
+      <Section.Title category="Our Story" title="Our Story" />
 
+      <div className="flex flex-col items-center">
         {EPISODES.map((item, index) => {
           const isEven = index % 2 === 0;
 
@@ -214,7 +205,7 @@ export const Story = () => {
                   transition={{ duration: 0.8, delay: 0.4 }}
                   className={`w-1/2 flex flex-col justify-center ${isEven ? "text-left items-start" : "text-right items-end"}`}
                 >
-                  <h3 className="text-lg font-serif font-bold text-stone-800 mb-2 leading-tight">
+                  <h3 className="text-lg font-bold text-stone-800 mb-2 leading-tight">
                     {item.title}
                   </h3>
                   <p className="text-xs text-stone-500 leading-relaxed whitespace-pre-wrap font-medium">
@@ -254,9 +245,7 @@ export const Story = () => {
             <p className="text-rose-500 font-bold text-sm tracking-widest uppercase">
               Finally
             </p>
-            <p className="text-stone-700 font-serif font-bold text-lg mt-1">
-              Wedding Day
-            </p>
+            <p className="text-stone-700 font-bold text-lg mt-1">Wedding Day</p>
           </div>
         </motion.div>
       </div>
