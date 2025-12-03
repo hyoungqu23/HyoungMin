@@ -1,120 +1,131 @@
 "use client";
 
-import { motion, Transition } from "motion/react";
+import { motion } from "motion/react";
 import Image from "next/image";
+import { useId } from "react"; // 고유 ID 생성을 위해 추가
 
 // --- 데이터 ---
 const EPISODES = [
   {
     year: "2015",
-    title: "우연히, 겨울",
-    desc: "도서관 앞 벤치,\n따뜻한 캔커피 하나로 시작된 인연.",
+    title: "첫 OO, 겨울",
+    desc: "와인색 코트를 입고 만나,\n함꼐 웃으며 이야기했던 날.",
     image: "/images/story_1.jpg",
   },
   {
-    year: "2018",
-    title: "너를 기다림",
-    desc: "전역하던 날,\n꽃신을 신겨주며 다짐했던 약속.",
+    year: "2016",
+    title: "첫 OO, 봄",
+    desc: "어쩌고 저쩌고\n어쩌고 저쩌고",
     image: "/images/story_2.jpg",
   },
   {
-    year: "2023",
-    title: "함께하는 여행",
-    desc: "제주도 푸른 밤,\n우리는 서로의 가장 친한 친구가 되었다.",
+    year: "2018",
+    title: "첫 OO, 봄",
+    desc: "어쩌고 저쩌고\n어쩌고 저쩌고",
+    image: "/images/story_2.jpg",
+  },
+  {
+    year: "2020",
+    title: "첫 OO, 봄",
+    desc: "어쩌고 저쩌고\n어쩌고 저쩌고",
+    image: "/images/story_2.jpg",
+  },
+  {
+    year: "2025",
+    title: "첫 OO, 여름",
+    desc: "어쩌고 저쩌고\n어쩌고 저쩌고",
     image: "/images/story_3.jpg",
   },
   {
     year: "2026",
-    title: "새로운 시작",
-    desc: "10년의 연애를 마치고,\n평생의 연인이 되기로 한 날.",
+    title: "새로운 시작, 봄",
+    desc: "11년의 연애를 마치고,\n평생의 연인이 되기로 한 날.",
     image: "/images/story_4.jpg",
   },
 ];
 
-// 🎨 발자국 설정 (터벅 터벅 느낌)
-const PATH_PROPS = {
+// 🎨 발자국 스타일 (보여지는 디자인)
+const FOOTPRINT_STYLE = {
   fill: "none",
   stroke: "#FDA4AF", // rose-300
   strokeWidth: "7",
   strokeLinecap: "round" as const,
-  strokeDasharray: "0 20", // 점 간격
+  strokeDasharray: "0 20", // 점선(발자국)
 };
 
-const TRANSITION_PROPS: Transition = {
-  duration: 2.5, // 걷는 속도 (조금 느긋하게)
-  ease: "linear", // 뚜벅뚜벅 일정한 속도
+// ✨ 애니메이션용 마스크 컴포넌트 (핵심 해결책)
+const AnimatedPath = ({ d }: { d: string }) => {
+  const maskId = useId(); // 유니크한 ID 생성 (Mask 충돌 방지)
+
+  return (
+    <svg
+      className="w-full h-24 md:h-32 overflow-visible"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+    >
+      <defs>
+        {/* 1. 마스크 정의: 하얀색 실선이 그려지면서 아래 내용을 보여줌 */}
+        <mask id={maskId}>
+          <motion.path
+            d={d}
+            fill="none"
+            stroke="white" // 마스크는 흰색 부분이 보임
+            strokeWidth="15" // 발자국(7px)보다 넉넉하게 두껍게 해서 가림 없이 보여줌
+            strokeLinecap="round"
+            initial={{ pathLength: 0 }}
+            whileInView={{ pathLength: 1 }}
+            viewport={{ once: true, margin: "-20%" }}
+            transition={{ duration: 2.5, ease: "linear" }}
+          />
+        </mask>
+      </defs>
+
+      {/* 2. 실제 발자국: 마스크를 적용하여 애니메이션 효과 냄 */}
+      {/* 배경용 연한 선 (선택사항: 발자국 길을 미리 연하게 보여주고 싶으면 주석 해제) */}
+      {/* <path d={d} {...FOOTPRINT_STYLE} stroke="#FFF1F2" /> */}
+
+      {/* 애니메이션 되는 발자국 */}
+      <path
+        d={d}
+        {...FOOTPRINT_STYLE}
+        mask={`url(#${maskId})`} // 위에서 만든 마스크 적용
+      />
+    </svg>
+  );
 };
 
-// --- S자 곡선 컴포넌트들 ---
+// --- 각 방향별 곡선 데이터 (d 값만 전달) ---
 const CurveLeftToRight = () => (
-  <svg
-    className="w-full h-24 md:h-32 overflow-visible"
-    viewBox="0 0 100 100"
-    preserveAspectRatio="none"
-  >
-    <motion.path
-      d="M 50 0 C 50 50, 50 50, 90 50 S 90 100, 90 100"
-      {...PATH_PROPS}
-      initial={{ pathLength: 0 }}
-      whileInView={{ pathLength: 1 }}
-      viewport={{ once: true, margin: "-20%" }}
-      transition={TRANSITION_PROPS}
-    />
-  </svg>
+  <AnimatedPath d="M 50 0 C 50 50, 50 50, 90 50 S 90 100, 90 100" />
 );
 
 const CurveRightToLeft = () => (
-  <svg
-    className="w-full h-24 md:h-32 overflow-visible"
-    viewBox="0 0 100 100"
-    preserveAspectRatio="none"
-  >
-    <motion.path
-      d="M 90 0 C 90 50, 90 50, 50 50 S 10 100, 10 100"
-      {...PATH_PROPS}
-      initial={{ pathLength: 0 }}
-      whileInView={{ pathLength: 1 }}
-      viewport={{ once: true, margin: "-20%" }}
-      transition={TRANSITION_PROPS}
-    />
-  </svg>
+  <AnimatedPath d="M 90 0 C 90 50, 90 50, 50 50 S 10 100, 10 100" />
 );
 
 const CurveBackToCenter = ({ from }: { from: "left" | "right" }) => (
-  <svg
-    className="w-full h-24 md:h-32 overflow-visible"
-    viewBox="0 0 100 100"
-    preserveAspectRatio="none"
-  >
-    <motion.path
-      d={
-        from === "left"
-          ? "M 10 0 C 10 50, 10 50, 50 100"
-          : "M 90 0 C 90 50, 90 50, 50 100"
-      }
-      {...PATH_PROPS}
-      initial={{ pathLength: 0 }}
-      whileInView={{ pathLength: 1 }}
-      viewport={{ once: true, margin: "-20%" }}
-      transition={TRANSITION_PROPS}
-    />
-  </svg>
+  <AnimatedPath
+    d={
+      from === "left"
+        ? "M 10 0 C 10 50, 10 50, 50 100"
+        : "M 90 0 C 90 50, 90 50, 50 100"
+    }
+  />
 );
 
-// ✨ 찰칵! 효과를 주는 이미지 컴포넌트
+// ✨ 찰칵! 효과 이미지 컴포넌트 (유지)
 const FlashImage = ({ src, alt }: { src: string; alt: string }) => {
   return (
     <div className="relative w-full h-full overflow-hidden rounded-xl bg-stone-100">
-      {/* 1. 하얀 섬광 (Flash Overlay) */}
+      {/* Flash Overlay */}
       <motion.div
         className="absolute inset-0 bg-white z-20 pointer-events-none"
-        initial={{ opacity: 1 }} // 처음엔 하얗게 가려져 있음
-        whileInView={{ opacity: 0 }} // 팟! 하고 사라짐
-        viewport={{ once: true, margin: "-20%" }} // 화면에 들어오면 트리거
-        transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }} // 0.2초 딜레이 후 섬광 사라짐
+        initial={{ opacity: 1 }}
+        whileInView={{ opacity: 0 }}
+        viewport={{ once: true, margin: "-20%" }}
+        transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
       />
-
-      {/* 2. 이미지 줌아웃 & 선명해짐 (Developing Effect) */}
+      {/* Developing Effect */}
       <motion.div
         className="relative w-full h-full"
         initial={{ scale: 1.2, filter: "blur(5px) grayscale(100%)" }}
@@ -158,7 +169,7 @@ export const Story = () => {
               <div
                 className={`w-full flex items-center justify-between gap-6 mb-0 ${isEven ? "flex-row" : "flex-row-reverse"}`}
               >
-                {/* 📸 사진 프레임 (찰칵 효과 적용) */}
+                {/* 📸 사진 프레임 */}
                 <motion.div
                   className="relative w-1/2 aspect-4/5"
                   initial={{
@@ -176,19 +187,16 @@ export const Story = () => {
                     type: "spring",
                     stiffness: 200,
                     damping: 20,
-                    delay: 0.1, // 발자국보다 아주 살짝 늦게 찰칵
+                    delay: 0.1,
                   }}
                 >
-                  {/* 폴라로이드 흰 테두리 */}
                   <div className="absolute inset-0 bg-white p-1.5 shadow-xl rounded-2xl">
                     <FlashImage src={item.image} alt={item.title} />
                   </div>
-
-                  {/* 연도 뱃지 (통통 튀어나옴) */}
                   <motion.div
                     initial={{ scale: 0 }}
                     whileInView={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 300, delay: 0.6 }} // 사진 나오고 난 뒤 뿅!
+                    transition={{ type: "spring", stiffness: 300, delay: 0.6 }}
                     className={`
                       absolute -top-2 ${isEven ? "-left-1" : "-right-1"} 
                       bg-rose-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md z-30 border-2 border-white
@@ -198,12 +206,12 @@ export const Story = () => {
                   </motion.div>
                 </motion.div>
 
-                {/* 📝 텍스트 영역 (스르륵 등장) */}
+                {/* 📝 텍스트 영역 */}
                 <motion.div
                   initial={{ opacity: 0, x: isEven ? 30 : -30 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: 0.4 }} // 사진 찍히고 나서 글씨 써짐
+                  transition={{ duration: 0.8, delay: 0.4 }}
                   className={`w-1/2 flex flex-col justify-center ${isEven ? "text-left items-start" : "text-right items-end"}`}
                 >
                   <h3 className="text-lg font-serif font-bold text-stone-800 mb-2 leading-tight">
@@ -215,7 +223,7 @@ export const Story = () => {
                 </motion.div>
               </div>
 
-              {/* 👣 발자국 길 (Step Path) */}
+              {/* 👣 발자국 길 (Mask 적용됨) */}
               {index < EPISODES.length - 1 && (
                 <div className="w-full -my-6 relative z-0 opacity-80 pointer-events-none">
                   {isEven ? <CurveLeftToRight /> : <CurveRightToLeft />}
