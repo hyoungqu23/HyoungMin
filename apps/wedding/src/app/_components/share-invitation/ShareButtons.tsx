@@ -4,9 +4,9 @@ import { motion } from "motion/react";
 import { useState } from "react";
 
 const WEDDING_URL = process.env.NEXT_PUBLIC_URL!;
-const WEDDING_TITLE = "형민 ♥ 신부 결혼합니다";
+const WEDDING_TITLE = "이형민 ♥ 임희재 결혼합니다";
 const WEDDING_DESCRIPTION =
-  "2026년 4월 19일 오후 2시, 웨딩홀에서 결혼식을 올립니다.";
+  "2026년 4월 19일 오전 11시, 더베르G 웨딩에서 결혼식을 올립니다.";
 
 export const ShareButtons = () => {
   const [copied, setCopied] = useState(false);
@@ -103,34 +103,41 @@ export const ShareButtons = () => {
 
 export const OpenKakaoButton = () => {
   const handleOpenKakao = () => {
-    const userAgent = navigator.userAgent;
-    const isAndroid = /Android/i.test(userAgent);
-    const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+    const kakao = window.Kakao;
 
-    if (isAndroid) {
-      const intentUrl =
-        "intent://#Intent;scheme=kakaotalk;package=com.kakao.talk;end";
-      window.location.href = intentUrl;
-      return;
+    if (!kakao.isInitialized()) {
+      kakao.init(process.env.NEXT_PUBLIC_KAKAO_SDK_API_KEY!);
     }
 
-    if (isIOS) {
-      const scheme = "kakaotalk://";
-      const appStoreUrl = "https://apps.apple.com/app/id362057947";
-
-      const start = Date.now();
-
-      window.location.href = scheme;
-
-      setTimeout(() => {
-        if (Date.now() - start < 2000) {
-          window.location.href = appStoreUrl;
-        }
-      }, 1500);
-      return;
-    }
-
-    alert("모바일에서만 실행 가능한 기능입니다.");
+    kakao.Share.sendDefault({
+      objectType: "location",
+      address: "서울 영등포구 국회대로 612 지상2층",
+      addressTitle: "더베르G 웨딩",
+      content: {
+        title: WEDDING_TITLE,
+        description: WEDDING_DESCRIPTION,
+        imageUrl: "",
+        link: {
+          mobileWebUrl: WEDDING_URL,
+          webUrl: WEDDING_URL,
+        },
+      },
+      social: {
+        likeCount: 0,
+        commentCount: 0,
+        viewCount: 0,
+        subscriberCount: 0,
+      },
+      buttons: [
+        {
+          title: "청첩장 보기",
+          link: {
+            mobileWebUrl: WEDDING_URL,
+            webUrl: WEDDING_URL,
+          },
+        },
+      ],
+    });
   };
 
   return (

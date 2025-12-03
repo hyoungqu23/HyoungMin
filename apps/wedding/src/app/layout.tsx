@@ -3,6 +3,8 @@ import { Analytics } from "./_components/analytics/Analytics";
 import { FloatingButton } from "./_components/floating/FloatingButton";
 import { Splash } from "./_components/splash/Splash";
 import "./globals.css";
+import Script from "next/script";
+import { Kakao } from "./_components/root/Kakao";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL!),
@@ -48,6 +50,7 @@ const RootLayout = ({ children }: LayoutProps) => {
   return (
     <html lang="ko">
       <body className="antialiased bg-rose-50">
+        <Kakao />
         <Analytics />
         <Splash />
         {children}
