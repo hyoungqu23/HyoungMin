@@ -54,53 +54,45 @@ const HandDrawnCircle = () => {
   );
 };
 
-// --- 2. 2026년 4월 달력 컴포넌트 ---
 export const Calendar = () => {
   const WEDDING_DAY = 19;
 
-  // 2026년 4월 1일은 수요일(idx: 3)입니다.
-  // 빈 칸: 일(0), 월(1), 화(2) -> 3개
   const blanks = Array(3).fill(null);
   const days = Array.from({ length: 30 }, (_, i) => i + 1);
   const totalSlots = [...blanks, ...days];
 
-  // 주 단위(7일)로 쪼개기
   const weeks = [];
   for (let i = 0; i < totalSlots.length; i += 7) {
     weeks.push(totalSlots.slice(i, i + 7));
   }
 
   return (
-    <div className="w-full max-w-sm mx-auto p-6 bg-white rounded-2xl shadow-sm border border-stone-100">
+    <div className="w-full max-w-sm mx-auto p-6 bg-white rounded-2xl shadow-sm border border-stone-100 flex flex-col items-center justify-center gap-4">
       {/* 달력 헤더 */}
-      <div className="text-center mb-6">
-        <h3 className="text-xl font-serif font-bold text-stone-800 tracking-widest">
-          2026. 04.
-        </h3>
-      </div>
+      <h3 className="text-center text-xl font-bold text-stone-800">
+        2026년 4월
+      </h3>
 
       {/* 달력 테이블 */}
       <table className="w-full border-collapse">
         <thead>
           <tr className="text-xs text-stone-400 border-b border-stone-100">
-            <th className="pb-3 font-normal text-rose-400">SUN</th>
-            <th className="pb-3 font-normal">MON</th>
-            <th className="pb-3 font-normal">TUE</th>
-            <th className="pb-3 font-normal">WED</th>
-            <th className="pb-3 font-normal">THU</th>
-            <th className="pb-3 font-normal">FRI</th>
-            <th className="pb-3 font-normal text-stone-400">SAT</th>
+            <th className="pb-3">SUN</th>
+            <th className="pb-3">MON</th>
+            <th className="pb-3">TUE</th>
+            <th className="pb-3">WED</th>
+            <th className="pb-3">THU</th>
+            <th className="pb-3">FRI</th>
+            <th className="pb-3">SAT</th>
           </tr>
         </thead>
         <tbody className="text-stone-700">
           {weeks.map((week, wIndex) => (
             <tr key={wIndex}>
               {week.map((day, dIndex) => {
-                // 날짜가 없는 빈 칸
                 if (!day) return <td key={dIndex} className="p-2"></td>;
 
                 const isWeddingDay = day === WEDDING_DAY;
-                const isSunday = dIndex === 0;
 
                 return (
                   <td
@@ -110,17 +102,13 @@ export const Calendar = () => {
                     <div className="relative inline-flex w-8 h-8 items-center justify-center z-10">
                       {/* 날짜 숫자 */}
                       <span
-                        className={`
-                        text-sm font-medium
-                        ${isWeddingDay ? "font-bold text-stone-900" : ""}
-                        ${isSunday && !isWeddingDay ? "text-rose-400" : ""}
-                      `}
+                        className={`${isWeddingDay ? "font-extrabold text-rose-400" : " text-sm font-medium"}`}
                       >
                         {day}
                       </span>
 
                       {/* 19일에만 동그라미 애니메이션 적용 */}
-                      {isWeddingDay && <HandDrawnCircle />}
+                      {isWeddingDay ? <HandDrawnCircle /> : null}
                     </div>
                   </td>
                 );
@@ -129,11 +117,6 @@ export const Calendar = () => {
           ))}
         </tbody>
       </table>
-
-      {/* 디테일 문구 */}
-      <div className="mt-6 text-center text-sm text-stone-500 font-serif">
-        <p>토요일 오후 12시 30분</p>
-      </div>
     </div>
   );
 };

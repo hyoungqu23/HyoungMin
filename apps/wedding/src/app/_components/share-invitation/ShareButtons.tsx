@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { useState } from "react";
+import { Copy } from "../../_icons/Copy";
 
 const WEDDING_URL = process.env.NEXT_PUBLIC_URL!;
 const WEDDING_TITLE = "이형민 ♥ 임희재 결혼합니다";
@@ -53,20 +54,7 @@ export const ShareButtons = () => {
         onClick={handleCopyAddress}
         className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-full shadow-md transition-colors"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-        </svg>
+        <Copy />
         {copied ? "복사 완료!" : "링크 복사"}
       </button>
 
@@ -144,7 +132,7 @@ export const OpenKakaoButton = () => {
     <motion.button
       whileTap={{ scale: 0.95 }}
       onClick={handleOpenKakao}
-      className="w-full flex items-center justify-center gap-2 px-8 py-3 bg-[#FEE500] text-[#3C1E1E] rounded-xl font-bold shadow-md hover:bg-[#F5DC00] transition-colors"
+      className="w-full flex items-center justify-center gap-2 px-8 py-3 bg-[#FEE500] text-[#3C1E1E] rounded-full font-bold shadow-md hover:bg-[#F5DC00] transition-colors"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

@@ -4,9 +4,7 @@ type SectionProps = ComponentProps<"section">;
 
 export const Section = ({ children, className }: SectionProps) => {
   return (
-    <section className={`w-screen min-h-svh px-4 ${className}`}>
-      {children}
-    </section>
+    <section className={`w-screen py-8 px-4 ${className}`}>{children}</section>
   );
 };
 
@@ -18,7 +16,7 @@ const Title = ({ category, title, description }: TitleProps) => {
       <p className="text-xs font-bold text-rose-400 tracking-widest uppercase">
         {category}
       </p>
-      <h2 className="text-xl font-serif font-bold text-stone-800">{title}</h2>
+      <h2 className="text-xl font-bold text-stone-800">{title}</h2>
       {description ? (
         <p className="text-sm text-stone-500 leading-relaxed whitespace-pre-line">
           {description}
