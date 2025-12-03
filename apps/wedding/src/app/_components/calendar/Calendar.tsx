@@ -2,8 +2,10 @@
 
 import { motion } from "motion/react";
 
-// --- 1. 손으로 그린 듯한 동그라미 애니메이션 컴포넌트 ---
 const HandDrawnCircle = () => {
+  const STROKE_COLOR = "#F43F5E";
+  const CIRCLE_DURATION = 1.5;
+
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
       <svg
@@ -11,23 +13,40 @@ const HandDrawnCircle = () => {
         height="100%"
         viewBox="0 0 100 100"
         className="overflow-visible"
-        style={{ transform: "scale(1.4) rotate(-5deg)" }} // 살짝 키우고 기울여서 자연스럽게
+        style={{ transform: "scale(1.4) rotate(-5deg)" }}
       >
         <motion.path
-          // 두 번 겹쳐 그린 듯한 자연스러운 패스
-          d="M50,10 C25,10 10,35 10,50 C10,75 35,90 50,90 C75,90 90,65 90,50 C90,30 70,10 50,10 C40,10 20,20 20,50"
+          d="M35,15 C65,5 95,25 92,55 C89,85 60,98 30,92 C5,87 0,50 20,25 C40,5 80,10 95,40 C105,70 75,95 45,95 C15,95 5,65 15,40 C25,15 65,15 85,35 C95,55 85,85 55,88"
           fill="none"
-          stroke="#F43F5E" // Rose-500 (포인트 컬러)
-          strokeWidth="2.5"
+          stroke={STROKE_COLOR}
+          strokeWidth="4.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           initial={{ pathLength: 0, opacity: 0 }}
           whileInView={{ pathLength: 1, opacity: 1 }}
-          viewport={{ once: false, amount: 0.8 }} // 화면에 보이면 그려짐
+          viewport={{
+            once: false,
+            margin: "-30% 0px -30% 0px",
+          }}
           transition={{
-            duration: 1.2,
+            duration: 0.9,
             ease: "easeInOut",
-            delay: 0.3,
+          }}
+        />
+        <motion.path
+          d="M80,0 L88,25 L65,10 L95,10 L72,25 Z"
+          fill="none"
+          stroke={STROKE_COLOR}
+          strokeWidth="4.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          initial={{ pathLength: 0, opacity: 0 }}
+          whileInView={{ pathLength: 1, opacity: 1 }}
+          viewport={{ once: false, margin: "-30% 0px -30% 0px" }}
+          transition={{
+            duration: 0.4,
+            delay: CIRCLE_DURATION - 0.2,
+            ease: "easeOut",
           }}
         />
       </svg>
