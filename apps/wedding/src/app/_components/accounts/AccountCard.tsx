@@ -1,0 +1,59 @@
+"use client";
+
+import { useState } from "react";
+
+export type Account = {
+  name: string;
+  relation: string;
+  bank: string;
+  accountNumber: string;
+};
+
+export const AccountCard = ({ account }: { account: Account }) => {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      const numberOnly = account.accountNumber.replace(/-/g, "");
+      await navigator.clipboard.writeText(numberOnly);
+
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch {
+      alert("복사에 실패했습니다.");
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-stone-100 last:border-0">
+      <div className="flex flex-col gap-0.5">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold text-stone-700">
+            {account.name}
+          </span>
+          <span className="text-xs text-stone-400">{account.relation}</span>
+        </div>
+        <div className="text-sm text-stone-600">
+          <span className="mr-2">{account.bank}</span>
+          <span className="tabular-nums font-medium">
+            {account.accountNumber}
+          </span>
+        </div>
+      </div>
+
+      <button
+        onClick={handleCopy}
+        className={`
+          px-3 py-1.5 rounded-lg text-xs font-bold transition-all
+          ${
+            isCopied
+              ? "bg-emerald-100 text-emerald-600"
+              : "bg-stone-100 text-stone-500 hover:bg-stone-200"
+          }
+        `}
+      >
+        {isCopied ? "복사됨 ✔" : "복사"}
+      </button>
+    </div>
+  );
+};
