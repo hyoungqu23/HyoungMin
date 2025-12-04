@@ -35,7 +35,7 @@ export const ScrollMasonry = ({
               scale: 1,
             }}
             viewport={{
-              once: false,
+              once: true,
               amount: 0.2,
               margin: "0px 0px -50px 0px",
             }}

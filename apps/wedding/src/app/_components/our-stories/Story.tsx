@@ -119,7 +119,7 @@ const FlashImage = ({ src, alt }: { src: string; alt: string }) => {
         className="absolute inset-0 bg-white z-20 pointer-events-none"
         initial={{ opacity: 1 }}
         whileInView={{ opacity: 0 }}
-        viewport={{ once: false, margin: "-20%" }}
+        viewport={{ once: true, margin: "-20%" }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
       />
       {/* Developing Effect */}
@@ -127,7 +127,7 @@ const FlashImage = ({ src, alt }: { src: string; alt: string }) => {
         className="relative w-full h-full"
         initial={{ scale: 1.2, filter: "blur(5px) grayscale(100%)" }}
         whileInView={{ scale: 1, filter: "blur(0px) grayscale(0%)" }}
-        viewport={{ once: false, margin: "-20%" }}
+        viewport={{ once: true, margin: "-20%" }}
         transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
       >
         <Image

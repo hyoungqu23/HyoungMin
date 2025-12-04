@@ -18,7 +18,7 @@ const countOptions = ["1", "2", "3", "custom"];
 const mealOptions = [
   { value: "yes" as const, label: "식사해요" },
   { value: "no" as const, label: "마음만 전해요" },
-  { value: "not_sure" as const, label: "모르겠어요" },
+  { value: "not_sure" as const, label: "미정" },
 ];
 
 type Props = {
@@ -71,7 +71,7 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
               <label
                 key={item.value}
                 className={`
-                  relative flex items-center justify-center p-3 rounded-xl border cursor-pointer transition-all duration-200
+                  relative flex items-center justify-center py-2 rounded-xl border cursor-pointer transition-all duration-200
                   ${
                     selectedSide === item.value
                       ? "bg-rose-50 border-rose-400 text-rose-600 font-bold shadow-sm"
@@ -105,7 +105,7 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
             type="text"
             placeholder="성함을 입력해주세요"
             {...register("name")}
-            className="w-full p-3.5 rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none transition placeholder:text-stone-400 text-stone-800"
+            className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none transition placeholder:text-stone-400 text-stone-800"
           />
           {errors.name && (
             <p className="text-xs text-rose-500">{errors.name.message}</p>
@@ -123,7 +123,7 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
               <label
                 key={val}
                 className={`
-                  flex-1 flex items-center justify-center py-3.5 rounded-xl border cursor-pointer transition-all duration-200
+                  flex-1 flex items-center justify-center py-2 rounded-xl border cursor-pointer transition-all duration-200
                   ${
                     selectedCountType === val
                       ? "bg-rose-50 border-rose-400 text-rose-600 font-bold shadow-sm"
@@ -162,7 +162,7 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
                       }
                     },
                   })}
-                  className="w-full p-3.5 rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none transition"
+                  className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none transition"
                 />
                 {errors.customCount && (
                   <p className="text-xs text-rose-500 mt-1">
@@ -184,12 +184,10 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
               <label
                 key={item.value}
                 className={`
-                  flex items-center justify-center p-3 rounded-xl border cursor-pointer transition-all
+                  flex items-center justify-center py-2 rounded-xl border cursor-pointer transition-all whitespace-nowrap
                   ${
                     selectedMeal === item.value
-                      ? item.value === "yes"
-                        ? "bg-rose-50 border-rose-400 text-rose-600 font-bold"
-                        : "bg-stone-100 border-stone-300 text-stone-600 font-bold"
+                      ? "bg-rose-50 border-rose-400 text-rose-600 font-bold"
                       : "border-stone-200 text-stone-500 hover:bg-stone-50"
                   }
                 `}
@@ -219,7 +217,7 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
             type="text"
             placeholder="동행하시는 분들의 성함을 입력해주세요"
             {...register("guestNames")}
-            className="w-full p-3.5 rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none transition placeholder:text-stone-400 text-stone-800"
+            className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none transition placeholder:text-stone-400 text-stone-800"
           />
         </div>
 
@@ -227,7 +225,7 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-3 rounded-xl bg-rose-500 text-white font-bold text-lg shadow-lg shadow-rose-200 hover:bg-rose-600 active:scale-95 disabled:bg-rose-300 disabled:scale-100 transition-all flex items-center justify-center gap-2"
+          className="w-full py-2 rounded-xl bg-rose-500 text-white font-bold text-lg shadow-lg shadow-rose-200 hover:bg-rose-600 active:scale-95 disabled:bg-rose-300 disabled:scale-100 transition-all flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
             <>
