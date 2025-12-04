@@ -10,21 +10,15 @@ import { GalleryContainer } from "./_components/gallery/GalleryContainer";
 import { LocationButtons } from "./_components/location/LocationButtons";
 import { Story } from "./_components/our-stories/Story";
 import { Share } from "./_components/share-invitation/Share";
+import { FlowerFrame } from "./_components/common/FlowerFrame";
+import { KakaoMap } from "./_components/location/KakaoMap";
 
 const Wedding = () => {
   return (
     <main role="main" id="main" className="w-screen min-h-svh">
       {/* Main */}
       <Section className="flex flex-col items-center justify-center gap-4">
-        <div className="rounded-t-full rounded-b-2xl shadow-sm aspect-3/4 overflow-hidden w-3/4 h-full relative">
-          <Image
-            src={SAMPLE_IMAGE}
-            alt="Wedding Day"
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
+        <FlowerFrame imageSrc={SAMPLE_IMAGE.src} />
         <h1 className="text-4xl font-bold italic">Our Wedding Day</h1>
       </Section>
 
@@ -94,7 +88,7 @@ const Wedding = () => {
           title="오시는 길"
           description={`더베르G 웨딩\n서울 영등포구 국회대로 612\n지상2층(예식장), 지하1층(연회장)`}
         />
-        {/* TODO: 네이버지도 혹은 카카오맵 API 추가 */}
+        <KakaoMap />
         <LocationButtons
           placeName="더베르G 웨딩"
           address="서울 영등포구 국회대로 612 지상2층,지하1층"
