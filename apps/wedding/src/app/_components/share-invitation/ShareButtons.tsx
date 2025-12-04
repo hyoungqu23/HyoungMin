@@ -104,7 +104,7 @@ export const OpenKakaoButton = () => {
       content: {
         title: WEDDING_TITLE,
         description: WEDDING_DESCRIPTION,
-        imageUrl: "",
+        imageUrl: "/images/sample.jpg",
         link: {
           mobileWebUrl: WEDDING_URL,
           webUrl: WEDDING_URL,
