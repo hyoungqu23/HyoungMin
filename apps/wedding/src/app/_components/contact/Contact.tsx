@@ -1,7 +1,8 @@
 "use client";
 
-import { Message } from "../../_icons/Message";
-import { Phone } from "../../_icons/Phone";
+import Phone from "@icons/call.svg";
+import Message from "@icons/sms.svg";
+import Image from "next/image";
 import { Accordion } from "../common/Accordion";
 import { Section } from "../common/Section";
 
@@ -34,7 +35,7 @@ const ContactRow = ({ contact }: { contact: Contact }) => {
           className="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
           aria-label={`${contact.name}에게 전화하기`}
         >
-          <Phone className="w-4 h-4" />
+          <Image src={Phone} alt="Phone" width={16} height={16} />
         </a>
 
         <a
@@ -42,7 +43,7 @@ const ContactRow = ({ contact }: { contact: Contact }) => {
           className="flex items-center justify-center w-9 h-9 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors"
           aria-label={`${contact.name}에게 문자하기`}
         >
-          <Message className="w-4 h-4" />
+          <Image src={Message} alt="Message" width={16} height={16} />
         </a>
       </div>
     </div>

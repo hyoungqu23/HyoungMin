@@ -1,34 +1,13 @@
 "use client";
 
 import { motion } from "motion/react";
-import { ComponentType, useState } from "react";
-import { Ribbon01 } from "../../_icons/Ribbon01";
-import { Ribbon02 } from "../../_icons/Ribbon02";
-import { Ribbon03 } from "../../_icons/Ribbon03";
-import { Ribbon04 } from "../../_icons/Ribbon04";
-import { Ribbon05 } from "../../_icons/Ribbon05";
-import { Ribbon06 } from "../../_icons/Ribbon06";
-import { Ribbon07 } from "../../_icons/Ribbon07";
-import { Ribbon08 } from "../../_icons/Ribbon08";
-import { Ribbon09 } from "../../_icons/Ribbon09";
-import { Ribbon10 } from "../../_icons/Ribbon10";
-import { Ribbon11 } from "../../_icons/Ribbon11";
-import { Ribbon12 } from "../../_icons/Ribbon12";
+import Image from "next/image";
+import { useState } from "react";
 
-const RibbonComponents: ComponentType[] = [
-  Ribbon01,
-  Ribbon02,
-  Ribbon03,
-  Ribbon04,
-  Ribbon05,
-  Ribbon06,
-  Ribbon07,
-  Ribbon08,
-  Ribbon09,
-  Ribbon10,
-  Ribbon11,
-  Ribbon12,
-];
+const ribbonSources: string[] = Array.from(
+  { length: 12 },
+  (_, idx) => `/icons/ribbon_${String(idx + 1).padStart(2, "0")}.svg`,
+);
 
 type RibbonConfig = {
   id: number;
@@ -48,7 +27,7 @@ const generateRibbons = (): RibbonConfig[] =>
     duration: 4 + Math.random() * 3,
     scale: 0.5 + Math.random() * 0.5,
     rotate: Math.random() * 360,
-    variant: Math.floor(Math.random() * RibbonComponents.length),
+    variant: Math.floor(Math.random() * ribbonSources.length),
   }));
 
 export const FallingRibbons = () => {
@@ -57,7 +36,6 @@ export const FallingRibbons = () => {
   return (
     <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden">
       {ribbons.map((r) => {
-        const RibbonIcon = RibbonComponents[r.variant];
         return (
           <motion.div
             key={r.id}
@@ -76,7 +54,13 @@ export const FallingRibbons = () => {
               ease: "linear",
             }}
           >
-            <RibbonIcon />
+            <Image
+              src={ribbonSources[r.variant]}
+              alt={`Ribbon ${r.variant + 1}`}
+              loading="lazy"
+              width={36}
+              height={28}
+            />
           </motion.div>
         );
       })}

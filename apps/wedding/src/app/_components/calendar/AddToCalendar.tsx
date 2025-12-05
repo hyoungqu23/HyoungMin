@@ -1,8 +1,9 @@
 "use client";
 
+import Calendar from "@icons/calendar.svg";
+import Google from "@logos/google.png";
 import { motion } from "motion/react";
-import { Calendar } from "../../_icons/Calendar";
-import { Google } from "../../_icons/Google";
+import Image from "next/image";
 
 interface AddToCalendarProps {
   title: string; // 예: 김철수 & 이영희 결혼식
@@ -91,7 +92,7 @@ export default function AddToCalendar({
         onClick={handleGoogleCalendar}
         className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white border border-stone-200 shadow-sm text-stone-600 font-bold text-sm hover:bg-stone-50 transition-colors"
       >
-        <Google className="w-4 h-4" />
+        <Image src={Google} alt="Google" width={16} height={16} />
         구글 캘린더
       </motion.button>
 
@@ -101,7 +102,7 @@ export default function AddToCalendar({
         onClick={handleNativeCalendar}
         className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-stone-800 text-white shadow-md font-bold text-sm hover:bg-stone-700 transition-colors"
       >
-        <Calendar className="w-4 h-4" />
+        <Image src={Calendar} alt="Calendar" width={16} height={16} />
         캘린더 앱 저장
       </motion.button>
     </div>

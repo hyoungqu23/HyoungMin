@@ -1,12 +1,11 @@
 "use client";
 
+import ChevronLeft from "@icons/arrow_left.svg";
+import ChevronRight from "@icons/arrow_right.svg";
+import Close from "@icons/close.svg";
 import { AnimatePresence, motion, type PanInfo } from "motion/react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { ChevronLeft } from "../../_icons/ChevronLeft";
-import { ChevronRight } from "../../_icons/ChevronRight";
-import { Close } from "../../_icons/Close";
-
 export type GalleryItem = {
   id: number;
   src: string;
@@ -103,7 +102,7 @@ export const GalleryModal = ({
         className="absolute top-6 right-6 text-white/70 hover:text-white z-50 p-2"
         onClick={onClose}
       >
-        <Close />
+        <Image src={Close} alt="Close" width={16} height={16} />
       </button>
 
       <button
@@ -113,7 +112,7 @@ export const GalleryModal = ({
           paginate(-1);
         }}
       >
-        <ChevronLeft />
+        <Image src={ChevronLeft} alt="Chevron Left" width={16} height={16} />
       </button>
       <button
         className="absolute right-4 z-50 hidden md:block text-white/50 hover:text-white p-4 rounded-full hover:bg-white/10 transition"
@@ -122,7 +121,7 @@ export const GalleryModal = ({
           paginate(1);
         }}
       >
-        <ChevronRight />
+        <Image src={ChevronRight} alt="Chevron Right" width={16} height={16} />
       </button>
 
       <div

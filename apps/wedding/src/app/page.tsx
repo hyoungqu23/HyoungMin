@@ -1,17 +1,16 @@
-import Image from "next/image";
 import SAMPLE_IMAGE from "../../public/images/sample.jpg";
 import { Accounts } from "./_components/accounts/Accounts";
 import AddToCalendar from "./_components/calendar/AddToCalendar";
 import { Calendar } from "./_components/calendar/Calendar";
+import { FlowerFrame } from "./_components/common/FlowerFrame";
 import { Section } from "./_components/common/Section";
 import { TypingAnimation } from "./_components/common/TypingText";
 import { Contact } from "./_components/contact/Contact";
 import { GalleryContainer } from "./_components/gallery/GalleryContainer";
+import { KakaoMap } from "./_components/location/KakaoMap";
 import { LocationButtons } from "./_components/location/LocationButtons";
 import { Story } from "./_components/our-stories/Story";
 import { Share } from "./_components/share-invitation/Share";
-import { FlowerFrame } from "./_components/common/FlowerFrame";
-import { KakaoMap } from "./_components/location/KakaoMap";
 
 const Wedding = () => {
   return (
@@ -19,7 +18,9 @@ const Wedding = () => {
       {/* Main */}
       <Section className="flex flex-col items-center justify-center gap-4">
         <FlowerFrame imageSrc={SAMPLE_IMAGE.src} />
-        <h1 className="text-4xl font-bold italic">Our Wedding Day</h1>
+        <h1 className="text-4xl font-bold italic font-serif tracking-tight">
+          Our Wedding Day
+        </h1>
       </Section>
 
       {/* Wedding Introduction */}
@@ -91,10 +92,11 @@ const Wedding = () => {
         <KakaoMap />
         <LocationButtons
           placeName="더베르G 웨딩"
-          address="서울 영등포구 국회대로 612 지상2층,지하1층"
           lat={37.5257757}
           lng={126.902050869}
         />
+        {/* 대중교통 */}
+        {/* 주차 */}
       </Section>
 
       {/* Our Story */}

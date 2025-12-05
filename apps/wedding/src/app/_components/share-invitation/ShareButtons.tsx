@@ -1,8 +1,10 @@
 "use client";
 
+import Copy from "@icons/copy.svg";
+import Share from "@icons/share.svg";
 import { motion } from "motion/react";
+import Image from "next/image";
 import { useState } from "react";
-import { Copy } from "../../_icons/Copy";
 
 const WEDDING_URL = process.env.NEXT_PUBLIC_URL!;
 const WEDDING_TITLE = "이형민 ♥ 임희재 결혼합니다";
@@ -54,7 +56,7 @@ export const ShareButtons = () => {
         onClick={handleCopyAddress}
         className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-full shadow-md transition-colors"
       >
-        <Copy />
+        <Image src={Copy} alt="Copy" width={16} height={16} />
         {copied ? "복사 완료!" : "링크 복사"}
       </button>
 
@@ -66,23 +68,7 @@ export const ShareButtons = () => {
         onClick={handleWebShare}
         className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-rose-400 hover:bg-rose-500 text-white rounded-full shadow-md transition-colors font-medium"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="18" cy="5" r="3" />
-          <circle cx="6" cy="12" r="3" />
-          <circle cx="18" cy="19" r="3" />
-          <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
-          <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
-        </svg>
+        <Image src={Share} alt="Share" width={16} height={16} />
         공유하기
       </button>
     </div>

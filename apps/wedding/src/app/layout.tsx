@@ -8,10 +8,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL!),
-  title: "이형민 ♥ 임희재 결혼식",
+  title: "🎀 형민 ❤️ 희재 결혼식 초대장 🎀",
   description: "형민이와 희재의 결혼식에 초대합니다.",
   openGraph: {
-    title: "이형민 ♥ 임희재 결혼식",
+    title: "🎀 형민 ❤️ 희재 결혼식 초대장 🎀",
     description: "형민이와 희재의 결혼식에 초대합니다.",
     images: [
       {

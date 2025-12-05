@@ -1,14 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "motion/react";
 
 export const FlowerFrame = ({ imageSrc }: { imageSrc: string }) => {
   return (
     <div className="relative w-full max-w-sm mx-auto p-4">
       <div className="absolute inset-0 z-20 pointer-events-none">
         <Image
-          src="/images/frame.svg"
+          src="/images/frame_square.svg"
           alt="Flower Frame"
           fill
           className="object-cover scale-110 rotate-180"
