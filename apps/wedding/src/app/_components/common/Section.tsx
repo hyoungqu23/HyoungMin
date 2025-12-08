@@ -4,7 +4,9 @@ type SectionProps = ComponentProps<"section">;
 
 export const Section = ({ children, className }: SectionProps) => {
   return (
-    <section className={`w-screen py-8 px-4 ${className}`}>{children}</section>
+    <section className={`w-screen py-8 px-4 max-w-md mx-auto ${className}`}>
+      {children}
+    </section>
   );
 };
 

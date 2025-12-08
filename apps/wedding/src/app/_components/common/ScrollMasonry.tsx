@@ -1,7 +1,7 @@
 "use client";
 
-import { Children, ReactNode } from "react";
 import { motion } from "motion/react";
+import { Children, ReactNode } from "react";
 
 type ScrollMasonryProps = {
   children: ReactNode;
@@ -15,7 +15,9 @@ export const ScrollMasonry = ({
   const items = Children.toArray(children);
 
   return (
-    <div className={`w-full columns-3 md:columns-4 gap-2.5 ${className}`}>
+    <div
+      className={`w-full max-w-md columns-3 md:columns-4 gap-2.5 ${className}`}
+    >
       {items.map((child, i) => {
         const randomDelay = (i % 4) * 0.1;
         const randomY = 30 + (i % 5) * 10;

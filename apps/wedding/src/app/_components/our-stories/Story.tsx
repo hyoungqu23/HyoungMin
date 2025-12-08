@@ -152,7 +152,7 @@ export const Story = () => {
   const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <Section className="relative overflow-hidden">
+    <Section className="relative overflow-hidden ">
       <div className="relative z-10 flex flex-col items-center gap-16 md:gap-24 w-full max-w-3xl mx-auto px-4">
         <Section.Title category="Love Story" title="우리가 걸어온 길" />
 
