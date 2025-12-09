@@ -49,7 +49,9 @@ type LayoutProps = Readonly<{
 const RootLayout = ({ children }: LayoutProps) => {
   return (
     <html lang="ko">
-      <body className={`${pretendardFont.variable} antialiased bg-rose-50`}>
+      <body
+        className={`${pretendardFont.variable} ${yeongwolFont.variable} ${cafe24SsurroundFont.variable} antialiased bg-rose-50`}
+      >
         <Kakao />
         <Analytics />
         <Splash />
@@ -113,4 +115,30 @@ const pretendardFont = localFont({
   display: "swap",
   preload: true,
   variable: "--pretendard",
+});
+
+const yeongwolFont = localFont({
+  src: [
+    {
+      path: "../../public/fonts/Yeongwol.woff2",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+  display: "swap",
+  preload: true,
+  variable: "--yeongwol",
+});
+
+const cafe24SsurroundFont = localFont({
+  src: [
+    {
+      path: "../../public/fonts/Cafe24Ssurround.woff2",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+  display: "swap",
+  preload: true,
+  variable: "--cafe24",
 });

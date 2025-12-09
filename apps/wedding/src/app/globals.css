@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@theme inline {
+  --font-yeongwol: var(--yeongwol);
+  --font-cafe24: var(--cafe24);
+}
+
 :root {
   margin: 0;
   padding: 0;
