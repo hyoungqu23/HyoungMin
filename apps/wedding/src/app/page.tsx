@@ -5,8 +5,9 @@ import AddToCalendar from "./_components/calendar/AddToCalendar";
 import { Calendar } from "./_components/calendar/Calendar";
 // import { FlowerFrame } from "./_components/common/FlowerFrame";
 import Image from "next/image";
+import { DrawingHeeJea } from "./_components/common/DrawingHeeJea";
+import { DrawingHyoungMin } from "./_components/common/DrawingHyoungMin";
 import { Section } from "./_components/common/Section";
-import { TypingAnimation } from "./_components/common/TypingText";
 import { WeddingProgressBar } from "./_components/common/WeddingProgressBar";
 import { Contact } from "./_components/contact/Contact";
 import { GalleryContainer } from "./_components/gallery/GalleryContainer";
@@ -45,11 +46,12 @@ const Wedding = async () => {
       {/* Wedding Introduction */}
       <Section className="flex flex-col items-center justify-center gap-24">
         <p className="text-center text-lg">
-          <span className="font-bold">2015년 겨울</span>, 버건디 코트를 입고
-          만나
+          <span className="font-bold">2015년 겨울</span>,
+          <br />
+          버건디 코트를 입고 만나
           <br />
           <span className="text-rose-400 font-semibold">열한 번째</span>{" "}
-          <span className="font-bold">2026년</span> 봄에,
+          <span className="font-bold">2026년 봄</span>,
           <br />
           <span className="text-rose-400 font-semibold">하나</span>가 됩니다.
         </p>
@@ -64,7 +66,7 @@ const Wedding = async () => {
               </p>
             </div>
             <h2 className="text-3xl font-bold">
-              <TypingAnimation>이형민</TypingAnimation>
+              <DrawingHyoungMin />
             </h2>
           </div>
           <div className="w-full flex items-center justify-between gap-x-4">
@@ -77,7 +79,7 @@ const Wedding = async () => {
               </p>
             </div>
             <h2 className="text-3xl font-bold">
-              <TypingAnimation>임희재</TypingAnimation>
+              <DrawingHeeJea />
             </h2>
           </div>
         </div>

@@ -21,21 +21,33 @@ const diffInDays = (a: Date, b: Date) =>
 const PixelCouple = () => {
   return (
     <svg
-      width={40}
-      height={32}
-      viewBox="0 0 40 32"
-      aria-hidden="true"
-      className="drop-shadow-sm"
+      width="26"
+      height="18"
+      viewBox="0 0 26 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
     >
-      <rect x="4" y="6" width="8" height="8" fill="#fed7aa" />
-      <rect x="4" y="4" width="8" height="3" fill="#0f172a" />
-      <rect x="3" y="14" width="10" height="8" fill="#0f172a" />
-      <rect x="7" y="16" width="2" height="3" fill="#f97373" />
-      <rect x="24" y="6" width="8" height="8" fill="#fee2b5" />
-      <rect x="24" y="4" width="8" height="3" fill="#854d0e" />
-      <rect x="23" y="14" width="10" height="3" fill="#f973a1" />
-      <rect x="22" y="17" width="12" height="6" fill="#fecdd3" />
-      <rect x="26" y="3" width="2" height="2" fill="#f9a8d4" />
+      <path d="M9 1.00391H1V9.00391H9V1.00391Z" fill="#FED7AA" />
+      <path d="M9 0.00390625H1V3.00391H9V0.00390625Z" fill="black" />
+      <path d="M10 9.00391H0V17.0039H10V9.00391Z" fill="black" />
+      <path
+        d="M6 9.00391H4V13.0039L5 14.0039L6 13.0039V9.00391Z"
+        fill="#F97373"
+      />
+      <path d="M22 3.00391H16V8.00391H22V3.00391Z" fill="#FEE2B5" />
+      <path d="M22 1.00391H16V3.00391H22V1.00391Z" fill="#854D0E" />
+      <path
+        d="M22 8.00391C21.259 7.01595 16.741 7.01595 16 8.00391C15.259 8.99186 14 11.0038 14 11.0038H24C24 11.0038 22.741 8.99186 22 8.00391Z"
+        fill="#F973A1"
+      />
+      <path
+        d="M24.0003 11.0039H14.0003C14.0003 11.0039 11.9703 13.9011 12.0003 16.0039C12.0304 18.1067 25.9703 18.1067 26.0003 16.0039C26.0304 13.9011 24.0003 11.0039 24.0003 11.0039Z"
+        fill="#FECDD3"
+      />
+      <path
+        d="M18.9997 2.00373C19.433 1.94957 19.433 0.0578817 18.9997 0.00372568C18.5665 -0.0504303 17.9997 0.503726 17.9997 0.503726C17.9997 0.503726 17.433 -0.0504303 16.9997 0.00372568C16.5665 0.0578816 16.5665 1.94957 16.9997 2.00373C17.433 2.05788 17.9997 1.50373 17.9997 1.50373C17.9997 1.50373 18.5665 2.05788 18.9997 2.00373Z"
+        fill="#F9A8D4"
+      />
     </svg>
   );
 };

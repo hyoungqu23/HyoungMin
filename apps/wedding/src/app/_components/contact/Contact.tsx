@@ -32,7 +32,7 @@ const ContactRow = ({ contact }: { contact: Contact }) => {
       <div className="flex gap-2">
         <a
           href={`tel:${cleanPhone}`}
-          className="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+          className="flex items-center justify-center w-9 h-9 rounded-lg bg-rose-100 hover:bg-rose-200 transition-colors"
           aria-label={`${contact.name}에게 전화하기`}
         >
           <Image src={Phone} alt="Phone" width={16} height={16} />
@@ -40,7 +40,7 @@ const ContactRow = ({ contact }: { contact: Contact }) => {
 
         <a
           href={`sms:${cleanPhone}`}
-          className="flex items-center justify-center w-9 h-9 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors"
+          className="flex items-center justify-center w-9 h-9 rounded-lg bg-rose-100 hover:bg-rose-200 transition-colors"
           aria-label={`${contact.name}에게 문자하기`}
         >
           <Image src={Message} alt="Message" width={16} height={16} />

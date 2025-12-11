@@ -1,5 +1,8 @@
 "use client";
 
+import Check from "@icons/check.svg";
+import Copy from "@icons/copy.svg";
+import Image from "next/image";
 import { useState } from "react";
 
 export type Account = {
@@ -43,16 +46,13 @@ export const AccountCard = ({ account }: { account: Account }) => {
 
       <button
         onClick={handleCopy}
-        className={`
-          px-3 py-1.5 rounded-lg text-xs font-bold transition-all
-          ${
-            isCopied
-              ? "bg-emerald-100 text-emerald-600"
-              : "bg-stone-100 text-stone-500 hover:bg-stone-200"
-          }
-        `}
+        className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-rose-100 hover:bg-rose-200"
       >
-        {isCopied ? "복사됨 ✔" : "복사"}
+        {isCopied ? (
+          <Image src={Check} alt="Check" width={16} height={16} />
+        ) : (
+          <Image src={Copy} alt="Copy" width={16} height={16} />
+        )}
       </button>
     </div>
   );

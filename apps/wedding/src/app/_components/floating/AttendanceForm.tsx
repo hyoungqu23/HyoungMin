@@ -1,14 +1,14 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AnimatePresence, motion } from "motion/react";
 import { useCallback } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { motion, AnimatePresence } from "motion/react";
+import { submitAttendance } from "../../_actions/submit-attendance";
 import {
   attendanceFormSchema,
   type AttendanceForm as AttendanceFormType,
 } from "../../_schemas/attendance-form";
-import { submitAttendance } from "../../_actions/submit-attendance";
 
 const sideOptions = [
   { value: "groom" as const, label: "신랑측" },
@@ -82,7 +82,7 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
                 <input
                   type="radio"
                   value={item.value}
-                  {...register("side")}
+                  {...register("side", { required: "선택해주세요." })}
                   className="absolute opacity-0 w-0 h-0"
                 />
                 {item.label}
@@ -104,7 +104,7 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
           <input
             type="text"
             placeholder="성함을 입력해주세요"
-            {...register("name")}
+            {...register("name", { required: "성함을 입력해주세요." })}
             className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none transition placeholder:text-stone-400 text-stone-800"
           />
           {errors.name && (
@@ -134,7 +134,9 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
                 <input
                   type="radio"
                   value={val}
-                  {...register("countType")}
+                  {...register("countType", {
+                    required: "인원 수를 선택해주세요.",
+                  })}
                   className="hidden"
                 />
                 {val === "custom" ? "직접입력" : `${val}명`}
@@ -195,7 +197,9 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
                 <input
                   type="radio"
                   value={item.value}
-                  {...register("meal")}
+                  {...register("meal", {
+                    required: "식사 여부를 선택해주세요.",
+                  })}
                   className="hidden"
                 />
                 {item.label}
