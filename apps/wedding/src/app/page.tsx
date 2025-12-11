@@ -11,6 +11,7 @@ import { KakaoMap } from "./_components/location/KakaoMap";
 import { LocationButtons } from "./_components/location/LocationButtons";
 import { Story } from "./_components/our-stories/Story";
 import { Share } from "./_components/share-invitation/Share";
+import { WeddingProgressBar } from "./_components/common/WeddingProgressBar";
 
 const Wedding = () => {
   return (
@@ -72,6 +73,7 @@ const Wedding = () => {
           title="Our Wedding Day"
           description={`2026년 4월 19일 일요일 오전 11시\n더베르G 웨딩\n서울 영등포구 국회대로 612 지상2층, 지하1층`}
         />
+        <WeddingProgressBar />
         <Calendar />
         <AddToCalendar
           title="Our Wedding Day"
