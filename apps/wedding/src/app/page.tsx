@@ -11,9 +11,13 @@ import { KakaoMap } from "./_components/location/KakaoMap";
 import { LocationButtons } from "./_components/location/LocationButtons";
 import { Story } from "./_components/our-stories/Story";
 import { Share } from "./_components/share-invitation/Share";
+import { RollingPaper } from "./_components/guestbook/RollingPaper";
 import { WeddingProgressBar } from "./_components/common/WeddingProgressBar";
+import { getGuestMessages } from "./_actions/guestbook";
 
-const Wedding = () => {
+const Wedding = async () => {
+  const initialGuestMessages = await getGuestMessages(1, 10);
+
   return (
     <main role="main" id="main" className="w-screen min-h-svh">
       {/* Main */}
@@ -124,6 +128,7 @@ const Wedding = () => {
       {/* Guestbook */}
       <Section className="flex flex-col items-center justify-center gap-4">
         <Section.Title category="Guestbook" title="축하 인사 전하기" />
+        <RollingPaper initialMessages={initialGuestMessages} />
       </Section>
     </main>
   );
