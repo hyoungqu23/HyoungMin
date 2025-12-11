@@ -43,7 +43,7 @@ export const FloatingButton = () => {
       {!isOpen ? (
         <div
           key="floating-button"
-          className="fixed bottom-0 w-fit right-0 z-50 p-4 flex justify-end pointer-events-none"
+          className="fixed bottom-4 w-fit right-2 z-50 flex justify-end pointer-events-none"
         >
           <motion.button
             initial={{ y: 100, opacity: 0 }}

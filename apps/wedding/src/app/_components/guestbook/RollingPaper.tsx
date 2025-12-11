@@ -1,12 +1,12 @@
 "use client";
 
+import { motion, useInView } from "motion/react";
+import { Activity, useEffect, useEffectEvent, useRef, useState } from "react";
 import {
   addGuestMessage,
   getGuestMessages,
   type GuestMessage,
 } from "../../_actions/guestbook";
-import { useInView, motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
 import { ScrollMasonry } from "../common/ScrollMasonry";
 
 const NOTE_COLORS = [
@@ -44,7 +44,7 @@ export const RollingPaper = ({
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(loadMoreRef, { margin: "100px" });
 
-  const loadMore = async () => {
+  const loadMore = useEffectEvent(async () => {
     if (isLoading || !hasMore) return;
 
     setIsLoading(true);
@@ -58,13 +58,13 @@ export const RollingPaper = ({
       setPage(nextPage);
     }
     setIsLoading(false);
-  };
+  });
 
   useEffect(() => {
     if (isInView && hasMore) {
       loadMore();
     }
-  }, [isInView]);
+  }, [hasMore, isInView]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -89,7 +89,6 @@ export const RollingPaper = ({
 
   return (
     <div className="w-full max-w-md mx-auto flex flex-col gap-4">
-      {/* Input form: 이름 + 내용 */}
       <form
         onSubmit={handleSubmit}
         className="w-full flex flex-col gap-3 bg-white/70 backdrop-blur-sm p-4 rounded-2xl border border-stone-200/60 shadow-sm"
@@ -120,49 +119,51 @@ export const RollingPaper = ({
         />
       </form>
 
-      {/* Rolling paper messages */}
-      <div className="w-full rounded-3xl border border-stone-200/60 bg-stone-50/80 shadow-inner p-4 pb-6 relative overflow-hidden min-h-[260px]">
-        <div className="pointer-events-none absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_1px_1px,#e5e7eb_0,transparent_1px)] bg-size-[16px_16px]" />
+      <Activity
+        mode={messages?.length && messages.length > 0 ? "visible" : "hidden"}
+      >
+        <div className="w-full rounded-3xl border border-stone-200/60 bg-stone-50/80 shadow-inner p-4 pb-6 relative overflow-hidden min-h-[260px]">
+          <div className="pointer-events-none absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_1px_1px,#e5e7eb_0,transparent_1px)] bg-size-[16px_16px]" />
 
-        <div className="relative">
-          <ScrollMasonry className="pb-4">
-            {messages?.map((msg) => {
-              const { color, rotation } = getMessageStyle(msg.id);
+          <div className="relative">
+            <ScrollMasonry className="pb-4">
+              {messages?.map((msg) => {
+                const { color, rotation } = getMessageStyle(msg.id);
 
-              return (
-                <motion.div
-                  key={msg.id}
-                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4 }}
-                  className={`relative p-4 rounded-sm shadow-md ${color} min-h-[140px] flex flex-col justify-between break-inside-avoid mb-4`}
-                  style={{ rotate: `${rotation}deg` }}
-                >
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-3.5 bg-white/40 backdrop-blur-[1px] rotate-1 shadow-sm" />
-                  <p className="text-sm text-stone-700 whitespace-pre-wrap leading-relaxed font-serif">
-                    {msg.message}
-                  </p>
-                  <div className="text-right mt-2">
-                    <span className="text-xs text-stone-500 font-bold tracking-tight">
-                      - {msg.name}
-                    </span>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </ScrollMasonry>
+                return (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4 }}
+                    className={`relative p-3 rounded-sm shadow-md ${color} min-h-15 flex flex-col justify-between break-inside-avoid mb-4`}
+                    style={{ rotate: `${rotation}deg` }}
+                  >
+                    <p className="text-sm text-stone-700 whitespace-pre-wrap leading-relaxed font-yeongwol">
+                      {msg.message}
+                    </p>
+                    <div className="text-right mt-2">
+                      <span className="text-xs text-stone-500 font-bold tracking-tight">
+                        - {msg.name}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </ScrollMasonry>
 
-          <div ref={loadMoreRef} className="py-4 text-center w-full">
-            {isLoading && (
-              <div className="inline-block w-5 h-5 border-2 border-rose-300 border-t-transparent rounded-full animate-spin" />
-            )}
-            {!hasMore && messages && messages.length > 0 && (
-              <p className="text-xs text-stone-400">마지막 메시지입니다 🌸</p>
-            )}
+            <div ref={loadMoreRef} className="py-4 text-center w-full">
+              {isLoading && (
+                <div className="inline-block w-5 h-5 border-2 border-rose-300 border-t-transparent rounded-full animate-spin" />
+              )}
+              {!hasMore && messages && messages.length > 0 && (
+                <p className="text-xs text-stone-400">마지막 메시지입니다 🌸</p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </Activity>
     </div>
   );
 };

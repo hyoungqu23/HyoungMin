@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Suspense } from "react";
+import { getHeartCount } from "./_actions/hearts";
 import { Analytics } from "./_components/analytics/Analytics";
 import { FloatingButton } from "./_components/floating/FloatingButton";
+import { HeartButton } from "./_components/floating/HeartButton";
 import { Kakao } from "./_components/root/Kakao";
 import { Splash } from "./_components/splash/Splash";
 import "./globals.css";
-import { Suspense } from "react";
-import { HeartButton } from "./_components/floating/HeartButton";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL!),
@@ -52,7 +53,7 @@ const RootLayout = ({ children }: LayoutProps) => {
   return (
     <html lang="ko">
       <body
-        className={`${pretendardFont.variable} ${yeongwolFont.variable} ${cafe24SsurroundFont.variable} antialiased bg-rose-50`}
+        className={`relative ${pretendardFont.variable} ${yeongwolFont.variable} ${cafe24SsurroundFont.variable} antialiased bg-rose-50 text-stone-900 overflow-x-hidden`}
       >
         <Kakao />
         <Analytics />
@@ -60,7 +61,7 @@ const RootLayout = ({ children }: LayoutProps) => {
         {children}
         <FloatingButton />
         <Suspense fallback={null}>
-          <HeartButton />
+          <HeartButton initialCountPromise={getHeartCount()} />
         </Suspense>
       </body>
     </html>

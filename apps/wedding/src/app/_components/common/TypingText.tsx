@@ -1,15 +1,22 @@
 "use client";
 
 import { motion, Variants } from "motion/react";
-import { useMemo } from "react";
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  ReactElement,
+  ReactNode,
+  useMemo,
+} from "react";
 
-type TypingAnimationProps = {
-  children: string;
+interface TypingAnimationProps {
+  children: ReactNode;
+  className?: string;
   speed?: number;
   delay?: number;
-  className?: string;
   once?: boolean;
-};
+}
 
 const childVariants: Variants = {
   hidden: {
@@ -28,37 +35,90 @@ const childVariants: Variants = {
   }),
 };
 
+interface ElementWithChildren {
+  children?: ReactNode;
+  [key: string]: unknown;
+}
+
+function isElementWithChildren(
+  node: ReactNode,
+): node is ReactElement<ElementWithChildren> {
+  return (
+    isValidElement(node) &&
+    typeof node.props === "object" &&
+    node.props !== null &&
+    "children" in node.props
+  );
+}
+
+let charIndex = 0;
+
 export const TypingAnimation = ({
   children,
+  className = "",
   speed = 0.05,
   delay = 0,
-  className = "",
   once = false,
 }: TypingAnimationProps) => {
-  const fullText = useMemo(() => children, [children]);
+  const fullText = useMemo(() => {
+    const extract = (node: ReactNode): string => {
+      if (typeof node === "string" || typeof node === "number") {
+        return String(node);
+      }
+      if (isElementWithChildren(node)) {
+        return Children.map(node.props.children, extract)?.join("") || "";
+      }
+      if (Array.isArray(node)) {
+        return node.map(extract).join("");
+      }
+      return "";
+    };
+    return extract(children);
+  }, [children]);
 
-  // charCounter 변수 제거됨 (불필요)
+  const renderTree = (node: ReactNode): ReactNode => {
+    if (typeof node === "string" || typeof node === "number") {
+      const text = String(node);
 
-  const renderText = (text: string) =>
-    text.split("").map((char, index) => {
-      // charCounter 대신 map이 제공하는 index를 사용
-      const order = index;
-      const currentDelay = delay + order * speed;
+      return text.split("").map((char, index) => {
+        if (char === "\n") {
+          return <br key={`br-${index}`} />;
+        }
 
-      if (char === "\n") return <br key={`br-${index}`} />;
+        const currentIndex = charIndex;
+        const currentDelay = delay + currentIndex * speed;
+        charIndex += 1;
 
-      return (
-        <motion.span
-          key={`char-${index}`} // key도 index 기반으로 변경
-          custom={currentDelay}
-          variants={childVariants}
-          className="inline-block whitespace-pre"
-          aria-hidden="true"
-        >
-          {char}
-        </motion.span>
+        return (
+          <motion.span
+            key={`char-${currentIndex}`}
+            custom={currentDelay}
+            variants={childVariants}
+            className="inline-block whitespace-pre"
+            aria-hidden="true"
+          >
+            {char}
+          </motion.span>
+        );
+      });
+    }
+
+    if (isElementWithChildren(node)) {
+      const { children: nodeChildren, ...restProps } = node.props;
+
+      const animatedChildren = Children.map(nodeChildren, (child) =>
+        renderTree(child),
       );
-    });
+
+      return cloneElement(node, restProps, animatedChildren);
+    }
+
+    if (Array.isArray(node)) {
+      return node.map((child) => renderTree(child));
+    }
+
+    return node;
+  };
 
   return (
     <motion.div
@@ -68,7 +128,11 @@ export const TypingAnimation = ({
       viewport={{ once, amount: 0.3 }}
       aria-label={fullText}
     >
-      {renderText(children)}
+      {/* 
+        renderTree 함수가 실행되면서 charIndex를 0부터 증가시키며 JSX를 생성합니다.
+        렌더링 결과물은 항상 동일하므로 Side Effect가 없습니다.
+      */}
+      {renderTree(children)}
     </motion.div>
   );
 };

@@ -3,9 +3,7 @@
 import { motion, useScroll, useTransform } from "motion/react";
 import Image from "next/image";
 import { useRef } from "react";
-import { Section } from "../common/Section";
 
-// --- 데이터 ---
 const EPISODES = [
   {
     year: "2015",
@@ -45,18 +43,17 @@ const EPISODES = [
   },
 ];
 
-const TimelineItem = ({
-  data,
-  index,
-}: {
+type TimelineItemProps = {
   data: (typeof EPISODES)[0];
   index: number;
-}) => {
+};
+
+const TimelineItem = ({ data, index }: TimelineItemProps) => {
   const isEven = index % 2 === 0;
 
   return (
     <div
-      className={`relative flex w-full items-center justify-between mb-24 md:mb-32 ${
+      className={`relative flex w-full items-center justify-between ${
         isEven ? "flex-row-reverse" : "flex-row"
       }`}
     >
@@ -79,7 +76,7 @@ const TimelineItem = ({
       >
         <motion.div
           whileHover={{ scale: 1.05, rotate: 0 }}
-          className="relative aspect-[4/5] w-full max-w-[280px] mx-auto bg-white p-2 md:p-3 shadow-lg rounded-sm transform transition-transform"
+          className="relative aspect-4/5 w-full max-w-[280px] mx-auto bg-white p-2 md:p-3 shadow-lg rounded-sm transform transition-transform"
           style={{
             boxShadow: "0 10px 30px -10px rgba(0,0,0,0.15)", // 부드러운 그림자
           }}
@@ -106,13 +103,13 @@ const TimelineItem = ({
       </motion.div>
 
       {/* 2. 중앙 타임라인 노드 (점) */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center z-10 w-8 h-8">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center z-10">
         <motion.div
           initial={{ scale: 0 }}
           whileInView={{ scale: 1 }}
           viewport={{ once: true }}
           transition={{ type: "spring", stiffness: 300, delay: 0.2 }}
-          className="w-4 h-4 rounded-full bg-rose-400 ring-4 ring-white shadow-sm"
+          className="size-3 rounded-full bg-rose-400 ring-4 ring-white shadow-sm"
         />
       </div>
 
@@ -152,48 +149,44 @@ export const Story = () => {
   const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <Section className="relative overflow-hidden ">
-      <div className="relative z-10 flex flex-col items-center gap-16 md:gap-24 w-full max-w-3xl mx-auto px-4">
-        <Section.Title category="Love Story" title="우리가 걸어온 길" />
+    <div className="relative z-10 flex flex-col items-center gap-16 md:gap-24 w-full max-w-3xl mx-auto px-4">
+      <div ref={containerRef} className="relative w-full">
+        {/* 중앙 연결 선 (배경 라인) */}
+        <div className="absolute left-1/2 top-0 bottom-0 w-[2px] -translate-x-1/2 bg-stone-200 rounded-full" />
 
-        <div ref={containerRef} className="relative w-full">
-          {/* 중앙 연결 선 (배경 라인) */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-[2px] -translate-x-1/2 bg-stone-200 rounded-full" />
+        {/* 스크롤에 따라 채워지는 선 (진행 라인) */}
+        <motion.div
+          style={{ height: lineHeight }}
+          className="absolute left-1/2 top-0 w-[2px] -translate-x-1/2 bg-rose-300 rounded-full origin-top z-0"
+        />
 
-          {/* 스크롤에 따라 채워지는 선 (진행 라인) */}
-          <motion.div
-            style={{ height: lineHeight }}
-            className="absolute left-1/2 top-0 w-[2px] -translate-x-1/2 bg-rose-300 rounded-full origin-top z-0"
-          />
-
-          <div className="pt-10 pb-20">
-            {EPISODES.map((item, index) => (
-              <TimelineItem key={index} data={item} index={index} />
-            ))}
-          </div>
-
-          {/* 마지막 엔딩 섹션 */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ type: "spring", duration: 0.8 }}
-            className="flex flex-col items-center gap-4 relative z-10 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-sm border border-rose-100"
-          >
-            <div className="relative w-16 h-16 md:w-20 md:h-20 bg-rose-50 rounded-full flex items-center justify-center border-2 border-rose-100 text-3xl md:text-4xl">
-              💍
-            </div>
-            <div className="text-center">
-              <p className="text-stone-500 text-sm font-serif italic mb-1">
-                And finally...
-              </p>
-              <h3 className="text-xl md:text-2xl font-bold text-stone-800">
-                12월 8일, 우리 결혼합니다
-              </h3>
-            </div>
-          </motion.div>
+        <div className="pt-10 pb-20">
+          {EPISODES.map((item, index) => (
+            <TimelineItem key={index} data={item} index={index} />
+          ))}
         </div>
+
+        {/* 마지막 엔딩 섹션 */}
+        {/* <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ type: "spring", duration: 0.8 }}
+          className="flex flex-col items-center gap-4 relative z-10 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-sm border border-rose-100"
+        >
+          <div className="relative w-16 h-16 md:w-20 md:h-20 bg-rose-50 rounded-full flex items-center justify-center border-2 border-rose-100 text-3xl md:text-4xl">
+            💍
+          </div>
+          <div className="text-center">
+            <p className="text-stone-500 text-sm font-serif italic mb-1">
+              And finally...
+            </p>
+            <h3 className="text-xl md:text-2xl font-bold text-stone-800">
+              12월 8일, 우리 결혼합니다
+            </h3>
+          </div>
+        </motion.div> */}
       </div>
-    </Section>
+    </div>
   );
 };

@@ -1,31 +1,45 @@
 import SAMPLE_IMAGE from "../../public/images/sample.jpg";
+import { getGuestMessages } from "./_actions/guestbook";
 import { Accounts } from "./_components/accounts/Accounts";
 import AddToCalendar from "./_components/calendar/AddToCalendar";
 import { Calendar } from "./_components/calendar/Calendar";
-import { FlowerFrame } from "./_components/common/FlowerFrame";
+// import { FlowerFrame } from "./_components/common/FlowerFrame";
+import Image from "next/image";
 import { Section } from "./_components/common/Section";
 import { TypingAnimation } from "./_components/common/TypingText";
+import { WeddingProgressBar } from "./_components/common/WeddingProgressBar";
 import { Contact } from "./_components/contact/Contact";
 import { GalleryContainer } from "./_components/gallery/GalleryContainer";
+import { RollingPaper } from "./_components/guestbook/RollingPaper";
 import { KakaoMap } from "./_components/location/KakaoMap";
 import { LocationButtons } from "./_components/location/LocationButtons";
-import { Story } from "./_components/our-stories/Story";
 import { Share } from "./_components/share-invitation/Share";
-import { RollingPaper } from "./_components/guestbook/RollingPaper";
-import { WeddingProgressBar } from "./_components/common/WeddingProgressBar";
-import { getGuestMessages } from "./_actions/guestbook";
 
 const Wedding = async () => {
   const initialGuestMessages = await getGuestMessages(1, 10);
 
   return (
-    <main role="main" id="main" className="w-screen min-h-svh">
+    <main
+      role="main"
+      id="main"
+      className="w-screen overflow-x-hidden min-h-svh"
+    >
       {/* Main */}
-      <Section className="flex flex-col items-center justify-center gap-4">
-        <FlowerFrame imageSrc={SAMPLE_IMAGE.src} />
-        <h1 className="text-4xl font-bold italic font-serif tracking-tight">
-          Our Wedding Day
-        </h1>
+      <Section className="flex flex-col items-center justify-center gap-4 py-0!">
+        {/* <FlowerFrame imageSrc={SAMPLE_IMAGE.src} /> */}
+        <div className="relative w-screen h-screen overflow-hidden">
+          <Image
+            src={SAMPLE_IMAGE.src}
+            alt="Wedding Day"
+            width={300}
+            height={500}
+            className="object-cover w-full h-full"
+          />
+          <div className="absolute inset-0 bg-black/15" />
+          <h1 className="absolute top-20 left-1/2 -translate-x-1/2 w-full text-center text-4xl font-bold font-yeongwol italic text-rose-50">
+            Our Wedding Day
+          </h1>
+        </div>
       </Section>
 
       {/* Wedding Introduction */}
@@ -34,10 +48,9 @@ const Wedding = async () => {
           <span className="font-bold">2015년 겨울</span>, 버건디 코트를 입고
           만나
           <br />
-          함께 웃으며 <span className="text-rose-400 font-semibold">11번</span>
-          의 봄날을 보내고
+          <span className="text-rose-400 font-semibold">열한 번째</span>{" "}
+          <span className="font-bold">2026년</span> 봄에,
           <br />
-          <span className="font-bold">2026년 봄</span>,{" "}
           <span className="text-rose-400 font-semibold">하나</span>가 됩니다.
         </p>
         <div className="w-full px-12 flex flex-col items-center justify-center gap-y-4">
@@ -72,11 +85,15 @@ const Wedding = async () => {
 
       {/* Calendar */}
       <Section className="flex flex-col items-center justify-center gap-4">
-        <Section.Title
-          category="Calendar"
-          title="Our Wedding Day"
-          description={`2026년 4월 19일 일요일 오전 11시\n더베르G 웨딩\n서울 영등포구 국회대로 612 지상2층, 지하1층`}
-        />
+        <Section.Title category="Calendar" title="Our Wedding Day" />
+        <p className="text-center text-stone-800 leading-relaxed whitespace-pre-line">
+          서울 영등포구 국회대로 612 지상2층, 지하1층
+          <br />
+          <span className="font-semibold">더베르G 웨딩</span>
+        </p>
+        <h3 className="text-lg font-semibold text-stone-800">
+          2026년 4월 19일 일요일 오전 11시
+        </h3>
         <WeddingProgressBar />
         <Calendar />
         <AddToCalendar
@@ -106,9 +123,10 @@ const Wedding = async () => {
       </Section>
 
       {/* Our Story */}
-      <Section className="flex flex-col items-center justify-center gap-4">
+      {/* <Section className="flex flex-col items-center justify-center gap-4">
+        <Section.Title category="Love Story" title="우리가 걸어온 길" />
         <Story />
-      </Section>
+      </Section> */}
 
       {/* Gallery */}
       <Section className="flex flex-col items-center justify-center gap-4">

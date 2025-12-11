@@ -95,7 +95,7 @@ export const Splash = () => {
   if (!showSplash) return null;
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center pointer-events-auto overflow-hidden bg-pink-50/30">
+    <div className="fixed inset-0 max-w-screen z-100 flex items-center justify-center pointer-events-auto overflow-hidden bg-pink-50/30">
       <motion.div
         className="absolute inset-0 z-30 pointer-events-none"
         animate={{ opacity: isOpening ? 0 : 1 }}
@@ -153,7 +153,7 @@ export const Splash = () => {
       </motion.div>
 
       <motion.div
-        className="relative z-40 flex flex-col items-center justify-center"
+        className="relative z-40 flex flex-col items-center justify-center gap-6 h-full"
         animate={
           isOpening
             ? { opacity: 0, scale: 1.1, filter: "blur(20px)" }
@@ -161,39 +161,37 @@ export const Splash = () => {
         }
         transition={{ duration: 1.5 }}
       >
-        <div className="flex flex-col items-center select-none drop-shadow-2xl">
-          <div className="flex items-end gap-1 text-5xl font-bold tracking-tighter text-stone-800 md:text-7xl">
+        <div className="flex flex-col items-center select-none drop-shadow-2xl gap-2">
+          <div className="flex items-end gap-1 text-5xl font-bold tracking-tightest font-yeongwol text-stone-800 md:text-7xl">
             <span ref={yearRef} className="tabular-nums">
               2015
             </span>
-            <span className="text-3xl text-rose-300 mb-1">.</span>
-            <span ref={monthRef} className="tabular-nums w-[1.4em] text-center">
+            .
+            <span ref={monthRef} className="tabular-nums w-fit text-center">
               12
             </span>
-            <span className="text-3xl text-rose-300 mb-1">.</span>
-            <span ref={dayRef} className="tabular-nums w-[1.4em] text-center">
+            .
+            <span ref={dayRef} className="tabular-nums w-fit text-center">
               26
             </span>
           </div>
 
-          <p className="mt-6 text-sm font-medium tracking-[0.2em] text-rose-400 uppercase">
+          <p className="text-sm font-medium tracking-[0.2em] text-rose-400 uppercase font-yeongwol">
             Wedding Day
           </p>
         </div>
 
         <AnimatePresence>
-          {isCountFinished && !isOpening && (
+          {isCountFinished && !isOpening ? (
             <motion.button
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.3 } }}
               transition={{ duration: 0.8, delay: 0.2, type: "spring" }}
               onClick={handleOpen}
-              className="mt-16 group relative inline-flex items-center gap-3 px-10 py-4 bg-rose-400 text-white rounded-full overflow-hidden transition-all hover:bg-rose-500 shadow-xl hover:shadow-2xl hover:shadow-rose-200"
+              className="group relative inline-flex items-center gap-3 px-10 py-4 bg-rose-400 text-white rounded-full overflow-hidden transition-all hover:bg-rose-500 shadow-xl hover:shadow-2xl hover:shadow-rose-200"
             >
-              <span className="relative font-semibold tracking-wide">
-                초대장 열기
-              </span>
+              <span className="relative font-semibold">초대장 열기</span>
               <svg
                 className="w-5 h-5 transition-transform group-hover:translate-x-1"
                 fill="none"
@@ -208,6 +206,8 @@ export const Splash = () => {
                 />
               </svg>
             </motion.button>
+          ) : (
+            <div className="w-full h-14" />
           )}
         </AnimatePresence>
       </motion.div>

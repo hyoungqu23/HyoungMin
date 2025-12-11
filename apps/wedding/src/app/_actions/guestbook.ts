@@ -50,7 +50,7 @@ export const getGuestMessages = async (
       end,
     );
     return messages ?? [];
-  } catch (error) {
+  } catch {
     return [];
   }
 };
