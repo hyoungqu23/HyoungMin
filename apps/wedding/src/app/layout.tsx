@@ -5,6 +5,8 @@ import { FloatingButton } from "./_components/floating/FloatingButton";
 import { Kakao } from "./_components/root/Kakao";
 import { Splash } from "./_components/splash/Splash";
 import "./globals.css";
+import { Suspense } from "react";
+import { HeartButton } from "./_components/floating/HeartButton";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL!),
@@ -57,6 +59,9 @@ const RootLayout = ({ children }: LayoutProps) => {
         <Splash />
         {children}
         <FloatingButton />
+        <Suspense fallback={null}>
+          <HeartButton />
+        </Suspense>
       </body>
     </html>
   );
