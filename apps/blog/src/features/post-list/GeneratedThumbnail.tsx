@@ -8,13 +8,15 @@ import {
 interface GeneratedThumbnailProps {
   title: string;
   className?: string;
+  bgColor?: string;
 }
 
 export const GeneratedThumbnail = ({
   title,
   className,
+  bgColor: bgColorOverride,
 }: GeneratedThumbnailProps) => {
-  const bgColor = generateThumbnailColor(title);
+  const bgColor = bgColorOverride ?? generateThumbnailColor(title);
   const textColor = getTextColor(bgColor);
 
   return (

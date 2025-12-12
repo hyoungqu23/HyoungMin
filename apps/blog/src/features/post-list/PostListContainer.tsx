@@ -12,6 +12,7 @@ export type PostWithSlug = {
   slug: string;
   meta: PostMeta;
   firstImage?: string | null;
+  seriesColor?: string;
 };
 
 interface PostListContainerProps {
@@ -71,6 +72,7 @@ export const PostListContainer = ({
               slug={post.slug}
               meta={post.meta}
               firstImage={post.firstImage}
+              seriesColor={post.seriesColor}
             />
           ))}
         </div>

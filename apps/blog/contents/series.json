@@ -1,22 +1,27 @@
 {
   "feature-sliced-design": {
     "title": "Feature-Sliced Design (FSD)",
-    "description": "FSD 개념부터 Next.js 적용까지"
+    "description": "FSD 개념부터 Next.js 적용까지",
+    "color": "#8B5CF6"
   },
   "nextjs-error-handling": {
     "title": "Next.js 에러 처리 전략",
-    "description": "App Router 기반 에러 처리 패턴 정리"
+    "description": "App Router 기반 에러 처리 패턴 정리",
+    "color": "#EF4444"
   },
   "nextjs-i18n": {
     "title": "Next.js 국제화(i18n)",
-    "description": "다국어 지원 구현과 자동화"
+    "description": "다국어 지원 구현과 자동화",
+    "color": "#06B6D4"
   },
   "web-performance": {
     "title": "웹 성능 & Core Web Vitals",
-    "description": "SEO와 성능 최적화 실전"
+    "description": "SEO와 성능 최적화 실전",
+    "color": "#F59E0B"
   },
   "retrospective": {
     "title": "프로젝트 회고",
-    "description": "팀/개인 프로젝트 회고 모음"
+    "description": "팀/개인 프로젝트 회고 모음",
+    "color": "#10B981"
   }
 }

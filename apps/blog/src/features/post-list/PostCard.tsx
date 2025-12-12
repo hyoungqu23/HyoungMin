@@ -9,6 +9,7 @@ interface PostCardProps {
   slug: string;
   meta: PostMeta;
   firstImage?: string | null;
+  seriesColor?: string;
 }
 
 const normalizeImageUrl = (url: string): string => {
@@ -21,7 +22,12 @@ const normalizeImageUrl = (url: string): string => {
   return `/${url}`;
 };
 
-export const PostCard = ({ slug, meta, firstImage }: PostCardProps) => {
+export const PostCard = ({
+  slug,
+  meta,
+  firstImage,
+  seriesColor,
+}: PostCardProps) => {
   // 썸네일 이미지 우선순위: meta.cover -> firstImage -> GeneratedThumbnail
   const thumbnailImage = meta.cover
     ? normalizeImageUrl(meta.cover)
@@ -45,7 +51,11 @@ export const PostCard = ({ slug, meta, firstImage }: PostCardProps) => {
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <GeneratedThumbnail title={meta.title} className="w-full h-full" />
+            <GeneratedThumbnail
+              title={meta.title}
+              className="w-full h-full"
+              bgColor={seriesColor}
+            />
           )}
         </div>
         <div className="p-6">

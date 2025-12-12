@@ -9,6 +9,10 @@ const seriesEntrySchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   cover: z.string().optional(),
+  color: z
+    .string()
+    .regex(/^#([0-9a-fA-F]{6})$/, "Invalid hex color")
+    .optional(),
 });
 
 const seriesRegistrySchema = z.record(seriesEntrySchema).default({});
