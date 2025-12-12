@@ -15,7 +15,9 @@ const seriesEntrySchema = z.object({
     .optional(),
 });
 
-const seriesRegistrySchema = z.record(seriesEntrySchema).default({});
+const seriesRegistrySchema = z
+  .record(z.string(), seriesEntrySchema)
+  .default({});
 
 export type SeriesInfo = z.infer<typeof seriesEntrySchema>;
 export type SeriesRegistry = Record<string, SeriesInfo>;
