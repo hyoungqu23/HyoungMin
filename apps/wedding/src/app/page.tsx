@@ -15,6 +15,7 @@ import { RollingPaper } from "./_components/guestbook/RollingPaper";
 import { KakaoMap } from "./_components/location/KakaoMap";
 import { LocationButtons } from "./_components/location/LocationButtons";
 import { Share } from "./_components/share-invitation/Share";
+import { UploadWeddingPhoto } from "./_components/gallery/UploadWeddingPhoto";
 
 const Wedding = async () => {
   const initialGuestMessages = await getGuestMessages(1, 10);
@@ -134,6 +135,7 @@ const Wedding = async () => {
       <Section className="flex flex-col items-center justify-center gap-4">
         <Section.Title category="Gallery" title="Lovely Moments" />
         <GalleryContainer />
+        <UploadWeddingPhoto />
       </Section>
 
       {/* Contact */}
