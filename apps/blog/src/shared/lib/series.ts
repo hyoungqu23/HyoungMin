@@ -17,8 +17,9 @@ const seriesEntrySchema = z.object({
 
 const seriesRegistrySchema = z.record(seriesEntrySchema).default({});
 
-export type SeriesRegistry = z.infer<typeof seriesRegistrySchema>;
-export type SeriesEntry = z.infer<typeof seriesEntrySchema> & { id: string };
+export type SeriesInfo = z.infer<typeof seriesEntrySchema>;
+export type SeriesRegistry = Record<string, SeriesInfo>;
+export type SeriesEntry = SeriesInfo & { id: string };
 
 let registryCache: SeriesRegistry | null = null;
 
