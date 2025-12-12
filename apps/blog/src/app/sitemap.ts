@@ -2,6 +2,11 @@ import type { MetadataRoute } from "next";
 
 import { siteUrl } from "@/shared/config/site";
 import { getAllPostSummaries } from "@/shared/lib/posts";
+import {
+  getAllCategories,
+  getAllSeries,
+  getAllTags,
+} from "@/shared/lib/taxonomies";
 
 type SitemapEntry = {
   url: string;
@@ -11,7 +16,12 @@ type SitemapEntry = {
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const posts = await getAllPostSummaries();
+  const [posts, categories, tags, seriesList] = await Promise.all([
+    getAllPostSummaries(),
+    getAllCategories(),
+    getAllTags(),
+    getAllSeries(),
+  ]);
 
   const validPosts: SitemapEntry[] = posts
     .filter((post) => !post.meta.draft)
@@ -42,6 +52,42 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 1.0,
     },
+    {
+      url: `${siteUrl}/categories`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${siteUrl}/tags`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${siteUrl}/series`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    ...categories.map((category) => ({
+      url: `${siteUrl}/categories/${encodeURIComponent(category.name)}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.4,
+    })),
+    ...tags.map((tag) => ({
+      url: `${siteUrl}/tags/${encodeURIComponent(tag.name)}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.4,
+    })),
+    ...seriesList.map((series) => ({
+      url: `${siteUrl}/series/${encodeURIComponent(series.id)}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    })),
     ...prioritizedPosts,
   ];
 }

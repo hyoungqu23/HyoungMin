@@ -10,11 +10,13 @@ import { listSlugs, readArticle } from "@/shared/lib/fs";
 import { compilePostMDX } from "@/shared/lib/mdx";
 import { mdxComponents } from "@/shared/lib/mdx-components";
 import { getPostSummary } from "@/shared/lib/posts";
+import { getSeriesEntry } from "@/shared/lib/series";
 import { calculateReadingTime } from "@/shared/lib/reading-time";
 import { getRelatedPosts } from "@/shared/lib/related-posts";
 import ReadingProgress from "@/widgets/reading-progress/ReadingProgress";
 import { RelatedPosts } from "@/widgets/related-posts/RelatedPosts";
 import TableOfContents from "@/widgets/toc/TableOfContents";
+import Link from "next/link";
 
 const siteName = "Blog";
 
@@ -102,6 +104,7 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
 
   // 관련 포스트 가져오기
   const relatedPosts = await getRelatedPosts(slug, 5);
+  const seriesEntry = meta.series ? await getSeriesEntry(meta.series) : null;
 
   // JSON-LD 구조화 데이터 (SEO + GEO)
   const jsonLd = {
@@ -165,8 +168,30 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
               </time>
               <span>|</span>
               <span>{readingTime}분 읽기</span>
+              {meta.category && (
+                <>
+                  <span>|</span>
+                  <Link
+                    href={`/categories/${encodeURIComponent(meta.category)}`}
+                    className="hover:text-secondary-400 transition-colors"
+                  >
+                    {meta.category}
+                  </Link>
+                </>
+              )}
+              {meta.series && (
+                <>
+                  <span>|</span>
+                  <Link
+                    href={`/series/${encodeURIComponent(meta.series)}`}
+                    className="hover:text-secondary-400 transition-colors"
+                  >
+                    {seriesEntry?.title ?? meta.series}
+                  </Link>
+                </>
+              )}
               <ShareButton url={`${siteUrl}/${slug}`} />
-              <TagList tags={meta.tags} />
+              <TagList tags={meta.tags} linkable />
             </div>
             {content}
           </Prose>

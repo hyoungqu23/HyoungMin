@@ -11,7 +11,11 @@ pub struct PostMetadata {
     pub description: String,
     #[serde(rename = "createdAt")]
     pub created_at: String,
+    pub category: Option<String>,
     pub tags: Vec<String>,
+    pub series: Option<String>,
+    #[serde(rename = "seriesOrder")]
+    pub series_order: Option<i32>,
     pub cover: Option<String>,
     pub draft: bool,
 }
@@ -161,6 +165,18 @@ fn generate_mdx(metadata: &PostMetadata, content: &str) -> String {
     frontmatter.push_str(&format!("title: {}\n", metadata.title));
     frontmatter.push_str(&format!("description: {}\n", metadata.description));
     frontmatter.push_str(&format!("createdAt: {}\n", metadata.created_at));
+
+    if let Some(category) = &metadata.category {
+        frontmatter.push_str(&format!("category: {}\n", category));
+    }
+
+    if let Some(series) = &metadata.series {
+        frontmatter.push_str(&format!("series: {}\n", series));
+    }
+
+    if let Some(series_order) = metadata.series_order {
+        frontmatter.push_str(&format!("seriesOrder: {}\n", series_order));
+    }
     
     if !metadata.tags.is_empty() {
         frontmatter.push_str("tags:\n");
@@ -285,7 +301,10 @@ mod tests {
             title: "Test Post".to_string(),
             description: "A test post".to_string(),
             created_at: "2024-01-01".to_string(),
+            category: None,
             tags: vec!["test".to_string(), "rust".to_string()],
+            series: None,
+            series_order: None,
             cover: None,
             draft: false,
         };
@@ -300,4 +319,3 @@ mod tests {
         assert!(mdx.contains("# Hello"));
     }
 }
-

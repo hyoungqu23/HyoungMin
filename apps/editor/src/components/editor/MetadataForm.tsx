@@ -111,6 +111,70 @@ export function MetadataForm({ metadata, onChange }: MetadataFormProps) {
         />
       </div>
 
+      {/* Category */}
+      <div className="space-y-1.5">
+        <label
+          htmlFor="category"
+          className="block text-sm font-medium text-foreground"
+        >
+          카테고리
+        </label>
+        <input
+          id="category"
+          type="text"
+          value={metadata.category || ""}
+          onChange={(e) =>
+            handleChange("category", e.target.value.trim() || undefined)
+          }
+          placeholder="React"
+          className="w-full px-3 py-2 bg-border/30 border border-border rounded-lg text-foreground placeholder:text-muted focus:outline-none focus:border-accent/50 transition-colors"
+        />
+      </div>
+
+      {/* Series */}
+      <div className="space-y-1.5">
+        <label
+          htmlFor="series"
+          className="block text-sm font-medium text-foreground"
+        >
+          시리즈 ID
+        </label>
+        <input
+          id="series"
+          type="text"
+          value={metadata.series || ""}
+          onChange={(e) =>
+            handleChange("series", e.target.value.trim() || undefined)
+          }
+          placeholder="fe-perf"
+          className="w-full px-3 py-2 bg-border/30 border border-border rounded-lg text-foreground placeholder:text-muted focus:outline-none focus:border-accent/50 transition-colors"
+        />
+      </div>
+
+      {/* Series Order */}
+      <div className="space-y-1.5">
+        <label
+          htmlFor="seriesOrder"
+          className="block text-sm font-medium text-foreground"
+        >
+          시리즈 순서
+        </label>
+        <input
+          id="seriesOrder"
+          type="number"
+          min={0}
+          value={metadata.seriesOrder ?? ""}
+          onChange={(e) =>
+            handleChange(
+              "seriesOrder",
+              e.target.value === "" ? undefined : Number(e.target.value),
+            )
+          }
+          placeholder="0"
+          className="w-full px-3 py-2 bg-border/30 border border-border rounded-lg text-foreground placeholder:text-muted focus:outline-none focus:border-accent/50 transition-colors"
+        />
+      </div>
+
       {/* Tags */}
       <div className="space-y-1.5">
         <label

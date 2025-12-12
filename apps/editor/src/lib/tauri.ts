@@ -30,7 +30,10 @@ export interface SubmitPostMetadata {
   title: string;
   description: string;
   createdAt: string;
+  category?: string;
   tags: string[];
+  series?: string;
+  seriesOrder?: number;
   cover?: string;
   draft: boolean;
 }

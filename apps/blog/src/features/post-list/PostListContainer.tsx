@@ -17,11 +17,15 @@ export type PostWithSlug = {
 interface PostListContainerProps {
   initialPosts: PostWithSlug[];
   postsPerPage?: number;
+  title?: string | null;
+  showLayoutToggle?: boolean;
 }
 
 export const PostListContainer = ({
   initialPosts,
   postsPerPage = 12,
+  title = "Blog",
+  showLayoutToggle = true,
 }: PostListContainerProps) => {
   const [layout, setLayout] = useState<LayoutType>("card");
   const [displayedCount, setDisplayedCount] = useState(postsPerPage);
@@ -52,8 +56,10 @@ export const PostListContainer = ({
     <div className="space-y-6">
       {/* 헤더 및 레이아웃 토글 */}
       <div className="flex items-center justify-between">
-        <h1 className="text-4xl font-bold">Blog</h1>
-        <LayoutToggle layout={layout} onLayoutChange={handleLayoutChange} />
+        {title && <h1 className="text-4xl font-bold">{title}</h1>}
+        {showLayoutToggle && (
+          <LayoutToggle layout={layout} onLayoutChange={handleLayoutChange} />
+        )}
       </div>
 
       {/* 포스트 목록 */}
