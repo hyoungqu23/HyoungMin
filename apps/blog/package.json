@@ -5,10 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "generate:mdx-components": "node scripts/generate-mdx-components.mjs",
+    "predev": "pnpm generate:mdx-components",
     "build": "next build",
+    "prebuild": "pnpm generate:mdx-components",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pretypecheck": "pnpm generate:mdx-components",
     "test": "vitest",
+    "pretest": "pnpm generate:mdx-components",
     "test:ci": "vitest run --coverage"
   },
   "dependencies": {
