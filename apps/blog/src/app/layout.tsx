@@ -42,6 +42,7 @@ export const metadata: Metadata = {
     images: [`${siteUrl}/images/logos/logo-background.png`],
   },
   alternates: {
+    canonical: siteUrl,
     types: {
       "application/rss+xml": [
         { url: `${siteUrl}/feed.xml`, title: `${siteName} RSS Feed` },

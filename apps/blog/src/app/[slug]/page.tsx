@@ -1,5 +1,6 @@
 import { Prose } from "@hyoungmin/ui";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 
@@ -10,13 +11,12 @@ import { listSlugs, readArticle } from "@/shared/lib/fs";
 import { compilePostMDX } from "@/shared/lib/mdx";
 import { mdxComponents } from "@/shared/lib/mdx-components";
 import { getPostSummary } from "@/shared/lib/posts";
-import { getSeriesEntry } from "@/shared/lib/series";
 import { calculateReadingTime } from "@/shared/lib/reading-time";
 import { getRelatedPosts } from "@/shared/lib/related-posts";
+import { getSeriesEntry } from "@/shared/lib/series";
 import ReadingProgress from "@/widgets/reading-progress/ReadingProgress";
 import { RelatedPosts } from "@/widgets/related-posts/RelatedPosts";
 import TableOfContents from "@/widgets/toc/TableOfContents";
-import Link from "next/link";
 
 const siteName = "Blog";
 
@@ -37,6 +37,10 @@ export const generateMetadata = async ({
   if (!meta || meta.draft) {
     return {
       title: "Not Found",
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 
