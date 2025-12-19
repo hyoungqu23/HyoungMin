@@ -1,9 +1,8 @@
-import SAMPLE_IMAGE from "../../public/images/sample.jpg";
+import SAMPLE_IMAGE from "../../../public/images/sample.jpg";
 import { getGuestMessages } from "./_actions/guestbook";
 import { Accounts } from "./_components/accounts/Accounts";
 import AddToCalendar from "./_components/calendar/AddToCalendar";
 import { Calendar } from "./_components/calendar/Calendar";
-// import { FlowerFrame } from "./_components/common/FlowerFrame";
 import Image from "next/image";
 import { DrawingHeeJea } from "./_components/common/DrawingHeeJea";
 import { DrawingHyoungMin } from "./_components/common/DrawingHyoungMin";
@@ -16,6 +15,7 @@ import { KakaoMap } from "./_components/location/KakaoMap";
 import { LocationButtons } from "./_components/location/LocationButtons";
 import { Share } from "./_components/share-invitation/Share";
 import { UploadWeddingPhoto } from "./_components/gallery/UploadWeddingPhoto";
+import { HandWritingText } from "./_components/common/HandWritingText";
 
 const Wedding = async () => {
   const initialGuestMessages = await getGuestMessages(1, 10);
@@ -38,6 +38,10 @@ const Wedding = async () => {
             className="object-cover w-full h-full"
           />
           <div className="absolute inset-0 bg-black/15" />
+          <div className="w-60 h-24 text-stone-800">
+            <HandWritingText text="이형민" />
+          </div>
+
           <h1 className="absolute top-20 left-1/2 -translate-x-1/2 w-full text-center text-4xl font-bold font-yeongwol italic text-rose-50">
             Our Wedding Day
           </h1>

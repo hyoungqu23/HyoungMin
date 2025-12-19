@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Suspense } from "react";
-import { getHeartCount } from "./_actions/hearts";
-import { Analytics } from "./_components/analytics/Analytics";
-import { FloatingButton } from "./_components/floating/FloatingButton";
-import { HeartButton } from "./_components/floating/HeartButton";
-import { Kakao } from "./_components/root/Kakao";
-import { Splash } from "./_components/splash/Splash";
+import { Analytics } from "./(invitation)/_components/analytics/Analytics";
+import { Kakao } from "./(invitation)/_components/root/Kakao";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -57,12 +52,7 @@ const RootLayout = ({ children }: LayoutProps) => {
       >
         <Kakao />
         <Analytics />
-        <Splash />
         {children}
-        <FloatingButton />
-        <Suspense fallback={null}>
-          <HeartButton initialCountPromise={getHeartCount()} />
-        </Suspense>
       </body>
     </html>
   );

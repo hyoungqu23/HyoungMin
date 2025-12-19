@@ -7,9 +7,9 @@ export const UploadWeddingPhoto = () => {
     <motion.a
       whileTap={{ scale: 0.95 }}
       href="https://photos.google.com/share/AF1QipNM4t2baLUmZq_81HycTX1FjJrUdYlXpLA6QBws8v_H7E0cMyciig1U0TIEB_0Qxg?key=UDU4MGVQWWZSSkJSc3BiODJ5MXRGS1Y3TFotLU9R"
-      className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-rose-400 hover:bg-rose-200 text-rose-500 rounded-full shadow-md transition-colors"
+      className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-rose-400 hover:bg-rose-200 text-rose-100 font-bold rounded-full shadow-md transition-colors"
     >
-      업로드하기
+      신랑, 신부의 예쁜 사진 전달하기
     </motion.a>
   );
 };
