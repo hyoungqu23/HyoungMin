@@ -2,11 +2,8 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
-import {
-  clearAllBodyScrollLocks,
-  disableBodyScroll,
-} from "../../_lib/scroll-lock";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { disableBodyScroll, enableBodyScroll } from "../../_lib/scroll-lock";
 
 const FallingRibbons = dynamic(
   () => import("./FallingRibbons").then((mod) => mod.FallingRibbons),
@@ -24,6 +21,7 @@ export const Splash = () => {
   const [isCountFinished, setIsCountFinished] = useState(false);
   const [isOpening, setIsOpening] = useState(false);
 
+  const splashRef = useRef<HTMLDivElement>(null);
   const yearRef = useRef<HTMLSpanElement>(null);
   const monthRef = useRef<HTMLSpanElement>(null);
   const dayRef = useRef<HTMLSpanElement>(null);
@@ -32,9 +30,17 @@ export const Splash = () => {
   const START_DATE = "2015-12-26";
   const END_DATE = "2026-04-19";
 
-  useEffect(() => {
-    disableBodyScroll(document.body);
+  useLayoutEffect(() => {
+    const el = splashRef.current;
+    if (!el) return;
 
+    disableBodyScroll(el);
+    return () => {
+      enableBodyScroll(el);
+    };
+  }, []);
+
+  useEffect(() => {
     const startTimestamp = new Date(START_DATE).getTime();
     const endTimestamp = new Date(END_DATE).getTime();
     const totalDiff = endTimestamp - startTimestamp;
@@ -77,25 +83,31 @@ export const Splash = () => {
         setIsCountFinished(true);
       }
     };
+
     animationFrameId = requestAnimationFrame(animate);
+
     return () => {
       cancelAnimationFrame(animationFrameId);
-      clearAllBodyScrollLocks();
     };
   }, []);
 
   const handleOpen = () => {
     setIsOpening(true);
     setTimeout(() => {
+      // 오프닝 애니메이션(2.4s) 동안은 계속 잠궈두고, 실제로 스플래시가 사라지는 시점에만 잠금을 풉니다.
+      const el = splashRef.current;
+      if (el) enableBodyScroll(el);
       setShowSplash(false);
     }, 2400);
-    clearAllBodyScrollLocks();
   };
 
   if (!showSplash) return null;
 
   return (
-    <div className="fixed inset-0 max-w-screen z-100 flex items-center justify-center pointer-events-auto overflow-hidden bg-pink-50/30">
+    <div
+      ref={splashRef}
+      className="fixed inset-0 max-w-screen z-100 flex items-center justify-center pointer-events-auto overflow-hidden bg-pink-50/30"
+    >
       <motion.div
         className="absolute inset-0 z-30 pointer-events-none"
         animate={{ opacity: isOpening ? 0 : 1 }}
@@ -183,31 +195,25 @@ export const Splash = () => {
 
         <AnimatePresence>
           {isCountFinished && !isOpening ? (
-            <motion.button
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.3 } }}
               transition={{ duration: 0.8, delay: 0.2, type: "spring" }}
-              onClick={handleOpen}
-              className="group relative inline-flex items-center gap-3 px-10 py-4 bg-rose-400 text-white rounded-full overflow-hidden transition-all hover:bg-rose-500 shadow-xl hover:shadow-2xl hover:shadow-rose-200"
+              className="flex flex-col items-center gap-3"
             >
-              <span className="relative font-semibold">초대장 열기</span>
-              <svg
-                className="w-5 h-5 transition-transform group-hover:translate-x-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <p className="text-sm font-medium">초대를 받으시겠습니까?</p>
+              <motion.button
+                onClick={handleOpen}
+                className="group relative inline-flex items-center gap-3 px-16 py-3 bg-rose-400 text-white rounded-full overflow-hidden transition-all hover:bg-rose-500 shadow-xl hover:shadow-2xl hover:shadow-rose-200"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
-            </motion.button>
+                <span className="relative font-semibold font-yeongwol">
+                  Yes
+                </span>
+              </motion.button>
+            </motion.div>
           ) : (
-            <div className="w-full h-14" />
+            <div className="w-full h-20" />
           )}
         </AnimatePresence>
       </motion.div>

@@ -1,11 +1,12 @@
 import SAMPLE_IMAGE from "../../../public/images/sample.jpg";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { cache } from "react";
 import { getGuestMessages } from "./_actions/guestbook";
 import { Accounts } from "./_components/accounts/Accounts";
 import AddToCalendar from "./_components/calendar/AddToCalendar";
 import { Calendar } from "./_components/calendar/Calendar";
 import Image from "next/image";
-import { DrawingHeeJea } from "./_components/common/DrawingHeeJea";
-import { DrawingHyoungMin } from "./_components/common/DrawingHyoungMin";
 import { Section } from "./_components/common/Section";
 import { WeddingProgressBar } from "./_components/common/WeddingProgressBar";
 import { Contact } from "./_components/contact/Contact";
@@ -15,10 +16,198 @@ import { KakaoMap } from "./_components/location/KakaoMap";
 import { LocationButtons } from "./_components/location/LocationButtons";
 import { Share } from "./_components/share-invitation/Share";
 import { UploadWeddingPhoto } from "./_components/gallery/UploadWeddingPhoto";
-import { HandWritingText } from "./_components/common/HandWritingText";
+import type { GalleryItem } from "./_components/gallery/GalleryContainer";
+
+const STORIES_DIR = path.join(process.cwd(), "public", "images", "stories");
+
+const readHead = async (filePath: string, bytes = 64 * 1024) => {
+  const handle = await fs.open(filePath, "r");
+  try {
+    const buffer = Buffer.alloc(bytes);
+    const { bytesRead } = await handle.read(buffer, 0, bytes, 0);
+    return buffer.subarray(0, bytesRead);
+  } finally {
+    await handle.close();
+  }
+};
+
+const getPngSize = (buf: Buffer) => {
+  // PNG signature: 89 50 4E 47 0D 0A 1A 0A
+  if (buf.length < 24) return null;
+  if (buf[0] !== 0x89 || buf[1] !== 0x50 || buf[2] !== 0x4e || buf[3] !== 0x47)
+    return null;
+  const width = buf.readUInt32BE(16);
+  const height = buf.readUInt32BE(20);
+  return { width, height };
+};
+
+const getGifSize = (buf: Buffer) => {
+  if (buf.length < 10) return null;
+  const header = buf.toString("ascii", 0, 6);
+  if (header !== "GIF87a" && header !== "GIF89a") return null;
+  const width = buf.readUInt16LE(6);
+  const height = buf.readUInt16LE(8);
+  return { width, height };
+};
+
+const getJpegSize = (buf: Buffer) => {
+  if (buf.length < 4) return null;
+  if (buf[0] !== 0xff || buf[1] !== 0xd8) return null; // SOI
+  let offset = 2;
+
+  const isSof = (marker: number) =>
+    marker === 0xc0 || // SOF0
+    marker === 0xc1 || // SOF1
+    marker === 0xc2 || // SOF2
+    marker === 0xc3 ||
+    marker === 0xc5 ||
+    marker === 0xc6 ||
+    marker === 0xc7 ||
+    marker === 0xc9 ||
+    marker === 0xca ||
+    marker === 0xcb ||
+    marker === 0xcd ||
+    marker === 0xce ||
+    marker === 0xcf;
+
+  while (offset + 3 < buf.length) {
+    // find next marker 0xFF
+    if (buf[offset] !== 0xff) {
+      offset += 1;
+      continue;
+    }
+    // skip fill bytes 0xFF
+    while (offset < buf.length && buf[offset] === 0xff) offset += 1;
+    const marker = buf[offset];
+    offset += 1;
+
+    // stand-alone markers
+    if (marker === 0xd9 || marker === 0xda) break; // EOI or SOS
+    if (offset + 1 >= buf.length) break;
+
+    const size = buf.readUInt16BE(offset);
+    if (size < 2) break;
+
+    if (isSof(marker)) {
+      if (offset + 7 >= buf.length) return null;
+      const height = buf.readUInt16BE(offset + 3);
+      const width = buf.readUInt16BE(offset + 5);
+      return { width, height };
+    }
+
+    offset += size;
+  }
+  return null;
+};
+
+const getWebpSize = (buf: Buffer) => {
+  if (buf.length < 30) return null;
+  if (buf.toString("ascii", 0, 4) !== "RIFF") return null;
+  if (buf.toString("ascii", 8, 12) !== "WEBP") return null;
+
+  let offset = 12;
+  while (offset + 8 <= buf.length) {
+    const chunkType = buf.toString("ascii", offset, offset + 4);
+    const chunkSize = buf.readUInt32LE(offset + 4);
+    const dataOffset = offset + 8;
+
+    if (chunkType === "VP8X") {
+      if (dataOffset + 10 > buf.length) return null;
+      const width = 1 + buf.readUIntLE(dataOffset + 4, 3);
+      const height = 1 + buf.readUIntLE(dataOffset + 7, 3);
+      return { width, height };
+    }
+
+    if (chunkType === "VP8L") {
+      // Lossless bitstream header (5 bytes) after chunk header
+      if (dataOffset + 5 > buf.length) return null;
+      if (buf[dataOffset] !== 0x2f) return null; // signature
+      const b0 = buf[dataOffset + 1];
+      const b1 = buf[dataOffset + 2];
+      const b2 = buf[dataOffset + 3];
+      const b3 = buf[dataOffset + 4];
+      const width = 1 + (((b1 & 0x3f) << 8) | b0);
+      const height = 1 + (((b3 & 0x0f) << 10) | (b2 << 2) | ((b1 & 0xc0) >> 6));
+      return { width, height };
+    }
+
+    if (chunkType === "VP8 ") {
+      // Lossy frame header: after 3 bytes frame tag, 3 bytes start code, then 2+2 bytes width/height
+      if (dataOffset + 10 > buf.length) return null;
+      if (
+        buf[dataOffset + 3] !== 0x9d ||
+        buf[dataOffset + 4] !== 0x01 ||
+        buf[dataOffset + 5] !== 0x2a
+      )
+        return null;
+      const width = buf.readUInt16LE(dataOffset + 6) & 0x3fff;
+      const height = buf.readUInt16LE(dataOffset + 8) & 0x3fff;
+      return { width, height };
+    }
+
+    // chunks are padded to even size
+    offset = dataOffset + chunkSize + (chunkSize % 2);
+  }
+  return null;
+};
+
+const getImageSize = async (filePath: string) => {
+  const buf = await readHead(filePath);
+  return (
+    getWebpSize(buf) || getPngSize(buf) || getJpegSize(buf) || getGifSize(buf)
+  );
+};
+
+const getStoryGalleryItems = cache(async (): Promise<GalleryItem[]> => {
+  let entries: string[] = [];
+  try {
+    entries = await fs.readdir(STORIES_DIR);
+  } catch {
+    return [];
+  }
+
+  const imageFiles = entries
+    .filter((name) => {
+      const lower = name.toLowerCase();
+      return (
+        (lower.endsWith(".webp") ||
+          lower.endsWith(".png") ||
+          lower.endsWith(".jpg") ||
+          lower.endsWith(".jpeg") ||
+          lower.endsWith(".gif")) &&
+        !lower.startsWith(".")
+      );
+    })
+    .sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
+
+  const items = await Promise.all(
+    imageFiles.map(async (fileName, index) => {
+      const filePath = path.join(STORIES_DIR, fileName);
+      try {
+        const size = await getImageSize(filePath);
+        return {
+          id: index,
+          src: `/images/stories/${fileName}`,
+          width: size?.width,
+          height: size?.height,
+        };
+      } catch {
+        return {
+          id: index,
+          src: `/images/stories/${fileName}`,
+        };
+      }
+    }),
+  );
+
+  return items;
+});
 
 const Wedding = async () => {
-  const initialGuestMessages = await getGuestMessages(1, 10);
+  const [initialGuestMessages, storyGalleryItems] = await Promise.all([
+    getGuestMessages(1, 10),
+    getStoryGalleryItems(),
+  ]);
 
   return (
     <main
@@ -28,7 +217,6 @@ const Wedding = async () => {
     >
       {/* Main */}
       <Section className="flex flex-col items-center justify-center gap-4 py-0!">
-        {/* <FlowerFrame imageSrc={SAMPLE_IMAGE.src} /> */}
         <div className="relative w-screen h-screen overflow-hidden">
           <Image
             src={SAMPLE_IMAGE.src}
@@ -38,10 +226,6 @@ const Wedding = async () => {
             className="object-cover w-full h-full"
           />
           <div className="absolute inset-0 bg-black/15" />
-          <div className="w-60 h-24 text-stone-800">
-            <HandWritingText text="이형민" />
-          </div>
-
           <h1 className="absolute top-20 left-1/2 -translate-x-1/2 w-full text-center text-4xl font-bold font-yeongwol italic text-rose-50">
             Our Wedding Day
           </h1>
@@ -60,7 +244,7 @@ const Wedding = async () => {
           <br />
           <span className="text-rose-400 font-semibold">하나</span>가 됩니다.
         </p>
-        <div className="w-full px-12 flex flex-col items-center justify-center gap-y-4">
+        <div className="w-full px-8 flex flex-col items-center justify-center gap-y-4">
           <div className="w-full flex items-center justify-between gap-x-4">
             <div className="flex flex-col items-start justify-center">
               <p>
@@ -70,9 +254,7 @@ const Wedding = async () => {
                 <span className="font-semibold">이민주, 이지연</span>의 오빠
               </p>
             </div>
-            <h2 className="text-3xl font-bold">
-              <DrawingHyoungMin />
-            </h2>
+            <h2 className="text-3xl font-bold font-cafe24">이형민</h2>
           </div>
           <div className="w-full flex items-center justify-between gap-x-4">
             <div className="flex flex-col items-start justify-center">
@@ -83,9 +265,7 @@ const Wedding = async () => {
                 <span className="font-semibold">임성재</span>의 동생
               </p>
             </div>
-            <h2 className="text-3xl font-bold">
-              <DrawingHeeJea />
-            </h2>
+            <h2 className="text-3xl font-bold font-cafe24">임희재</h2>
           </div>
         </div>
       </Section>
@@ -138,7 +318,7 @@ const Wedding = async () => {
       {/* Gallery */}
       <Section className="flex flex-col items-center justify-center gap-4">
         <Section.Title category="Gallery" title="Lovely Moments" />
-        <GalleryContainer />
+        <GalleryContainer items={storyGalleryItems} />
         <UploadWeddingPhoto />
       </Section>
 

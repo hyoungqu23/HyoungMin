@@ -2,9 +2,12 @@ import { ComponentProps } from "react";
 
 type SectionProps = ComponentProps<"section">;
 
-export const Section = ({ children, className }: SectionProps) => {
+export const Section = ({ children, className, ...props }: SectionProps) => {
   return (
-    <section className={`w-screen py-8 px-4 max-w-md mx-auto ${className}`}>
+    <section
+      {...props}
+      className={`w-screen py-8 px-4 max-w-md mx-auto ${className ?? ""}`}
+    >
       {children}
     </section>
   );

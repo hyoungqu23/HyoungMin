@@ -6,22 +6,27 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import { useState } from "react";
 
-const WEDDING_URL = process.env.NEXT_PUBLIC_URL!;
+const ENV_WEDDING_URL = process.env.NEXT_PUBLIC_URL;
 const WEDDING_TITLE = "이형민 ♥ 임희재 결혼합니다";
 const WEDDING_DESCRIPTION =
   "2026년 4월 19일 오전 11시, 더베르G 웨딩에서 결혼식을 올립니다.";
+
+const getWeddingUrl = () => ENV_WEDDING_URL ?? window.location.origin;
+const getWeddingImageUrl = () =>
+  new URL("/images/sample.jpg", getWeddingUrl()).toString();
 
 export const ShareButtons = () => {
   const [copied, setCopied] = useState(false);
 
   const handleCopyAddress = async () => {
+    const weddingUrl = getWeddingUrl();
     try {
-      await navigator.clipboard.writeText(WEDDING_URL);
+      await navigator.clipboard.writeText(weddingUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
       const textArea = document.createElement("textarea");
-      textArea.value = WEDDING_URL;
+      textArea.value = weddingUrl;
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand("copy");
@@ -34,10 +39,11 @@ export const ShareButtons = () => {
   const handleWebShare = async () => {
     if (navigator.share) {
       try {
+        const weddingUrl = getWeddingUrl();
         await navigator.share({
           title: WEDDING_TITLE,
           text: WEDDING_DESCRIPTION,
-          url: WEDDING_URL,
+          url: weddingUrl,
         });
       } catch (error) {
         if ((error as Error).name !== "AbortError") {
@@ -78,10 +84,19 @@ export const ShareButtons = () => {
 export const OpenKakaoButton = () => {
   const handleOpenKakao = () => {
     const kakao = window.Kakao;
+    const apiKey = process.env.NEXT_PUBLIC_KAKAO_SDK_API_KEY;
+
+    if (!apiKey) {
+      alert("카카오 공유를 위한 설정이 필요합니다.");
+      return;
+    }
 
     if (!kakao.isInitialized()) {
-      kakao.init(process.env.NEXT_PUBLIC_KAKAO_SDK_API_KEY!);
+      kakao.init(apiKey);
     }
+
+    const weddingUrl = getWeddingUrl();
+    const weddingImageUrl = getWeddingImageUrl();
 
     kakao.Share.sendDefault({
       objectType: "location",
@@ -90,10 +105,10 @@ export const OpenKakaoButton = () => {
       content: {
         title: WEDDING_TITLE,
         description: WEDDING_DESCRIPTION,
-        imageUrl: "/images/sample.jpg",
+        imageUrl: weddingImageUrl,
         link: {
-          mobileWebUrl: WEDDING_URL,
-          webUrl: WEDDING_URL,
+          mobileWebUrl: weddingUrl,
+          webUrl: weddingUrl,
         },
       },
       social: {
@@ -106,8 +121,8 @@ export const OpenKakaoButton = () => {
         {
           title: "청첩장 보기",
           link: {
-            mobileWebUrl: WEDDING_URL,
-            webUrl: WEDDING_URL,
+            mobileWebUrl: weddingUrl,
+            webUrl: weddingUrl,
           },
         },
       ],

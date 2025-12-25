@@ -13,9 +13,6 @@ type ImageSlideProps = {
   durationSec?: number;
 };
 
-// Pure CSS-driven slider (no JS handlers). Duplicates the slide list so the
-// keyframe animation loops seamlessly. Animation pauses on hover and respects
-// prefers-reduced-motion.
 export const ImageSlide = ({
   images,
   className = "",
@@ -46,7 +43,7 @@ export const ImageSlide = ({
         {loopedImages.map((image, index) => (
           <div
             key={`${typeof image.src === "string" ? image.src : image.src.src}-${index}`}
-            className={`relative w-full flex-shrink-0 ${aspectRatioClassName}`}
+            className={`relative w-full shrink-0 ${aspectRatioClassName}`}
           >
             <Image
               src={image.src}
@@ -63,47 +60,15 @@ export const ImageSlide = ({
       {shouldAnimate ? (
         <>
           <div
-            className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white via-white/80 to-transparent"
+            className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-linear-to-r from-white via-white/80 to-transparent"
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-white via-white/80 to-transparent"
+            className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-linear-to-l from-white via-white/80 to-transparent"
             aria-hidden
           />
         </>
       ) : null}
-
-      <style jsx>{`
-        .image-slide-track {
-          width: calc(var(--slide-count) * 200%);
-          animation: image-slide var(--image-slide-duration) linear infinite;
-        }
-
-        .image-slide-track[data-animate="false"] {
-          width: 100%;
-          animation: none;
-        }
-
-        .group:hover .image-slide-track {
-          animation-play-state: paused;
-        }
-
-        @keyframes image-slide {
-          from {
-            transform: translateX(0);
-          }
-          to {
-            transform: translateX(calc(-100% * var(--slide-count)));
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .image-slide-track {
-            animation: none;
-            transform: translateX(0);
-          }
-        }
-      `}</style>
     </div>
   );
 };

@@ -1,12 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
-import {
-  clearAllBodyScrollLocks,
-  disableBodyScroll,
-  enableBodyScroll,
-} from "../../_lib/scroll-lock";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { disableBodyScroll, enableBodyScroll } from "../../_lib/scroll-lock";
 import { AttendanceForm } from "./AttendanceForm";
 
 const ChevronUp = ({ className }: { className?: string }) => (
@@ -23,16 +19,17 @@ const ChevronUp = ({ className }: { className?: string }) => (
 
 export const FloatingButton = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const sheetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      disableBodyScroll(document.body);
-    } else {
-      enableBodyScroll(document.body);
-    }
+    if (!isOpen) return;
+    const el = sheetRef.current;
+    if (!el) return;
 
+    // 스크롤락은 "바텀시트(모달) 엘리먼트"를 타겟으로 걸어야 중복 모달/스플래시와 충돌이 덜합니다.
+    disableBodyScroll(el);
     return () => {
-      clearAllBodyScrollLocks();
+      enableBodyScroll(el);
     };
   }, [isOpen]);
 
@@ -74,6 +71,7 @@ export const FloatingButton = () => {
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            ref={sheetRef}
             className="fixed bottom-0 left-0 right-0 z-50 w-full rounded-t-3xl overflow-hidden bg-white shadow-2xl flex flex-col max-h-[95vh]"
           >
             {/* 헤더 */}

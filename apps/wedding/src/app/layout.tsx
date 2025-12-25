@@ -4,8 +4,13 @@ import { Analytics } from "./(invitation)/_components/analytics/Analytics";
 import { Kakao } from "./(invitation)/_components/root/Kakao";
 import "./globals.css";
 
+const METADATA_BASE_URL =
+  process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
+
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_URL!),
+  metadataBase: new URL(METADATA_BASE_URL),
   title: "🎀 형민 ❤️ 희재 결혼식 초대장 🎀",
   description: "형민이와 희재의 결혼식에 초대합니다.",
   openGraph: {

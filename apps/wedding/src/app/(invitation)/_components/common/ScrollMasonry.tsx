@@ -8,15 +8,21 @@ type ScrollMasonryProps = {
   className?: string;
 };
 
+const DEFAULT_COLUMNS_CLASSNAME = "columns-3 md:columns-4";
+
 export const ScrollMasonry = ({
   children,
   className = "",
 }: ScrollMasonryProps) => {
   const items = Children.toArray(children);
+  const hasColumnsClass = className.includes("columns-");
+  const resolvedColumnsClassName = hasColumnsClass
+    ? ""
+    : DEFAULT_COLUMNS_CLASSNAME;
 
   return (
     <div
-      className={`w-full max-w-md columns-3 md:columns-4 gap-2.5 ${className}`}
+      className={`w-full max-w-md gap-2.5 ${resolvedColumnsClassName} ${className}`}
     >
       {items.map((child, i) => {
         const randomDelay = (i % 4) * 0.1;

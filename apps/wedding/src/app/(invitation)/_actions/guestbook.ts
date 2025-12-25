@@ -19,11 +19,12 @@ export const addGuestMessage = async (formData: FormData) => {
 
   if (!name || !message) return { success: false, newMessage: null };
 
+  const now = Date.now();
   const newMessage: GuestMessage = {
-    id: Date.now().toString(),
+    id: now.toString(),
     name,
     message,
-    createdAt: Date.now(),
+    createdAt: now,
   };
 
   try {

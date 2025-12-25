@@ -3,6 +3,10 @@
 import Script from "next/script";
 
 export const Kakao = () => {
+  const apiKey = process.env.NEXT_PUBLIC_KAKAO_SDK_API_KEY;
+
+  if (!apiKey) return null;
+
   return (
     <>
       <Script
@@ -11,12 +15,12 @@ export const Kakao = () => {
         crossOrigin="anonymous"
         strategy="afterInteractive"
         onLoad={() => {
-          window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_SDK_API_KEY!);
+          window.Kakao.init(apiKey);
         }}
       />
       <Script
         type="text/javascript"
-        src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_SDK_API_KEY!}&autoload=false`}
+        src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}&autoload=false`}
         strategy="afterInteractive"
       />
     </>

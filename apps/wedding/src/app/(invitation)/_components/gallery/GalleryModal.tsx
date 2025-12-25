@@ -6,10 +6,12 @@ import Close from "@icons/close.svg";
 import { AnimatePresence, motion, type PanInfo } from "motion/react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
+
 export type GalleryItem = {
   id: number;
   src: string;
-  ratio: string;
+  width?: number;
+  height?: number;
 };
 
 type GalleryModalProps = {
