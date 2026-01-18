@@ -67,7 +67,7 @@ export const Calendar = () => {
   }
 
   return (
-    <div className="w-full max-w-sm mx-auto p-6 bg-white rounded-2xl shadow-sm border border-stone-100 flex flex-col items-center justify-center gap-4">
+    <div className="w-full max-w-sm mx-auto p-6 bg-white rounded-2xl shadow-sm border border-stone-100 flex flex-col items-center justify-center gap-4 font-hahmlet">
       {/* 달력 헤더 */}
       <h3 className="text-center text-xl font-bold text-stone-800">
         2026년 4월

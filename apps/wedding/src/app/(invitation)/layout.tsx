@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import { getHeartCount } from "./_actions/hearts";
 import { FloatingButton } from "./_components/floating/FloatingButton";
 import { HeartButton } from "./_components/floating/HeartButton";
-import { Splash } from "./_components/splash/Splash";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL!),
@@ -48,7 +47,7 @@ type LayoutProps = Readonly<{
 const InvitationLayout = ({ children }: LayoutProps) => {
   return (
     <>
-      <Splash />
+      {/* <Splash /> */}
       {children}
       <FloatingButton />
       <Suspense fallback={null}>

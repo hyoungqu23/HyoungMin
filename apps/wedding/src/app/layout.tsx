@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Great_Vibes, Hahmlet } from "next/font/google";
 import localFont from "next/font/local";
 import { Analytics } from "./(invitation)/_components/analytics/Analytics";
 import { Kakao } from "./(invitation)/_components/root/Kakao";
@@ -53,7 +54,7 @@ const RootLayout = ({ children }: LayoutProps) => {
   return (
     <html lang="ko">
       <body
-        className={`relative ${pretendardFont.variable} ${yeongwolFont.variable} ${cafe24SsurroundFont.variable} antialiased bg-rose-50 text-stone-900 overflow-x-hidden`}
+        className={`relative ${pretendardFont.variable} ${greatVibesFont.variable} ${hahmletFont.variable} antialiased bg-black overflow-x-hidden`}
       >
         <Kakao />
         <Analytics />
@@ -64,6 +65,21 @@ const RootLayout = ({ children }: LayoutProps) => {
 };
 
 export default RootLayout;
+
+const greatVibesFont = Great_Vibes({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+  variable: "--great-vibes",
+});
+
+const hahmletFont = Hahmlet({
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
+  preload: true,
+  variable: "--hahmlet",
+});
 
 const pretendardFont = localFont({
   src: [
@@ -116,30 +132,4 @@ const pretendardFont = localFont({
   display: "swap",
   preload: true,
   variable: "--pretendard",
-});
-
-const yeongwolFont = localFont({
-  src: [
-    {
-      path: "../../public/fonts/Yeongwol.woff2",
-      weight: "400",
-      style: "normal",
-    },
-  ],
-  display: "swap",
-  preload: true,
-  variable: "--yeongwol",
-});
-
-const cafe24SsurroundFont = localFont({
-  src: [
-    {
-      path: "../../public/fonts/Cafe24Ssurround.woff2",
-      weight: "400",
-      style: "normal",
-    },
-  ],
-  display: "swap",
-  preload: true,
-  variable: "--cafe24",
 });

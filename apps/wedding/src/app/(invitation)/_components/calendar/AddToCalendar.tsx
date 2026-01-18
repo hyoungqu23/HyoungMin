@@ -90,7 +90,7 @@ export default function AddToCalendar({
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={handleGoogleCalendar}
-        className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white border border-stone-200 shadow-sm text-stone-600 font-bold text-sm hover:bg-stone-50 transition-colors"
+        className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white shadow-sm text-black font-bold text-sm hover:bg-primary transition-colors"
       >
         <Image src={Google} alt="Google" width={16} height={16} />
         구글 캘린더
@@ -100,7 +100,7 @@ export default function AddToCalendar({
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={handleNativeCalendar}
-        className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-stone-800 text-white shadow-md font-bold text-sm hover:bg-stone-700 transition-colors"
+        className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-primary shadow-sm text-black font-bold text-sm hover:bg-primary/80 transition-colors"
       >
         <Image src={Calendar} alt="Calendar" width={16} height={16} />
         캘린더 앱 저장

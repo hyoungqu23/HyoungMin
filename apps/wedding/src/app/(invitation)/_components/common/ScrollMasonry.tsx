@@ -22,7 +22,7 @@ export const ScrollMasonry = ({
 
   return (
     <div
-      className={`w-full max-w-md gap-2.5 ${resolvedColumnsClassName} ${className}`}
+      className={`w-full max-w-md gap-2 ${resolvedColumnsClassName} ${className}`}
     >
       {items.map((child, i) => {
         const randomDelay = (i % 4) * 0.1;
@@ -31,7 +31,7 @@ export const ScrollMasonry = ({
         return (
           <motion.div
             key={i}
-            className="break-inside-avoid mb-2.5"
+            className="break-inside-avoid mb-2"
             initial={{
               opacity: 0,
               y: randomY,

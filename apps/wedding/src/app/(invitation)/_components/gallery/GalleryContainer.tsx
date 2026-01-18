@@ -15,17 +15,31 @@ export type GalleryItem = {
 
 type GalleryContainerProps = {
   items: GalleryItem[];
+  initialVisibleCount?: number;
 };
 
-export const GalleryContainer = ({ items }: GalleryContainerProps) => {
+const LOAD_MORE_COUNT = 10;
+
+export const GalleryContainer = ({
+  items,
+  initialVisibleCount = 10,
+}: GalleryContainerProps) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [visibleCount, setVisibleCount] = useState(initialVisibleCount);
 
   if (!items.length) return null;
 
+  const visibleItems = items.slice(0, visibleCount);
+  const hasMore = visibleCount < items.length;
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => Math.min(prev + LOAD_MORE_COUNT, items.length));
+  };
+
   return (
     <>
-      <ScrollMasonry className="columns-7 md:columns-7">
-        {items.map((item, index) => (
+      <ScrollMasonry className="columns-5 md:columns-5">
+        {visibleItems.map((item, index) => (
           <div
             key={item.id}
             className="relative w-full overflow-hidden rounded shadow-sm group cursor-pointer"
@@ -43,6 +57,18 @@ export const GalleryContainer = ({ items }: GalleryContainerProps) => {
           </div>
         ))}
       </ScrollMasonry>
+
+      {hasMore && (
+        <div className="flex justify-center mt-6">
+          <button
+            type="button"
+            onClick={handleLoadMore}
+            className="px-6 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-full hover:bg-gray-50 transition-colors duration-200"
+          >
+            더 보기 ({items.length - visibleCount}장)
+          </button>
+        </div>
+      )}
 
       <AnimatePresence>
         {selectedIndex !== null && (

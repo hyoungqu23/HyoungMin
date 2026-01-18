@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-yeongwol: var(--yeongwol);
-  --font-cafe24: var(--cafe24);
+  --font-pretendard: var(--pretendard);
+  --font-great-vibes: var(--great-vibes);
+  --font-hahmlet: var(--hahmlet);
+  --color-primary: #e69eb4;
 }
 
 :root {

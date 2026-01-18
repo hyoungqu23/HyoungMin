@@ -18,12 +18,12 @@ type TitleProps = { category: string; title: string; description?: string };
 const Title = ({ category, title, description }: TitleProps) => {
   return (
     <div className="text-center flex flex-col items-center gap-3">
-      <p className="text-xs font-bold text-rose-400 tracking-widest uppercase font-cafe24">
+      <p className="text-sm font-bold text-primary tracking-widest font-great-vibes">
         {category}
       </p>
-      <h2 className="text-xl font-bold text-stone-800 font-cafe24">{title}</h2>
+      <h2 className="text-xl font-bold text-white font-pretendard">{title}</h2>
       {description ? (
-        <p className="text-sm text-stone-500 leading-relaxed whitespace-pre-line">
+        <p className="text-sm text-white/75 leading-relaxed whitespace-pre-line">
           {description}
         </p>
       ) : null}

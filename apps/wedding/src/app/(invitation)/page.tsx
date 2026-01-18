@@ -1,4 +1,4 @@
-import SAMPLE_IMAGE from "../../../public/images/sample.jpg";
+import Image from "next/image";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { cache } from "react";
@@ -6,17 +6,15 @@ import { getGuestMessages } from "./_actions/guestbook";
 import { Accounts } from "./_components/accounts/Accounts";
 import AddToCalendar from "./_components/calendar/AddToCalendar";
 import { Calendar } from "./_components/calendar/Calendar";
-import Image from "next/image";
 import { Section } from "./_components/common/Section";
-import { WeddingProgressBar } from "./_components/common/WeddingProgressBar";
 import { Contact } from "./_components/contact/Contact";
+import type { GalleryItem } from "./_components/gallery/GalleryContainer";
 import { GalleryContainer } from "./_components/gallery/GalleryContainer";
+import { UploadWeddingPhoto } from "./_components/gallery/UploadWeddingPhoto";
 import { RollingPaper } from "./_components/guestbook/RollingPaper";
 import { KakaoMap } from "./_components/location/KakaoMap";
 import { LocationButtons } from "./_components/location/LocationButtons";
 import { Share } from "./_components/share-invitation/Share";
-import { UploadWeddingPhoto } from "./_components/gallery/UploadWeddingPhoto";
-import type { GalleryItem } from "./_components/gallery/GalleryContainer";
 
 const STORIES_DIR = path.join(process.cwd(), "public", "images", "stories");
 
@@ -216,72 +214,108 @@ const Wedding = async () => {
       className="w-screen overflow-x-hidden min-h-svh"
     >
       {/* Main */}
-      <Section className="flex flex-col items-center justify-center gap-4 py-0!">
-        <div className="relative w-screen h-screen overflow-hidden">
-          <Image
-            src={SAMPLE_IMAGE.src}
-            alt="Wedding Day"
-            width={300}
-            height={500}
-            className="object-cover w-full h-full"
-          />
-          <div className="absolute inset-0 bg-black/15" />
-          <h1 className="absolute top-20 left-1/2 -translate-x-1/2 w-full text-center text-4xl font-bold font-yeongwol italic text-rose-50">
+      <Section className="flex flex-col items-center justify-center gap-8 py-20">
+        <div className="flex flex-col items-center justify-center gap-2">
+          <h1 className="text-center text-5xl font-bold font-great-vibes italic text-primary">
             Our Wedding Day
           </h1>
+          <p className="font-hahmlet text-white opacity-75">이형민 & 임희재</p>
+        </div>
+        <div className="h-fit overflow-hidden w-full border-2 border-white">
+          <Image
+            src="/images/1624.jpg"
+            alt="1624.jpg"
+            width={400}
+            height={400}
+            className="w-full"
+          />
+        </div>
+        <div className="flex flex-col items-center justify-center gap-2">
+          <p className="font-hahmlet font-bold -tracking-[0.05rem] uppercase text-primary">
+            {"You're invited to our wedding."}
+          </p>
+          <p className="font-hahmlet text-white text-center">
+            <b>
+              <span>2026년 4월 19일 일요일 오전 11시</span>
+            </b>
+            <br />
+            <span>더베르G 웨딩</span>
+            <br />
+            <span>서울시 영등포구 국회대로 612 2층</span>
+          </p>
         </div>
       </Section>
 
-      {/* Wedding Introduction */}
-      <Section className="flex flex-col items-center justify-center gap-24">
-        <p className="text-center text-lg">
-          <span className="font-bold">2015년 겨울</span>,
-          <br />
-          버건디 코트를 입고 만나
-          <br />
-          <span className="text-rose-400 font-semibold">열한 번째</span>{" "}
-          <span className="font-bold">2026년 봄</span>,
-          <br />
-          <span className="text-rose-400 font-semibold">하나</span>가 됩니다.
+      {/* Introduction */}
+      <Section className="flex flex-col items-center justify-center gap-8 pt-4 py-20">
+        <Image
+          src={"/icons/ribbon_10.svg"}
+          alt="invitation"
+          width={40}
+          height={40}
+        />
+
+        <p className="font-hahmlet whitespace-pre-line text-white text-center">
+          {
+            "11년이라는 긴 시간동안\n서로의 청춘을 채워준 가장 친한 친구이자 연인."
+          }
         </p>
-        <div className="w-full px-8 flex flex-col items-center justify-center gap-y-4">
-          <div className="w-full flex items-center justify-between gap-x-4">
-            <div className="flex flex-col items-start justify-center">
-              <p>
-                <span className="font-semibold">이병수, 이광이</span>의 아들
-              </p>
-              <p>
-                <span className="font-semibold">이민주, 이지연</span>의 오빠
-              </p>
-            </div>
-            <h2 className="text-3xl font-bold font-cafe24">이형민</h2>
+
+        <p className="font-hahmlet whitespace-pre-line text-white text-center">
+          {
+            "많은 계절을 함께 보낸 저희 두 사람,\n이제 평생을 약속하는 자리에 여러분을 모십니다."
+          }
+        </p>
+      </Section>
+
+      {/* Opening Image */}
+      <Section className="p-0!">
+        <Image
+          src="/images/1034.jpg"
+          alt="1034.jpg"
+          width={400}
+          height={400}
+          className="w-full h-auto"
+        />
+      </Section>
+
+      {/* Bride and Groom */}
+      <Section className="bg-primary w-full px-12 flex flex-col items-center font-pretendard justify-center gap-y-4">
+        <div className="w-full flex items-center justify-between gap-x-4">
+          <div className="flex flex-col items-start justify-center">
+            <p>
+              <span className="font-semibold">이병수, 이광이</span>의 아들
+            </p>
+            <p>
+              <span className="font-semibold">이민주, 이지연</span>의 오빠
+            </p>
           </div>
-          <div className="w-full flex items-center justify-between gap-x-4">
-            <div className="flex flex-col items-start justify-center">
-              <p>
-                <span className="font-semibold">임종윤, 서미경</span>의 딸
-              </p>
-              <p>
-                <span className="font-semibold">임성재</span>의 동생
-              </p>
-            </div>
-            <h2 className="text-3xl font-bold font-cafe24">임희재</h2>
+          <h2 className="text-3xl font-bold font-cafe24">이형민</h2>
+        </div>
+        <div className="w-full flex items-center justify-between gap-x-4">
+          <div className="flex flex-col items-start justify-center">
+            <p>
+              <span className="font-semibold">임종윤, 서미경</span>의 딸
+            </p>
+            <p>
+              <span className="font-semibold">임성재</span>의 동생
+            </p>
           </div>
+          <h2 className="text-3xl font-bold font-cafe24">임희재</h2>
         </div>
       </Section>
 
       {/* Calendar */}
       <Section className="flex flex-col items-center justify-center gap-4">
-        <Section.Title category="Calendar" title="Our Wedding Day" />
-        <p className="text-center text-stone-800 leading-relaxed whitespace-pre-line">
+        <Section.Title
+          category="Calendar"
+          title="2026년 4월 19일 일요일 오전 11시"
+        />
+        <p className="text-center text-sm text-white/75 leading-relaxed whitespace-pre-line">
           서울 영등포구 국회대로 612 지상2층, 지하1층
           <br />
           <span className="font-semibold">더베르G 웨딩</span>
         </p>
-        <h3 className="text-lg font-semibold text-stone-800">
-          2026년 4월 19일 일요일 오전 11시
-        </h3>
-        <WeddingProgressBar />
         <Calendar />
         <AddToCalendar
           title="Our Wedding Day"
@@ -308,12 +342,6 @@ const Wedding = async () => {
         {/* 대중교통 */}
         {/* 주차 */}
       </Section>
-
-      {/* Our Story */}
-      {/* <Section className="flex flex-col items-center justify-center gap-4">
-        <Section.Title category="Love Story" title="우리가 걸어온 길" />
-        <Story />
-      </Section> */}
 
       {/* Gallery */}
       <Section className="flex flex-col items-center justify-center gap-4">
