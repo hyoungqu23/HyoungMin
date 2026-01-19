@@ -1,8 +1,4 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { getHeartCount } from "./_actions/hearts";
-import { FloatingButton } from "./_components/floating/FloatingButton";
-import { HeartButton } from "./_components/floating/HeartButton";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL!),
@@ -49,10 +45,10 @@ const InvitationLayout = ({ children }: LayoutProps) => {
     <>
       {/* <Splash /> */}
       {children}
-      <FloatingButton />
+      {/* <FloatingButton />
       <Suspense fallback={null}>
         <HeartButton initialCountPromise={getHeartCount()} />
-      </Suspense>
+      </Suspense> */}
     </>
   );
 };

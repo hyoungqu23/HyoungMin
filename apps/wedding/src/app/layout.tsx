@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Great_Vibes, Hahmlet } from "next/font/google";
+import { Great_Vibes, Hahmlet, Playfair_Display } from "next/font/google";
 import localFont from "next/font/local";
 import { Analytics } from "./(invitation)/_components/analytics/Analytics";
 import { Kakao } from "./(invitation)/_components/root/Kakao";
@@ -54,7 +54,7 @@ const RootLayout = ({ children }: LayoutProps) => {
   return (
     <html lang="ko">
       <body
-        className={`relative ${pretendardFont.variable} ${greatVibesFont.variable} ${hahmletFont.variable} antialiased bg-black overflow-x-hidden`}
+        className={`relative ${pretendardFont.variable} ${greatVibesFont.variable} ${hahmletFont.variable} ${playfairDisplayFont.variable} antialiased bg-black overflow-x-hidden`}
       >
         <Kakao />
         <Analytics />
@@ -79,6 +79,13 @@ const hahmletFont = Hahmlet({
   display: "swap",
   preload: true,
   variable: "--hahmlet",
+});
+
+const playfairDisplayFont = Playfair_Display({
+  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
+  preload: true,
+  variable: "--playfair-display",
 });
 
 const pretendardFont = localFont({

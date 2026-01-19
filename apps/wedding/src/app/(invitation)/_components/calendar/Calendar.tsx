@@ -25,7 +25,7 @@ const HandDrawnCircle = () => {
           initial={{ pathLength: 0, opacity: 0 }}
           whileInView={{ pathLength: 1, opacity: 1 }}
           viewport={{
-            once: false,
+            once: true,
             margin: "-30% 0px -30% 0px",
           }}
           transition={{
@@ -42,7 +42,7 @@ const HandDrawnCircle = () => {
           strokeLinejoin="round"
           initial={{ pathLength: 0, opacity: 0 }}
           whileInView={{ pathLength: 1, opacity: 1 }}
-          viewport={{ once: false, margin: "-30% 0px -30% 0px" }}
+          viewport={{ once: true, margin: "-30% 0px -30% 0px" }}
           transition={{
             duration: 0.4,
             delay: CIRCLE_DURATION - 0.2,
@@ -67,7 +67,7 @@ export const Calendar = () => {
   }
 
   return (
-    <div className="w-full max-w-sm mx-auto p-6 bg-white rounded-2xl shadow-sm border border-stone-100 flex flex-col items-center justify-center gap-4 font-hahmlet">
+    <div className="w-full max-w-sm mx-auto p-6 bg-white rounded-2xl shadow-sm border border-stone-100 flex flex-col items-center justify-center gap-4 font-pretendard">
       {/* 달력 헤더 */}
       <h3 className="text-center text-xl font-bold text-stone-800">
         2026년 4월

@@ -33,27 +33,28 @@ const Wedding = async () => {
       className="w-screen overflow-x-hidden min-h-svh"
     >
       {/* Main */}
-      <Section className="flex flex-col items-center justify-center gap-8 py-20">
+      <Section className="flex flex-col items-center justify-center gap-8 py-10">
         <div className="flex flex-col items-center justify-center gap-2">
           <h1 className="text-center text-5xl font-bold font-great-vibes italic text-primary">
             Our Wedding Day
           </h1>
-          <p className="font-hahmlet text-white opacity-75">이형민 & 임희재</p>
+          <p className="font-playfair-display text-sm tracking-tight text-white opacity-75">
+            Lee HyoungMin & Lim HeeJae
+          </p>
         </div>
-        <div className="h-fit overflow-hidden w-full border-2 border-white">
+        <div className="h-fit overflow-hidden w-[60vw] border-2 border-white">
           <Image
             src="/images/1624.jpg"
             alt="1624.jpg"
             width={400}
             height={400}
-            className="w-full"
           />
         </div>
-        <div className="flex flex-col items-center justify-center gap-2">
-          <p className="font-hahmlet font-bold -tracking-[0.05rem] uppercase text-primary">
+        <div className="flex flex-col items-center justify-center gap-2 text-sm">
+          <p className="font-playfair-display font-bold uppercase text-primary">
             {"You're invited to our wedding."}
           </p>
-          <p className="font-hahmlet text-white text-center">
+          <p className="font-pretendard text-white text-center">
             <b>
               <span>2026년 4월 19일 일요일 오전 11시</span>
             </b>
@@ -66,7 +67,7 @@ const Wedding = async () => {
       </Section>
 
       {/* Introduction */}
-      <Section className="flex flex-col items-center justify-center gap-8 pt-4 py-20">
+      <Section className="flex flex-col items-center justify-center gap-8 pt-4 py-20 text-xs">
         <Image
           src={"/icons/ribbon_10.svg"}
           alt="invitation"
@@ -74,13 +75,13 @@ const Wedding = async () => {
           height={40}
         />
 
-        <p className="font-hahmlet whitespace-pre-line text-white text-center">
+        <p className="font-pretendard whitespace-pre-line text-white text-center">
           {
             "11년이라는 긴 시간동안\n서로의 청춘을 채워준 가장 친한 친구이자 연인."
           }
         </p>
 
-        <p className="font-hahmlet whitespace-pre-line text-white text-center">
+        <p className="font-pretendard whitespace-pre-line text-white text-center">
           {
             "많은 계절을 함께 보낸 저희 두 사람,\n이제 평생을 약속하는 자리에 여러분을 모십니다."
           }
@@ -124,13 +125,28 @@ const Wedding = async () => {
         </div>
       </Section>
 
+      <Section>
+        <div className="grid grid-cols-3 grid-rows-3 gap-3">
+          <div className="col-span-3 row-span-2 w-full rounded bg-amber-50" />
+          <div className="aspect-square w-full rounded bg-amber-100" />
+          <div className="aspect-square w-full rounded bg-amber-200" />
+          <div className="aspect-square w-full rounded bg-amber-300" />
+          <div className="aspect-square w-full rounded bg-amber-400" />
+          <div className="aspect-square w-full rounded bg-amber-500" />
+          <div className="aspect-square w-full rounded bg-amber-600" />
+          <div className="aspect-square w-full rounded bg-amber-700" />
+          <div className="aspect-square w-full rounded bg-amber-800" />
+          <div className="aspect-square w-full rounded bg-amber-900" />
+        </div>
+      </Section>
+
       {/* Calendar */}
-      <Section className="flex flex-col items-center justify-center gap-4">
+      <Section className="flex flex-col items-center justify-center gap-4 bg-white text-black">
         <Section.Title
           category="Calendar"
           title="2026년 4월 19일 일요일 오전 11시"
         />
-        <p className="text-center text-sm text-white/75 leading-relaxed whitespace-pre-line">
+        <p className="text-center text-sm  leading-relaxed whitespace-pre-line">
           서울 영등포구 국회대로 612 지상2층, 지하1층
           <br />
           <span className="font-semibold">더베르G 웨딩</span>
@@ -146,7 +162,7 @@ const Wedding = async () => {
       </Section>
 
       {/* Location */}
-      <Section className="flex flex-col items-center justify-center gap-4">
+      <Section className="flex flex-col items-center justify-center gap-4 bg-white">
         <Section.Title
           category="Location"
           title="오시는 길"
@@ -163,7 +179,7 @@ const Wedding = async () => {
       </Section>
 
       {/* Gallery */}
-      <Section className="flex flex-col items-center justify-center gap-4">
+      <Section className="flex flex-col items-center justify-center gap-4 bg-white">
         <Section.Title category="Gallery" title="Lovely Moments" />
         <GalleryContainer items={storyGalleryItems} />
         <UploadWeddingPhoto />
@@ -172,14 +188,14 @@ const Wedding = async () => {
       {/* Contact */}
       {/* Share */}
       {/* Accounts */}
-      <Section className="flex flex-col items-center justify-center gap-4">
+      <Section className="flex flex-col items-center justify-center gap-4 bg-white">
         <Contact />
         <Accounts />
         <Share />
       </Section>
 
       {/* Guestbook */}
-      <Section className="flex flex-col items-center justify-center gap-4">
+      <Section className="flex flex-col items-center justify-center gap-4 bg-white">
         <Section.Title category="Guestbook" title="축하 인사 전하기" />
         <RollingPaper initialMessages={initialGuestMessages} />
       </Section>
