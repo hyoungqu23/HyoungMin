@@ -1,6 +1,6 @@
 "use server";
 
-import { google } from "googleapis";
+import { sheets as googleSheets } from "@googleapis/sheets";
 import { JWT } from "google-auth-library";
 
 const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
@@ -19,7 +19,7 @@ const getSheetsClient = () => {
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
 
-  return google.sheets({ auth, version: "v4" });
+  return googleSheets({ auth, version: "v4" });
 };
 
 const getTimestamp = () => {
