@@ -8,6 +8,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { FloatingExportButton } from "./components/FloatingExportButton";
 import { HistoryChart } from "./components/HistoryChart";
 import { ManagedProductList } from "./components/ManagedProductList";
 import { RankingList } from "./components/RankingList";
@@ -170,6 +171,9 @@ function App() {
 
   return (
     <div className="flex h-screen bg-gray-50 text-gray-900 font-sans">
+      {/* Floating Export Button */}
+      <FloatingExportButton />
+
       {/* Sidebar */}
       <div className="w-96 bg-white border-r border-gray-200 flex flex-col">
         {/* Header */}

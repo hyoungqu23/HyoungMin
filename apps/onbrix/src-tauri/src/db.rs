@@ -1,4 +1,4 @@
-use crate::types::{ManagedProduct, ManagedProductWithRank, ProductItem, RankHistory, ReviewItem, ReviewStats, ReviewWithMeta};
+use crate::types::{ManagedProduct, ManagedProductWithRank, ProductItem, RankHistory, ReviewItem, ReviewStats, ReviewWithMeta, RankingExportItem, ReviewExportItem};
 use anyhow::Result;
 use rusqlite::{Connection, Row};
 use std::path::PathBuf;
@@ -59,6 +59,13 @@ pub enum DbRequest {
     },
     GetActiveProductIds {
         resp: oneshot::Sender<Result<Vec<String>>>,
+    },
+    // ===== Export (엑셀 내보내기) =====
+    GetRankingsForExport {
+        resp: oneshot::Sender<Result<Vec<RankingExportItem>>>,
+    },
+    GetReviewsForExport {
+        resp: oneshot::Sender<Result<Vec<ReviewExportItem>>>,
     },
 }
 
@@ -366,6 +373,73 @@ impl DbHandle {
                         })();
                         let _ = resp.send(res);
                     }
+                    // ===== Export Handlers =====
+                    DbRequest::GetRankingsForExport { resp } => {
+                        let res = (|| -> Result<Vec<RankingExportItem>> {
+                            let mut stmt = conn.prepare(
+                                "SELECT 
+                                    strftime('%Y-%m-%d %H:%M', s.created_at) as date,
+                                    r.rank,
+                                    r.brand_name,
+                                    r.product_name,
+                                    r.price,
+                                    r.product_id
+                                FROM ranking_items r
+                                JOIN crawl_sessions s ON r.session_id = s.id
+                                WHERE s.created_at >= datetime('now', '-30 days')
+                                ORDER BY s.created_at DESC, r.rank ASC"
+                            )?;
+                            let rows = stmt.query_map([], |row| {
+                                Ok(RankingExportItem {
+                                    created_at: row.get(0)?,
+                                    rank: row.get(1)?,
+                                    brand_name: row.get(2)?,
+                                    product_name: row.get(3)?,
+                                    price: row.get(4)?,
+                                    product_id: row.get(5)?,
+                                })
+                            })?;
+                            let mut items = Vec::new();
+                            for row in rows { items.push(row?); }
+                            println!("[DB] GetRankingsForExport: {} items", items.len());
+                            Ok(items)
+                        })();
+                        let _ = resp.send(res);
+                    }
+                    DbRequest::GetReviewsForExport { resp } => {
+                        let res = (|| -> Result<Vec<ReviewExportItem>> {
+                            let mut stmt = conn.prepare(
+                                "SELECT 
+                                    r.review_date,
+                                    r.crawled_at,
+                                    COALESCE(mp.product_name, r.product_id) as product_name,
+                                    r.writer_name,
+                                    r.rating,
+                                    r.content,
+                                    COALESCE(r.images_json, '[]') as images_json
+                                FROM product_reviews r
+                                LEFT JOIN managed_products mp ON r.product_id = mp.product_id
+                                WHERE r.review_date >= date('now', '-30 days')
+                                ORDER BY r.review_date DESC"
+                            )?;
+                            let rows = stmt.query_map([], |row| {
+                                Ok(ReviewExportItem {
+                                    review_date: row.get(0)?,
+                                    crawled_at: row.get(1)?,
+                                    product_name: row.get(2)?,
+                                    writer_name: row.get(3)?,
+                                    rating: row.get(4)?,
+                                    content: row.get(5)?,
+                                    images_json: row.get(6)?,
+                                })
+                            })?;
+                            let mut items = Vec::new();
+                            for row in rows { items.push(row?); }
+                            println!("[DB] GetReviewsForExport: {} items", items.len());
+                            Ok(items)
+                        })();
+                        let _ = resp.send(res);
+                    }
                 }
             }
         });
@@ -448,6 +522,20 @@ impl DbHandle {
     pub async fn get_active_product_ids(&self) -> Result<Vec<String>> {
         let (tx, rx) = oneshot::channel();
         self.sender.send(DbRequest::GetActiveProductIds { resp: tx }).await?;
+        rx.await?
+    }
+
+    // ===== Export Methods =====
+
+    pub async fn get_rankings_for_export(&self) -> Result<Vec<RankingExportItem>> {
+        let (tx, rx) = oneshot::channel();
+        self.sender.send(DbRequest::GetRankingsForExport { resp: tx }).await?;
+        rx.await?
+    }
+
+    pub async fn get_reviews_for_export(&self) -> Result<Vec<ReviewExportItem>> {
+        let (tx, rx) = oneshot::channel();
+        self.sender.send(DbRequest::GetReviewsForExport { resp: tx }).await?;
         rx.await?
     }
 }

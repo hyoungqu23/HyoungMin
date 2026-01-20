@@ -92,3 +92,26 @@ pub struct ReviewWithMeta {
     pub images: Vec<String>,
     pub crawled_at: String,
 }
+
+// ===== Export Types (엑셀 내보내기용) =====
+
+#[derive(Debug, Clone)]
+pub struct RankingExportItem {
+    pub created_at: String,
+    pub rank: i32,
+    pub brand_name: String,
+    pub product_name: String,
+    pub price: i32,
+    pub product_id: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct ReviewExportItem {
+    pub review_date: String,
+    pub crawled_at: String,
+    pub product_name: String,
+    pub writer_name: String,
+    pub rating: i32,
+    pub content: String,
+    pub images_json: String,
+}

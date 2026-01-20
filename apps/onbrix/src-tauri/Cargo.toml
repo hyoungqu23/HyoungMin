@@ -30,4 +30,6 @@ chrono = "0.4"
 thiserror = "1.0"
 tracing = "0.1"
 tracing-subscriber = "0.3"
+rust_xlsxwriter = "0.79"
+tauri-plugin-dialog = "2"
 

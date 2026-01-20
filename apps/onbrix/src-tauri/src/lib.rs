@@ -2,6 +2,7 @@ use tauri::{AppHandle, Emitter, Manager, State};
 
 mod crawler;
 mod db;
+mod export;
 mod scheduler;
 mod types;
 
@@ -9,8 +10,8 @@ use db::DbHandle;
 use types::{ManagedProductWithRank, ProductItem, RankHistory, ReviewStats, ReviewWithMeta};
 
 // State wrapper
-struct AppState {
-    db: DbHandle,
+pub struct AppState {
+    pub db: DbHandle,
 }
 
 #[tauri::command]
@@ -207,6 +208,7 @@ pub fn run() {
             Ok(())
         })
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             manual_crawl, 
             search_brand_rankings, 
@@ -215,7 +217,9 @@ pub fn run() {
             get_managed_products_with_rank,
             get_product_reviews,
             get_review_stats,
-            manual_review_crawl
+            manual_review_crawl,
+            export::export_rankings_excel,
+            export::export_reviews_excel
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
