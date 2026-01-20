@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { HistoryChart } from "./components/HistoryChart";
 import { ManagedProductList } from "./components/ManagedProductList";
 import { RankingList } from "./components/RankingList";
+import { ReviewAnalytics } from "./components/ReviewAnalytics";
 import {
   getManagedProductsWithRank,
   ManagedProductWithRank,
@@ -340,8 +341,15 @@ function App() {
               </div>
             </header>
 
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-6">
               <HistoryChart productId={currentSelectedProduct.product_id} />
+
+              {/* 내 상품 탭에서만 리뷰 분석 표시 */}
+              {activeTab === "my-products" && selectedManagedProduct && (
+                <ReviewAnalytics
+                  productId={selectedManagedProduct.product_id}
+                />
+              )}
             </div>
           </div>
         ) : (

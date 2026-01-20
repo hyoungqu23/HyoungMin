@@ -50,3 +50,22 @@ CREATE TABLE IF NOT EXISTS managed_products (
 -- Managed Products 인덱스
 CREATE INDEX IF NOT EXISTS idx_managed_brand ON managed_products(brand_id);
 CREATE INDEX IF NOT EXISTS idx_managed_active ON managed_products(is_active);
+
+-- [신규] 상품 리뷰 테이블 (VoC 수집)
+CREATE TABLE IF NOT EXISTS product_reviews (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id TEXT NOT NULL,           -- managed_products 테이블 참조
+  review_date TEXT NOT NULL,          -- YYYY-MM-DD (작성일)
+  writer_name TEXT NOT NULL,
+  rating INTEGER NOT NULL,            -- 1 ~ 5
+  content TEXT,
+  images_json TEXT,                   -- 이미지 URL 배열 (JSON 문자열)
+  crawled_at DATETIME DEFAULT (datetime('now', 'localtime')),
+  
+  -- 중복 수집 방지 (동일 제품, 동일 작성자, 동일 날짜, 동일 내용)
+  UNIQUE(product_id, writer_name, review_date, content)
+);
+
+-- 리뷰 테이블 인덱스
+CREATE INDEX IF NOT EXISTS idx_reviews_product_date ON product_reviews(product_id, review_date);
+CREATE INDEX IF NOT EXISTS idx_reviews_crawled_at ON product_reviews(crawled_at);

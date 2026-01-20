@@ -6,7 +6,7 @@ mod scheduler;
 mod types;
 
 use db::DbHandle;
-use types::{ManagedProductWithRank, ProductItem, RankHistory};
+use types::{ManagedProductWithRank, ProductItem, RankHistory, ReviewStats, ReviewWithMeta};
 
 // State wrapper
 struct AppState {
@@ -118,6 +118,68 @@ async fn get_managed_products_with_rank(state: State<'_, AppState>) -> Result<Ve
     res
 }
 
+// ===== Product Reviews Commands =====
+
+#[tauri::command]
+async fn get_product_reviews(state: State<'_, AppState>, product_id: String, limit: Option<i32>) -> Result<Vec<ReviewWithMeta>, String> {
+    println!("[Command] get_product_reviews called for product_id: {}", product_id);
+    state.db.get_product_reviews(product_id, limit).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_review_stats(state: State<'_, AppState>, product_id: String) -> Result<ReviewStats, String> {
+    println!("[Command] get_review_stats called for product_id: {}", product_id);
+    state.db.get_review_stats(product_id).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn manual_review_crawl(app: AppHandle, state: State<'_, AppState>, product_id: String, target_date: String) -> Result<usize, String> {
+    println!("[Command] manual_review_crawl called for product_id: {}, date: {}", product_id, target_date);
+    
+    let _ = app.emit("review-crawl-progress", serde_json::json!({
+        "status": "starting",
+        "message": "리뷰 크롤링 시작..."
+    }));
+
+    let pid = product_id.clone();
+    let date = target_date.clone();
+    let res = tokio::task::spawn_blocking(move || crawler::crawl_reviews(&pid, &date))
+        .await
+        .map_err(|e| e.to_string())?;
+
+    match res {
+        Ok(reviews) => {
+            let count = reviews.len();
+            if count > 0 {
+                let saved = state.db.save_reviews(product_id, reviews)
+                    .await
+                    .map_err(|e| e.to_string())?;
+                
+                let _ = app.emit("review-crawl-progress", serde_json::json!({
+                    "status": "completed",
+                    "message": format!("{}개 리뷰 저장 완료", saved)
+                }));
+                let _ = app.emit("refresh-needed", ());
+                
+                Ok(saved)
+            } else {
+                let _ = app.emit("review-crawl-progress", serde_json::json!({
+                    "status": "completed",
+                    "message": "새로운 리뷰가 없습니다"
+                }));
+                Ok(0)
+            }
+        }
+        Err(e) => {
+            let _ = app.emit("review-crawl-progress", serde_json::json!({
+                "status": "error",
+                "message": format!("크롤링 실패: {}", e)
+            }));
+            Err(e.to_string())
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -150,7 +212,10 @@ pub fn run() {
             search_brand_rankings, 
             get_product_history,
             sync_brand_products,
-            get_managed_products_with_rank
+            get_managed_products_with_rank,
+            get_product_reviews,
+            get_review_stats,
+            manual_review_crawl
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

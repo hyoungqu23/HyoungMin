@@ -54,3 +54,41 @@ pub struct BrandCrawlResult {
     pub brand_id: String,  // 향후 다중 브랜드 지원용
     pub items: Vec<ManagedProduct>,
 }
+
+// ===== Product Reviews (리뷰 크롤링) =====
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ReviewItem {
+    pub review_date: String,      // YYYY-MM-DD 형식
+    pub writer_name: String,
+    pub rating: i32,              // 1 ~ 5
+    pub content: String,
+    pub images: Vec<String>,      // 이미지 URL 배열
+}
+
+#[derive(Debug)]
+#[allow(dead_code)]
+pub struct ReviewCrawlResult {
+    pub product_id: String,
+    pub items: Vec<ReviewItem>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ReviewStats {
+    pub total_count: i32,
+    pub average_rating: f64,
+    pub yesterday_count: i32,
+    pub yesterday_avg_rating: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ReviewWithMeta {
+    pub id: i64,
+    pub product_id: String,
+    pub review_date: String,
+    pub writer_name: String,
+    pub rating: i32,
+    pub content: String,
+    pub images: Vec<String>,
+    pub crawled_at: String,
+}

@@ -52,3 +52,41 @@ export async function getManagedProductsWithRank(): Promise<
 > {
   return invoke("get_managed_products_with_rank", {});
 }
+
+// ===== Product Reviews =====
+
+export interface ReviewWithMeta {
+  id: number;
+  product_id: string;
+  review_date: string;
+  writer_name: string;
+  rating: number;
+  content: string;
+  images: string[];
+  crawled_at: string;
+}
+
+export interface ReviewStats {
+  total_count: number;
+  average_rating: number;
+  yesterday_count: number;
+  yesterday_avg_rating: number;
+}
+
+export async function getProductReviews(
+  productId: string,
+  limit?: number,
+): Promise<ReviewWithMeta[]> {
+  return invoke("get_product_reviews", { productId, limit });
+}
+
+export async function getReviewStats(productId: string): Promise<ReviewStats> {
+  return invoke("get_review_stats", { productId });
+}
+
+export async function manualReviewCrawl(
+  productId: string,
+  targetDate: string,
+): Promise<number> {
+  return invoke("manual_review_crawl", { productId, targetDate });
+}

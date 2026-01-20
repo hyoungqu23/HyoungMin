@@ -1,4 +1,4 @@
-use crate::types::{ManagedProduct, ManagedProductWithRank, ProductItem, RankHistory};
+use crate::types::{ManagedProduct, ManagedProductWithRank, ProductItem, RankHistory, ReviewItem, ReviewStats, ReviewWithMeta};
 use anyhow::Result;
 use rusqlite::{Connection, Row};
 use std::path::PathBuf;
@@ -38,6 +38,27 @@ pub enum DbRequest {
     GetLastManagedSync {
         brand_id: String,
         resp: oneshot::Sender<Result<Option<String>>>,
+    },
+    // ===== Product Reviews =====
+    SaveReviews {
+        product_id: String,
+        reviews: Vec<ReviewItem>,
+        resp: oneshot::Sender<Result<usize>>,
+    },
+    GetProductReviews {
+        product_id: String,
+        limit: Option<i32>,
+        resp: oneshot::Sender<Result<Vec<ReviewWithMeta>>>,
+    },
+    GetReviewStats {
+        product_id: String,
+        resp: oneshot::Sender<Result<ReviewStats>>,
+    },
+    GetLastReviewCrawl {
+        resp: oneshot::Sender<Result<Option<String>>>,
+    },
+    GetActiveProductIds {
+        resp: oneshot::Sender<Result<Vec<String>>>,
     },
 }
 
@@ -234,6 +255,117 @@ impl DbHandle {
                         })();
                         let _ = resp.send(res);
                     }
+                    // ===== Product Reviews Handlers =====
+                    DbRequest::SaveReviews { product_id, reviews, resp } => {
+                        let res = (|| -> Result<usize> {
+                            println!("[DB] SaveReviews: {} reviews for product {}", reviews.len(), product_id);
+                            let tx = conn.unchecked_transaction()?;
+                            let mut count = 0;
+                            for r in reviews {
+                                let images_json = serde_json::to_string(&r.images).unwrap_or("[]".to_string());
+                                // INSERT OR IGNORE for deduplication
+                                let rows_affected = tx.execute(
+                                    "INSERT OR IGNORE INTO product_reviews (product_id, review_date, writer_name, rating, content, images_json)
+                                     VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                                    (&product_id, &r.review_date, &r.writer_name, r.rating, &r.content, &images_json),
+                                )?;
+                                if rows_affected > 0 {
+                                    count += 1;
+                                }
+                            }
+                            tx.commit()?;
+                            println!("[DB] Saved {} new reviews (duplicates ignored)", count);
+                            Ok(count)
+                        })();
+                        let _ = resp.send(res);
+                    }
+                    DbRequest::GetProductReviews { product_id, limit, resp } => {
+                        let res = (|| -> Result<Vec<ReviewWithMeta>> {
+                            let limit_clause = limit.map(|l| format!(" LIMIT {}", l)).unwrap_or_default();
+                            let query = format!(
+                                "SELECT id, product_id, review_date, writer_name, rating, content, images_json, crawled_at
+                                 FROM product_reviews
+                                 WHERE product_id = ?1
+                                 ORDER BY review_date DESC, id DESC{}",
+                                limit_clause
+                            );
+                            let mut stmt = conn.prepare(&query)?;
+                            let rows = stmt.query_map([&product_id], |row| {
+                                let images_json: String = row.get(6)?;
+                                let images: Vec<String> = serde_json::from_str(&images_json).unwrap_or_default();
+                                Ok(ReviewWithMeta {
+                                    id: row.get(0)?,
+                                    product_id: row.get(1)?,
+                                    review_date: row.get(2)?,
+                                    writer_name: row.get(3)?,
+                                    rating: row.get(4)?,
+                                    content: row.get(5)?,
+                                    images,
+                                    crawled_at: row.get(7)?,
+                                })
+                            })?;
+                            let mut items = Vec::new();
+                            for row in rows { items.push(row?); }
+                            println!("[DB] GetProductReviews {}: {} items", product_id, items.len());
+                            Ok(items)
+                        })();
+                        let _ = resp.send(res);
+                    }
+                    DbRequest::GetReviewStats { product_id, resp } => {
+                        let res = (|| -> Result<ReviewStats> {
+                            // 어제 날짜 계산
+                            let yesterday = chrono::Local::now()
+                                .checked_sub_signed(chrono::Duration::days(1))
+                                .map(|d| d.format("%Y-%m-%d").to_string())
+                                .unwrap_or_default();
+                            
+                            // 전체 통계
+                            let (total_count, average_rating): (i32, f64) = conn.query_row(
+                                "SELECT COUNT(*), COALESCE(AVG(rating), 0) FROM product_reviews WHERE product_id = ?1",
+                                [&product_id],
+                                |row| Ok((row.get(0)?, row.get(1)?))
+                            ).unwrap_or((0, 0.0));
+                            
+                            // 어제 통계
+                            let (yesterday_count, yesterday_avg_rating): (i32, f64) = conn.query_row(
+                                "SELECT COUNT(*), COALESCE(AVG(rating), 0) FROM product_reviews WHERE product_id = ?1 AND review_date = ?2",
+                                [&product_id, &yesterday],
+                                |row| Ok((row.get(0)?, row.get(1)?))
+                            ).unwrap_or((0, 0.0));
+                            
+                            Ok(ReviewStats {
+                                total_count,
+                                average_rating,
+                                yesterday_count,
+                                yesterday_avg_rating,
+                            })
+                        })();
+                        let _ = resp.send(res);
+                    }
+                    DbRequest::GetLastReviewCrawl { resp } => {
+                        let res = (|| -> Result<Option<String>> {
+                            let last: Option<String> = conn.query_row(
+                                "SELECT MAX(crawled_at) FROM product_reviews",
+                                [],
+                                |row| row.get(0)
+                            ).ok().flatten();
+                            Ok(last)
+                        })();
+                        let _ = resp.send(res);
+                    }
+                    DbRequest::GetActiveProductIds { resp } => {
+                        let res = (|| -> Result<Vec<String>> {
+                            let mut stmt = conn.prepare(
+                                "SELECT product_id FROM managed_products WHERE is_active = 1"
+                            )?;
+                            let rows = stmt.query_map([], |row| row.get(0))?;
+                            let mut ids = Vec::new();
+                            for row in rows { ids.push(row?); }
+                            println!("[DB] GetActiveProductIds: {} products", ids.len());
+                            Ok(ids)
+                        })();
+                        let _ = resp.send(res);
+                    }
                 }
             }
         });
@@ -284,6 +416,38 @@ impl DbHandle {
     pub async fn get_last_managed_sync(&self, brand_id: String) -> Result<Option<String>> {
         let (tx, rx) = oneshot::channel();
         self.sender.send(DbRequest::GetLastManagedSync { brand_id, resp: tx }).await?;
+        rx.await?
+    }
+
+    // ===== Product Reviews Methods =====
+
+    pub async fn save_reviews(&self, product_id: String, reviews: Vec<ReviewItem>) -> Result<usize> {
+        let (tx, rx) = oneshot::channel();
+        self.sender.send(DbRequest::SaveReviews { product_id, reviews, resp: tx }).await?;
+        rx.await?
+    }
+
+    pub async fn get_product_reviews(&self, product_id: String, limit: Option<i32>) -> Result<Vec<ReviewWithMeta>> {
+        let (tx, rx) = oneshot::channel();
+        self.sender.send(DbRequest::GetProductReviews { product_id, limit, resp: tx }).await?;
+        rx.await?
+    }
+
+    pub async fn get_review_stats(&self, product_id: String) -> Result<ReviewStats> {
+        let (tx, rx) = oneshot::channel();
+        self.sender.send(DbRequest::GetReviewStats { product_id, resp: tx }).await?;
+        rx.await?
+    }
+
+    pub async fn get_last_review_crawl(&self) -> Result<Option<String>> {
+        let (tx, rx) = oneshot::channel();
+        self.sender.send(DbRequest::GetLastReviewCrawl { resp: tx }).await?;
+        rx.await?
+    }
+
+    pub async fn get_active_product_ids(&self) -> Result<Vec<String>> {
+        let (tx, rx) = oneshot::channel();
+        self.sender.send(DbRequest::GetActiveProductIds { resp: tx }).await?;
         rx.await?
     }
 }
