@@ -6,7 +6,7 @@ mod scheduler;
 mod types;
 
 use db::DbHandle;
-use types::{ProductItem, RankHistory};
+use types::{ManagedProductWithRank, ProductItem, RankHistory};
 
 // State wrapper
 struct AppState {
@@ -64,6 +64,60 @@ async fn get_product_history(state: State<'_, AppState>, product_id: String) -> 
     state.db.get_history(product_id).await.map_err(|e| e.to_string())
 }
 
+// ===== Managed Products Commands =====
+
+#[tauri::command]
+async fn sync_brand_products(app: AppHandle, state: State<'_, AppState>, brand_id: String) -> Result<usize, String> {
+    println!("[Command] sync_brand_products called for brand_id: {}", brand_id);
+    
+    // 진행률 이벤트 발생
+    let _ = app.emit("brand-sync-progress", serde_json::json!({
+        "status": "syncing",
+        "message": "브랜드 상품 동기화 중..."
+    }));
+    
+    let brand_id_clone = brand_id.clone();
+    let res = tokio::task::spawn_blocking(move || crawler::crawl_brand_products(&brand_id_clone))
+        .await
+        .map_err(|e| e.to_string())?;
+
+    match res {
+        Ok(result) => {
+            let count = result.items.len();
+            state.db.upsert_managed_products(result.items)
+                .await
+                .map_err(|e| e.to_string())?;
+            
+            let _ = app.emit("brand-sync-progress", serde_json::json!({
+                "status": "completed",
+                "message": format!("{}개 상품 동기화 완료", count),
+                "count": count
+            }));
+            let _ = app.emit("refresh-needed", ());
+            
+            Ok(count)
+        }
+        Err(e) => {
+            let _ = app.emit("brand-sync-progress", serde_json::json!({
+                "status": "error",
+                "message": format!("크롤링 실패: {}", e)
+            }));
+            Err(e.to_string())
+        }
+    }
+}
+
+#[tauri::command]
+async fn get_managed_products_with_rank(state: State<'_, AppState>) -> Result<Vec<ManagedProductWithRank>, String> {
+    println!("[Command] get_managed_products_with_rank called");
+    let res = state.db.get_managed_products_with_rank().await.map_err(|e| e.to_string());
+    match &res {
+        Ok(items) => println!("[Command] get_managed_products_with_rank returning {} items", items.len()),
+        Err(e) => println!("[Command] get_managed_products_with_rank failed: {}", e),
+    }
+    res
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -94,7 +148,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             manual_crawl, 
             search_brand_rankings, 
-            get_product_history
+            get_product_history,
+            sync_brand_products,
+            get_managed_products_with_rank
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

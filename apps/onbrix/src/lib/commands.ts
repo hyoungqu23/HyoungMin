@@ -30,3 +30,25 @@ export async function getProductHistory(
 ): Promise<RankHistory[]> {
   return invoke("get_product_history", { productId });
 }
+
+// ===== Managed Products =====
+
+export interface ManagedProductWithRank {
+  product_id: string;
+  product_name: string;
+  product_image_url?: string;
+  brand_name: string;
+  is_active: boolean;
+  current_rank?: number; // undefined = 순위 밖
+  previous_rank?: number; // undefined = 순위 밖
+}
+
+export async function syncBrandProducts(brandId: string): Promise<number> {
+  return invoke("sync_brand_products", { brandId });
+}
+
+export async function getManagedProductsWithRank(): Promise<
+  ManagedProductWithRank[]
+> {
+  return invoke("get_managed_products_with_rank", {});
+}

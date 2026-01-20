@@ -34,3 +34,19 @@ CREATE INDEX IF NOT EXISTS idx_items_product_session ON ranking_items(product_id
 -- Prevent duplicates in same session
 CREATE UNIQUE INDEX IF NOT EXISTS ux_session_product
 ON ranking_items(session_id, product_id);
+
+-- [신규] 관리 대상 상품 (자사 상품 마스터)
+-- 매일 08시 혹은 앱 실행 시 업데이트 (Upsert)
+CREATE TABLE IF NOT EXISTS managed_products (
+  product_id TEXT PRIMARY KEY,           -- 고유 ID
+  product_name TEXT NOT NULL,
+  product_image_url TEXT,
+  brand_id TEXT NOT NULL,                 -- 브랜드 ID
+  brand_name TEXT,
+  is_active BOOLEAN DEFAULT 1,            -- 품절/삭제 추적
+  last_updated_at DATETIME DEFAULT (datetime('now', 'localtime'))
+);
+
+-- Managed Products 인덱스
+CREATE INDEX IF NOT EXISTS idx_managed_brand ON managed_products(brand_id);
+CREATE INDEX IF NOT EXISTS idx_managed_active ON managed_products(is_active);
