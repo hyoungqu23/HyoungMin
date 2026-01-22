@@ -86,7 +86,23 @@ export async function getReviewStats(productId: string): Promise<ReviewStats> {
 
 export async function manualReviewCrawl(
   productId: string,
-  targetDate: string,
+  sinceDate: string,
 ): Promise<number> {
-  return invoke("manual_review_crawl", { productId, targetDate });
+  return invoke("manual_review_crawl", { productId, sinceDate });
+}
+
+export async function crawlRecentReviews(months: number): Promise<number> {
+  return invoke("crawl_recent_reviews", { months });
+}
+
+export async function getAllReviews(limit?: number): Promise<ReviewWithMeta[]> {
+  return invoke("get_all_reviews", { limit });
+}
+
+export async function exportRankingsExcel(): Promise<void> {
+  return invoke("export_rankings_excel");
+}
+
+export async function exportReviewsExcel(): Promise<void> {
+  return invoke("export_reviews_excel");
 }

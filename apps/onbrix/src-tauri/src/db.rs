@@ -39,7 +39,11 @@ pub enum DbRequest {
         brand_id: String,
         resp: oneshot::Sender<Result<Option<String>>>,
     },
-    // ===== Product Reviews =====
+    // Product Reviews Handlers
+    GetAllReviews {
+        limit: Option<i32>,
+        resp: oneshot::Sender<Result<Vec<ReviewWithMeta>>>,
+    },
     SaveReviews {
         product_id: String,
         reviews: Vec<ReviewItem>,
@@ -263,6 +267,47 @@ impl DbHandle {
                         let _ = resp.send(res);
                     }
                     // ===== Product Reviews Handlers =====
+                    DbRequest::GetAllReviews { limit, resp } => {
+                        let res = (|| -> Result<Vec<ReviewWithMeta>> {
+                            println!("[DB] GetAllReviews called");
+                            let limit_clause = limit.map(|l| format!(" LIMIT {}", l)).unwrap_or_default();
+                            
+                            // JOIN managed_products to get product_name/brand_name if needed, 
+                            // but currently ReviewWithMeta doesn't have those fields.
+                            // The user request asked for filtering by product name, so frontend needs product_id -> product_name mapping.
+                            // ReviewWithMeta has product_id, so frontend can look up.
+                            // BUT, we might want to return them.
+                            // For now, let's stick to existing struct but ensure we get all data.
+                            
+                            let query = format!(
+                                "SELECT id, product_id, review_date, writer_name, rating, content, images_json, crawled_at
+                                 FROM product_reviews
+                                 ORDER BY review_date DESC, id DESC{}",
+                                limit_clause
+                            );
+                            
+                            let mut stmt = conn.prepare(&query)?;
+                            let rows = stmt.query_map([], |row| {
+                                let images_json: String = row.get(6)?;
+                                let images: Vec<String> = serde_json::from_str(&images_json).unwrap_or_default();
+                                Ok(ReviewWithMeta {
+                                    id: row.get(0)?,
+                                    product_id: row.get(1)?,
+                                    review_date: row.get(2)?,
+                                    writer_name: row.get(3)?,
+                                    rating: row.get(4)?,
+                                    content: row.get(5)?,
+                                    images,
+                                    crawled_at: row.get(7)?,
+                                })
+                            })?;
+                            let mut items = Vec::new();
+                            for row in rows { items.push(row?); }
+                            println!("[DB] GetAllReviews returning {} items", items.len());
+                            Ok(items)
+                        })();
+                        let _ = resp.send(res);
+                    }
                     DbRequest::SaveReviews { product_id, reviews, resp } => {
                         let res = (|| -> Result<usize> {
                             println!("[DB] SaveReviews: {} reviews for product {}", reviews.len(), product_id);
@@ -494,6 +539,12 @@ impl DbHandle {
     }
 
     // ===== Product Reviews Methods =====
+    
+    pub async fn get_all_reviews(&self, limit: Option<i32>) -> Result<Vec<ReviewWithMeta>> {
+        let (tx, rx) = oneshot::channel();
+        self.sender.send(DbRequest::GetAllReviews { limit, resp: tx }).await?;
+        rx.await?
+    }
 
     pub async fn save_reviews(&self, product_id: String, reviews: Vec<ReviewItem>) -> Result<usize> {
         let (tx, rx) = oneshot::channel();

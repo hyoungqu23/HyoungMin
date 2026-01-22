@@ -232,9 +232,9 @@ pub fn crawl_brand_products(brand_id: &str) -> Result<BrandCrawlResult> {
     })
 }
 
-/// 상품 리뷰 크롤링 (어제 날짜 리뷰만 수집)
-pub fn crawl_reviews(product_id: &str, target_date: &str) -> Result<Vec<crate::types::ReviewItem>> {
-    println!("[Crawler] Starting review crawl for product_id: {}, target_date: {}", product_id, target_date);
+/// 상품 리뷰 크롤링 (특정 날짜 이후의 모든 리뷰 수집)
+pub fn crawl_reviews(product_id: &str, since_date: &str) -> Result<Vec<crate::types::ReviewItem>> {
+    println!("[Crawler] Starting review crawl for product_id: {}, since: {}", product_id, since_date);
     
     // 리뷰 탭 URL (최신순 정렬)
     let url = format!(
@@ -258,7 +258,7 @@ pub fn crawl_reviews(product_id: &str, target_date: &str) -> Result<Vec<crate::t
     let _ = tab.wait_for_element("ul.list_review");
     sleep(Duration::from_millis(1000));
 
-    // 무한 스크롤 처리 - 타겟 날짜 이전 데이터가 나올 때까지 스크롤
+    // 무한 스크롤 처리 - since_date 이전 데이터가 나올 때까지 스크롤
     println!("[Crawler] Starting scroll to load reviews...");
     let mut scroll_count = 0;
     let max_scrolls = 30;
@@ -282,17 +282,18 @@ pub fn crawl_reviews(product_id: &str, target_date: &str) -> Result<Vec<crate::t
             var dateEl = lastItem.querySelector('.list_reviewinfo li:nth-child(2) .txt_reviewinfo');
             if (!dateEl) return "CONTINUE";
             var dateStr = dateEl.innerText.trim(); // "2026.01.19" 형식
-            var targetDate = "{}";
-            // 날짜 비교: dateStr < targetDate 이면 STOP
-            if (dateStr < targetDate) return "STOP";
+            var sinceDate = "{}"; // "2026.01.01" 형식 (점 구분자)
+            // 날짜 비교 (Lexicographical works for YYYY.MM.DD)
+            // 가장 마지막 아이템 날짜가 sinceDate보다 작으면 (더 과거이면) 이미 충분히 로드된 것 -> STOP
+            if (dateStr < sinceDate) return "STOP";
             return "CONTINUE";
         }})()
-        "#, target_date.replace("-", "."));
+        "#, since_date.replace("-", "."));
 
         let result = tab.evaluate(&check_js, true)?;
         if let Some(val) = result.value.and_then(|v| v.as_str().map(String::from)) {
-            println!("[Crawler] Scroll #{}: status = {}", scroll_count, val);
             if val == "STOP" {
+                println!("[Crawler] Found reviews older than {}, stopping scroll.", since_date);
                 break;
             }
         }
@@ -300,10 +301,10 @@ pub fn crawl_reviews(product_id: &str, target_date: &str) -> Result<Vec<crate::t
 
     println!("[Crawler] Scroll complete. Extracting reviews...");
 
-    // 리뷰 데이터 추출 (타겟 날짜만 필터링)
+    // 리뷰 데이터 추출 (since_date 이후 데이터만)
     let extract_js = format!(r#"
     (function() {{
-        var targetDate = "{}";
+        var sinceDate = "{}"; // "2026-01-01"
         var items = [];
         var reviewEls = document.querySelectorAll('ul.list_review > app-view-review-item');
         
@@ -316,8 +317,8 @@ pub fn crawl_reviews(product_id: &str, target_date: &str) -> Result<Vec<crate::t
             // 형식 통일: "2026.01.19" -> "2026-01-19"
             var formattedDate = dateStr.replace(/\./g, "-");
             
-            // 타겟 날짜가 아니면 스킵
-            if (formattedDate !== targetDate) continue;
+            // sinceDate보다 이전이면 스킵 (과거 데이터)
+            if (formattedDate < sinceDate) continue;
             
             // 작성자
             var nickEl = el.querySelector('.txt_nick');
@@ -356,7 +357,7 @@ pub fn crawl_reviews(product_id: &str, target_date: &str) -> Result<Vec<crate::t
         }}
         return JSON.stringify(items);
     }})()
-    "#, target_date);
+    "#, since_date);
 
     let remote_object = tab.evaluate(&extract_js, true)?;
     
@@ -370,7 +371,7 @@ pub fn crawl_reviews(product_id: &str, target_date: &str) -> Result<Vec<crate::t
     
     println!("[Crawler] Parsing review JSON...");
     let items: Vec<crate::types::ReviewItem> = serde_json::from_str(json_str)?;
-    println!("[Crawler] Extracted {} reviews for date {}", items.len(), target_date);
+    println!("[Crawler] Extracted {} reviews since {}", items.len(), since_date);
 
     Ok(items)
 }

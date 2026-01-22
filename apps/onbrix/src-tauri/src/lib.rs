@@ -134,8 +134,8 @@ async fn get_review_stats(state: State<'_, AppState>, product_id: String) -> Res
 }
 
 #[tauri::command]
-async fn manual_review_crawl(app: AppHandle, state: State<'_, AppState>, product_id: String, target_date: String) -> Result<usize, String> {
-    println!("[Command] manual_review_crawl called for product_id: {}, date: {}", product_id, target_date);
+async fn manual_review_crawl(app: AppHandle, state: State<'_, AppState>, product_id: String, since_date: String) -> Result<usize, String> {
+    println!("[Command] manual_review_crawl called for product_id: {}, since: {}", product_id, since_date);
     
     let _ = app.emit("review-crawl-progress", serde_json::json!({
         "status": "starting",
@@ -143,7 +143,7 @@ async fn manual_review_crawl(app: AppHandle, state: State<'_, AppState>, product
     }));
 
     let pid = product_id.clone();
-    let date = target_date.clone();
+    let date = since_date.clone();
     let res = tokio::task::spawn_blocking(move || crawler::crawl_reviews(&pid, &date))
         .await
         .map_err(|e| e.to_string())?;
@@ -179,6 +179,78 @@ async fn manual_review_crawl(app: AppHandle, state: State<'_, AppState>, product
             Err(e.to_string())
         }
     }
+}
+
+#[tauri::command]
+async fn crawl_recent_reviews(app: AppHandle, state: State<'_, AppState>, months: i32) -> Result<usize, String> {
+    println!("[Command] crawl_recent_reviews called for recent {} months", months);
+    
+    // Calculate since_date
+    let since_date = chrono::Local::now()
+        .checked_sub_signed(chrono::Duration::days((months * 30) as i64))
+        .map(|d| d.format("%Y-%m-%d").to_string())
+        .unwrap_or_else(|| "".to_string());
+        
+    if since_date.is_empty() {
+        return Err("Failed to calculate date".to_string());
+    }
+    
+    // Get all active product IDs
+    let product_ids = state.db.get_active_product_ids().await.map_err(|e| e.to_string())?;
+    let total_products = product_ids.len();
+    let mut total_saved = 0;
+    
+    println!("[Command] Starting bulk crawl for {} products since {}", total_products, since_date);
+    
+    // Process in background (async) but emit progress
+    let app_handle = app.clone();
+    let db_handle = state.db.clone();
+    
+    tokio::spawn(async move {
+        for (i, pid) in product_ids.iter().enumerate() {
+            let _ = app_handle.emit("review-crawl-progress", serde_json::json!({
+                "status": "crawling",
+                "message": format!("최근 리뷰 수집 중... ({}/{})", i + 1, total_products),
+                "current": i + 1,
+                "total": total_products
+            }));
+            
+            let p_clone = pid.clone();
+            let d_clone = since_date.clone();
+            
+            // Blocking crawl call
+            let res = tokio::task::spawn_blocking(move || crawler::crawl_reviews(&p_clone, &d_clone)).await;
+            
+            match res {
+                Ok(Ok(reviews)) => {
+                    if !reviews.is_empty() {
+                        if let Ok(saved) = db_handle.save_reviews(pid.clone(), reviews).await {
+                             total_saved += saved;
+                        }
+                    }
+                }
+                Ok(Err(e)) => eprintln!("[BulkCrawl] Error crawling {}: {}", pid, e),
+                Err(e) => eprintln!("[BulkCrawl] Task join error: {}", e),
+            }
+            
+            // Rate limit
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        }
+        
+        println!("[BulkCrawl] Completed. Total new reviews saved: {}", total_saved);
+        let _ = app_handle.emit("review-crawl-progress", serde_json::json!({
+            "status": "completed",
+            "message": format!("전체 수집 완료 ({}개 리뷰 저장됨)", total_saved)
+        }));
+        let _ = app_handle.emit("refresh-needed", ());
+    });
+
+    Ok(total_products) // Return immediately that task started
+}
+
+#[tauri::command]
+async fn get_all_reviews(state: State<'_, AppState>, limit: Option<i32>) -> Result<Vec<ReviewWithMeta>, String> {
+    state.db.get_all_reviews(limit).await.map_err(|e| e.to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -218,6 +290,8 @@ pub fn run() {
             get_product_reviews,
             get_review_stats,
             manual_review_crawl,
+            crawl_recent_reviews,
+            get_all_reviews,
             export::export_rankings_excel,
             export::export_reviews_excel
         ])

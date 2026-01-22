@@ -225,8 +225,8 @@ pub async fn start_scheduler(app: AppHandle, db: DbHandle) {
         run_crawl_once(&app_clone, &db_clone, category_id).await;
 
         loop {
-            // Default 30 min interval
-            sleep(StdDuration::from_secs(30 * 60)).await;
+            // 1 hour interval (requested by user)
+            sleep(StdDuration::from_secs(60 * 60)).await;
 
             println!("[Scheduler] Starting auto-crawl...");
             run_crawl_once(&app_clone, &db_clone, category_id).await;
@@ -265,10 +265,19 @@ pub async fn start_scheduler(app: AppHandle, db: DbHandle) {
         }
     });
 
-    // 리뷰 크롤링 스케줄러 (매일 00:00 자정)
+    // 리뷰 크롤링 스케줄러 (앱 시작 시 + 매일 00:00 자정)
     let app_review = app.clone();
     let db_review = db.clone();
     tokio::spawn(async move {
+        // 앱 시작 시: 오늘 크롤링 안 됐으면 즉시 실행
+        let last_crawl = db_review.get_last_review_crawl().await.ok().flatten();
+        if !is_synced_today(&last_crawl) {
+            println!("[Scheduler] Initial review crawl needed - last crawl: {:?}", last_crawl);
+            run_review_crawl(&app_review, &db_review).await;
+        } else {
+            println!("[Scheduler] Reviews already crawled today, skipping initial crawl");
+        }
+
         // 1시간마다 체크
         loop {
             sleep(StdDuration::from_secs(60 * 60)).await;
