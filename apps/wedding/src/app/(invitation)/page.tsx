@@ -44,8 +44,8 @@ const Wedding = async () => {
         </div>
         <div className="h-fit overflow-hidden w-[60vw] border-2 border-white">
           <Image
-            src="/images/1624.jpg"
-            alt="1624.jpg"
+            src="/images/1624.webp"
+            alt="1624.webp"
             width={400}
             height={400}
           />
@@ -91,8 +91,8 @@ const Wedding = async () => {
       {/* Opening Image */}
       <Section className="p-0!">
         <Image
-          src="/images/1034.jpg"
-          alt="1034.jpg"
+          src="/images/1034.webp"
+          alt="1034.webp"
           width={400}
           height={400}
           className="w-full h-auto"
@@ -196,16 +196,6 @@ const Wedding = async () => {
               />
             ))}
           </HorizontalScroll>
-          <UploadWeddingPhoto />
-        </Section>
-
-        {/* Contact */}
-        {/* Share */}
-        {/* Accounts */}
-        <Section className="flex flex-col items-center justify-center gap-4">
-          <Contact />
-          <Accounts />
-          <Share />
         </Section>
 
         {/* Guestbook */}
