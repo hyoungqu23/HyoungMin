@@ -21,9 +21,9 @@ const Title = ({ category, title, description }: TitleProps) => {
       <p className="text-sm font-bold text-primary tracking-widest font-great-vibes">
         {category}
       </p>
-      <h2 className="text-xl font-bold text-black font-pretendard">{title}</h2>
+      <h2 className="text-xl font-bold font-pretendard">{title}</h2>
       {description ? (
-        <p className="text-sm text-black/75 leading-relaxed whitespace-pre-line">
+        <p className="text-sm opacity-75 leading-relaxed whitespace-pre-line">
           {description}
         </p>
       ) : null}

@@ -6,7 +6,6 @@ import { Calendar } from "./_components/calendar/Calendar";
 import { Section } from "./_components/common/Section";
 import { Contact } from "./_components/contact/Contact";
 import type { GalleryItem } from "./_components/gallery/GalleryContainer";
-import { GalleryContainer } from "./_components/gallery/GalleryContainer";
 import { UploadWeddingPhoto } from "./_components/gallery/UploadWeddingPhoto";
 import { RollingPaper } from "./_components/guestbook/RollingPaper";
 import { KakaoMap } from "./_components/location/KakaoMap";
@@ -15,6 +14,7 @@ import { Share } from "./_components/share-invitation/Share";
 
 // 빌드 시 생성된 이미지 메타데이터 (fs 접근 제거)
 import storyGalleryData from "@/generated/story-gallery-items.json";
+import { HorizontalScroll } from "./_components/common/HorizontalScroll";
 
 const getStoryGalleryItems = (): GalleryItem[] => {
   return storyGalleryData as GalleryItem[];
@@ -140,65 +140,80 @@ const Wedding = async () => {
         </div>
       </Section>
 
-      {/* Calendar */}
-      <Section className="flex flex-col items-center justify-center gap-4 bg-white text-black">
-        <Section.Title
-          category="Calendar"
-          title="2026년 4월 19일 일요일 오전 11시"
-        />
-        <p className="text-center text-sm  leading-relaxed whitespace-pre-line">
-          서울 영등포구 국회대로 612 지상2층, 지하1층
-          <br />
-          <span className="font-semibold">더베르G 웨딩</span>
-        </p>
-        <Calendar />
-        <AddToCalendar
-          title="Our Wedding Day"
-          description="Our Wedding Day"
-          startDate="2026-04-19 11:00"
-          endDate="2026-04-19 12:30"
-          location="더베르G 웨딩"
-        />
-      </Section>
+      <div className="bg-white">
+        {/* Calendar */}
+        <Section className="flex flex-col items-center justify-center gap-4">
+          <Section.Title
+            category="Calendar"
+            title="2026년 4월 19일 일요일 오전 11시"
+          />
+          <p className="text-center text-sm  leading-relaxed whitespace-pre-line">
+            서울 영등포구 국회대로 612 지상2층, 지하1층
+            <br />
+            <span className="font-semibold">더베르G 웨딩</span>
+          </p>
+          <Calendar />
+          <AddToCalendar
+            title="Our Wedding Day"
+            description="Our Wedding Day"
+            startDate="2026-04-19 11:00"
+            endDate="2026-04-19 12:30"
+            location="더베르G 웨딩"
+          />
+        </Section>
 
-      {/* Location */}
-      <Section className="flex flex-col items-center justify-center gap-4 bg-white">
-        <Section.Title
-          category="Location"
-          title="오시는 길"
-          description={`더베르G 웨딩\n서울 영등포구 국회대로 612\n지상2층(예식장), 지하1층(연회장)`}
-        />
-        <KakaoMap />
-        <LocationButtons
-          placeName="더베르G 웨딩"
-          lat={37.5257757}
-          lng={126.902050869}
-        />
-        {/* 대중교통 */}
-        {/* 주차 */}
-      </Section>
+        {/* Location */}
+        <Section className="flex flex-col items-center justify-center gap-4">
+          <Section.Title
+            category="Location"
+            title="오시는 길"
+            description={`더베르G 웨딩\n서울 영등포구 국회대로 612\n지상2층(예식장), 지하1층(연회장)`}
+          />
+          <KakaoMap />
+          <LocationButtons
+            placeName="더베르G 웨딩"
+            lat={37.5257757}
+            lng={126.902050869}
+          />
+          {/* 대중교통 */}
+          {/* 주차 */}
+        </Section>
 
-      {/* Gallery */}
-      <Section className="flex flex-col items-center justify-center gap-4 bg-white">
-        <Section.Title category="Gallery" title="Lovely Moments" />
-        <GalleryContainer items={storyGalleryItems} />
-        <UploadWeddingPhoto />
-      </Section>
+        {/* Gallery */}
+        <Section className="flex flex-col items-center justify-center gap-4">
+          <Section.Title category="Gallery" title="Lovely Moments" />
+          {/* <GalleryContainer items={storyGalleryItems} /> */}
 
-      {/* Contact */}
-      {/* Share */}
-      {/* Accounts */}
-      <Section className="flex flex-col items-center justify-center gap-4 bg-white">
-        <Contact />
-        <Accounts />
-        <Share />
-      </Section>
+          <HorizontalScroll>
+            {storyGalleryItems.map((item) => (
+              <Image
+                key={item.id}
+                src={item.src}
+                alt={String(item.id)}
+                width={item.width}
+                height={item.height}
+                className="h-[20vh] w-auto object-cover"
+              />
+            ))}
+          </HorizontalScroll>
+          <UploadWeddingPhoto />
+        </Section>
 
-      {/* Guestbook */}
-      <Section className="flex flex-col items-center justify-center gap-4 bg-white">
-        <Section.Title category="Guestbook" title="축하 인사 전하기" />
-        <RollingPaper initialMessages={initialGuestMessages} />
-      </Section>
+        {/* Contact */}
+        {/* Share */}
+        {/* Accounts */}
+        <Section className="flex flex-col items-center justify-center gap-4">
+          <Contact />
+          <Accounts />
+          <Share />
+        </Section>
+
+        {/* Guestbook */}
+        <Section className="flex flex-col items-center justify-center gap-4">
+          <Section.Title category="Guestbook" title="축하 인사 전하기" />
+          <RollingPaper initialMessages={initialGuestMessages} />
+        </Section>
+      </div>
     </main>
   );
 };

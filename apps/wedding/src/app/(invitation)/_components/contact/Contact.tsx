@@ -70,7 +70,6 @@ export const Contact = () => {
         title="연락하기"
         description="축하의 마음을 전해주세요."
       />
-
       <div className="flex flex-col gap-3">
         <Accordion name="contact" title="신랑측 연락처">
           {groomContacts.map((contact, idx) => (

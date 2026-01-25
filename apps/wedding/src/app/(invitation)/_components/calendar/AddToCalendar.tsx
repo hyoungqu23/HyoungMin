@@ -100,7 +100,7 @@ export default function AddToCalendar({
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={handleNativeCalendar}
-        className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-primary shadow-sm text-black font-bold text-sm hover:bg-primary/80 transition-colors"
+        className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-primary shadow-sm text-white font-bold text-sm hover:bg-primary/80 transition-colors"
       >
         <Image src={Calendar} alt="Calendar" width={16} height={16} />
         캘린더 앱 저장

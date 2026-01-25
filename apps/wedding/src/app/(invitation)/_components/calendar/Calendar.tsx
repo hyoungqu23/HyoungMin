@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 
 const HandDrawnCircle = () => {
-  const STROKE_COLOR = "#F43F5E";
+  const STROKE_COLOR = "#E69EB4";
   const CIRCLE_DURATION = 1.5;
 
   return (
@@ -102,7 +102,7 @@ export const Calendar = () => {
                     <div className="relative inline-flex w-8 h-8 items-center justify-center z-10">
                       {/* 날짜 숫자 */}
                       <span
-                        className={`${isWeddingDay ? "font-extrabold text-rose-400" : " text-sm font-medium"}`}
+                        className={`${isWeddingDay ? "font-extrabold text-primary" : " text-sm font-medium"}`}
                       >
                         {day}
                       </span>

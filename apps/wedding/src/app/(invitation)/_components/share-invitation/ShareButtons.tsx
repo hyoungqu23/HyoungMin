@@ -72,7 +72,7 @@ export const ShareButtons = () => {
       {/* Web Share API */}
       <button
         onClick={handleWebShare}
-        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-rose-400 hover:bg-rose-500 text-white rounded-full shadow-md transition-colors font-medium"
+        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/80 text-white rounded-full shadow-md transition-colors font-medium"
       >
         <Image src={Share} alt="Share" width={16} height={16} />
         공유하기

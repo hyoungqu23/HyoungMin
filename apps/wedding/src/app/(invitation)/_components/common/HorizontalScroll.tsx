@@ -1,45 +1,29 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
-
 type HorizontalScrollProps = {
   children: React.ReactNode;
-  direction?: "left" | "right";
   speed?: number;
   className?: string;
 };
 
 export const HorizontalScroll = ({
   children,
-  direction = "left",
-  speed = 300,
+  speed = 200,
   className = "",
 }: HorizontalScrollProps) => {
-  const targetRef = useRef<HTMLDivElement>(null);
-
-  const { scrollYProgress } = useScroll({
-    target: targetRef,
-    offset: ["start start", "end end"],
-  });
-
-  const xRange = direction === "left" ? ["0%", "-100%"] : ["-100%", "0%"];
-
-  const x = useTransform(scrollYProgress, [0, 1], xRange);
-
   return (
-    <section
-      ref={targetRef}
-      className="relative w-full"
-      style={{ height: `${speed}vh` }}
-    >
-      <div className="sticky top-0 flex h-screen w-full items-center justify-start overflow-hidden">
-        <motion.div
-          style={{ x }}
-          className={`flex h-full items-center gap-10 p-10 will-change-transform ${className}`}
-        >
-          {children}
-        </motion.div>
+    <section className={`w-full overflow-hidden ${className}`}>
+      <div
+        className="flex gap-2 whitespace-nowrap animate-marquee"
+        style={
+          {
+            "--marquee-duration": `${speed}s`,
+            width: "max-content",
+          } as React.CSSProperties
+        }
+      >
+        <div className="flex shrink-0 items-center gap-2">{children}</div>
+        <div className="flex shrink-0 items-center gap-2">{children}</div>
       </div>
     </section>
   );
