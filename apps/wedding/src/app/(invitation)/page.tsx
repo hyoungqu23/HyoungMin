@@ -125,7 +125,7 @@ const Wedding = async () => {
         </div>
       </Section>
 
-      <Section>
+      <Section className="flex flex-col gap-4">
         <div className="grid grid-cols-3 grid-rows-3 gap-3">
           <div className="col-span-3 row-span-2 w-full rounded bg-amber-50" />
           <div className="aspect-square w-full rounded bg-amber-100" />
@@ -138,6 +138,8 @@ const Wedding = async () => {
           <div className="aspect-square w-full rounded bg-amber-800" />
           <div className="aspect-square w-full rounded bg-amber-900" />
         </div>
+
+        <UploadWeddingPhoto />
       </Section>
 
       <div className="bg-white">
@@ -177,6 +179,15 @@ const Wedding = async () => {
           />
           {/* 대중교통 */}
           {/* 주차 */}
+        </Section>
+
+        {/* Contact */}
+        {/* Share */}
+        {/* Accounts */}
+        <Section className="flex flex-col items-center justify-center gap-4">
+          <Contact />
+          <Accounts />
+          <Share />
         </Section>
 
         {/* Gallery */}

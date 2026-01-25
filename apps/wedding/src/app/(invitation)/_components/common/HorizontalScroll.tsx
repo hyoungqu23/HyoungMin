@@ -8,7 +8,7 @@ type HorizontalScrollProps = {
 
 export const HorizontalScroll = ({
   children,
-  speed = 200,
+  speed = 100,
   className = "",
 }: HorizontalScrollProps) => {
   return (
