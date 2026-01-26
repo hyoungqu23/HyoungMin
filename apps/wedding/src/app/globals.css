@@ -14,37 +14,6 @@
   box-sizing: border-box;
 }
 
-/* ImageSlide 컴포넌트 애니메이션 */
-.image-slide-track {
-  width: calc(var(--slide-count) * 200%);
-  animation: image-slide var(--image-slide-duration) linear infinite;
-}
-
-.image-slide-track[data-animate="false"] {
-  width: 100%;
-  animation: none;
-}
-
-.group:hover .image-slide-track {
-  animation-play-state: paused;
-}
-
-@keyframes image-slide {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(calc(-100% * var(--slide-count)));
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .image-slide-track {
-    animation: none;
-    transform: translateX(0);
-  }
-}
-
 @keyframes marquee {
   0% {
     transform: translateX(0%);
