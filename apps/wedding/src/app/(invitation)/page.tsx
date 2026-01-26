@@ -5,26 +5,15 @@ import AddToCalendar from "./_components/calendar/AddToCalendar";
 import { Calendar } from "./_components/calendar/Calendar";
 import { Section } from "./_components/common/Section";
 import { Contact } from "./_components/contact/Contact";
-import type { GalleryItem } from "./_components/gallery/GalleryContainer";
 import { UploadWeddingPhoto } from "./_components/gallery/UploadWeddingPhoto";
 import { RollingPaper } from "./_components/guestbook/RollingPaper";
 import { KakaoMap } from "./_components/location/KakaoMap";
 import { LocationButtons } from "./_components/location/LocationButtons";
 import { Share } from "./_components/share-invitation/Share";
-
-// 빌드 시 생성된 이미지 메타데이터 (fs 접근 제거)
-import storyGalleryData from "@/generated/story-gallery-items.json";
-import { HorizontalScroll } from "./_components/common/HorizontalScroll";
-
-const getStoryGalleryItems = (): GalleryItem[] => {
-  return storyGalleryData as GalleryItem[];
-};
+import Link from "next/link";
 
 const Wedding = async () => {
-  const [initialGuestMessages, storyGalleryItems] = await Promise.all([
-    getGuestMessages(1, 10),
-    Promise.resolve(getStoryGalleryItems()),
-  ]);
+  const initialGuestMessages = await getGuestMessages(1, 10);
 
   return (
     <main
@@ -140,6 +129,28 @@ const Wedding = async () => {
         </div>
 
         <UploadWeddingPhoto />
+        <Link
+          href="/moments"
+          className="inline-flex items-center justify-center gap-2 w-full px-6 py-4 bg-linear-to-r from-rose-400 to-rose-500 text-white font-pretendard text-sm font-medium rounded-xl shadow-lg shadow-rose-200/50 hover:from-rose-500 hover:to-rose-600 transition-all duration-300 hover:shadow-xl hover:shadow-rose-300/50"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21,15 16,10 5,21" />
+          </svg>
+          <span>Lovely Moments</span>
+          <span className="text-rose-200 text-xs">(231장의 사진)</span>
+        </Link>
       </Section>
 
       <div className="bg-white">
@@ -190,13 +201,13 @@ const Wedding = async () => {
           <Share />
         </Section>
 
-        {/* Gallery */}
+        {/* 
         <Section className="flex flex-col items-center justify-center gap-4">
           <Section.Title category="Gallery" title="Lovely Moments" />
-          {/* <GalleryContainer items={storyGalleryItems} /> */}
+          <GalleryContainer items={storyGalleryItems} />
 
           <HorizontalScroll>
-            {storyGalleryItems.map((item) => (
+            {storyGalleryItems.map(item => (
               <Image
                 key={item.id}
                 src={item.src}
@@ -208,6 +219,7 @@ const Wedding = async () => {
             ))}
           </HorizontalScroll>
         </Section>
+        */}
 
         {/* Guestbook */}
         <Section className="flex flex-col items-center justify-center gap-4">

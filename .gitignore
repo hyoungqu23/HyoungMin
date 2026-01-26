@@ -44,3 +44,4 @@ lerna-debug.log*
 # OS
 Thumbs.db
 
+.pnpm-store/

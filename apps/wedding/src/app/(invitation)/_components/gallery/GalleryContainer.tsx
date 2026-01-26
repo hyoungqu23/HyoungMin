@@ -24,13 +24,16 @@ export const GalleryContainer = ({
   items,
   initialVisibleCount = 10,
 }: GalleryContainerProps) => {
+  const showAll = initialVisibleCount === 0;
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [visibleCount, setVisibleCount] = useState(initialVisibleCount);
+  const [visibleCount, setVisibleCount] = useState(
+    showAll ? items.length : initialVisibleCount,
+  );
 
   if (!items.length) return null;
 
-  const visibleItems = items.slice(0, visibleCount);
-  const hasMore = visibleCount < items.length;
+  const visibleItems = showAll ? items : items.slice(0, visibleCount);
+  const hasMore = !showAll && visibleCount < items.length;
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => Math.min(prev + LOAD_MORE_COUNT, items.length));
@@ -38,11 +41,11 @@ export const GalleryContainer = ({
 
   return (
     <>
-      <ScrollMasonry className="columns-5 md:columns-5">
+      <ScrollMasonry className="columns-4 md:columns-4">
         {visibleItems.map((item, index) => (
           <div
             key={item.id}
-            className="relative w-full overflow-hidden rounded shadow-sm group cursor-pointer"
+            className="relative w-full overflow-hidden rounded-sm shadow-sm group cursor-pointer"
             onClick={() => setSelectedIndex(index)}
           >
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />

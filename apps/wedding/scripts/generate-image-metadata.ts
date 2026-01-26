@@ -6,13 +6,20 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
-const STORIES_DIR = path.join(process.cwd(), "public", "images", "stories");
+const STORIES_DIR = path.join(process.cwd(), "public", "images", "moments");
 const OUTPUT_FILE = path.join(
   process.cwd(),
   "src",
   "generated",
   "story-gallery-items.json",
 );
+
+const parseDateFromFileName = (fileName: string): string | undefined => {
+  // 예) 20260126.webp, 20260126_2.webp, 20260126_10.webp -> "20260126"
+  const baseName = path.parse(fileName).name;
+  const match = /^(\d{8})/.exec(baseName);
+  return match?.[1];
+};
 
 const readHead = async (filePath: string, bytes = 64 * 1024) => {
   const handle = await fs.open(filePath, "r");
@@ -152,7 +159,7 @@ async function main() {
   try {
     entries = await fs.readdir(STORIES_DIR);
   } catch (error) {
-    console.error("❌ stories 디렉토리를 읽을 수 없습니다:", error);
+    console.error("❌ moments 디렉토리를 읽을 수 없습니다:", error);
     // 빈 배열로 JSON 생성
     await fs.mkdir(path.dirname(OUTPUT_FILE), { recursive: true });
     await fs.writeFile(OUTPUT_FILE, JSON.stringify([], null, 2));
@@ -176,18 +183,21 @@ async function main() {
   const items = await Promise.all(
     imageFiles.map(async (fileName, index) => {
       const filePath = path.join(STORIES_DIR, fileName);
+      const date = parseDateFromFileName(fileName);
       try {
         const size = await getImageSize(filePath);
         return {
           id: index,
-          src: `/images/stories/${fileName}`,
+          ...(date ? { date } : {}),
+          src: `/images/moments/${fileName}`,
           width: size?.width,
           height: size?.height,
         };
       } catch {
         return {
           id: index,
-          src: `/images/stories/${fileName}`,
+          ...(date ? { date } : {}),
+          src: `/images/moments/${fileName}`,
         };
       }
     }),
