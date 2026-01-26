@@ -1,8 +1,10 @@
 import Image from "next/image";
+import Link from "next/link";
 import { getGuestMessages } from "./_actions/guestbook";
 import { Accounts } from "./_components/accounts/Accounts";
 import AddToCalendar from "./_components/calendar/AddToCalendar";
 import { Calendar } from "./_components/calendar/Calendar";
+import { Accordion } from "./_components/common/Accordion";
 import { Section } from "./_components/common/Section";
 import { Contact } from "./_components/contact/Contact";
 import { UploadWeddingPhoto } from "./_components/gallery/UploadWeddingPhoto";
@@ -10,7 +12,6 @@ import { RollingPaper } from "./_components/guestbook/RollingPaper";
 import { KakaoMap } from "./_components/location/KakaoMap";
 import { LocationButtons } from "./_components/location/LocationButtons";
 import { Share } from "./_components/share-invitation/Share";
-import Link from "next/link";
 
 const Wedding = async () => {
   const initialGuestMessages = await getGuestMessages(1, 10);
@@ -31,14 +32,16 @@ const Wedding = async () => {
             Lee HyoungMin & Lim HeeJae
           </p>
         </div>
-        <div className="h-fit overflow-hidden w-[60vw] border-2 border-white">
-          <Image
-            src="/images/1624.webp"
-            alt="1624.webp"
-            width={400}
-            height={400}
-          />
-        </div>
+
+        <Image
+          src="/images/main.webp"
+          alt="main.webp"
+          width={1200}
+          height={800}
+          priority
+          className="w-full h-auto"
+        />
+
         <div className="flex flex-col items-center justify-center gap-2 text-sm">
           <p className="font-playfair-display font-bold uppercase text-primary">
             {"You're invited to our wedding."}
@@ -63,16 +66,14 @@ const Wedding = async () => {
           width={40}
           height={40}
         />
-
         <p className="font-pretendard whitespace-pre-line text-white text-center">
           {
-            "11년이라는 긴 시간동안\n서로의 청춘을 채워준 가장 친한 친구이자 연인."
+            "'너'와 '나'에서 '우리'가 된 지 열한 해\n이제는 부부라는 이름으로 손 꼭 잡고 함께 걷고자 합니다."
           }
         </p>
-
         <p className="font-pretendard whitespace-pre-line text-white text-center">
           {
-            "많은 계절을 함께 보낸 저희 두 사람,\n이제 평생을 약속하는 자리에 여러분을 모십니다."
+            "소중한 걸음 하시어 축복해 주세요.\n그 마음 깊이 간직하며 예쁘고 행복하게 살겠습니다."
           }
         </p>
       </Section>
@@ -80,10 +81,11 @@ const Wedding = async () => {
       {/* Opening Image */}
       <Section className="p-0!">
         <Image
-          src="/images/1034.webp"
-          alt="1034.webp"
-          width={400}
-          height={400}
+          src="/images/curtain.webp"
+          alt="curtain.webp"
+          width={1000}
+          height={1000}
+          priority
           className="w-full h-auto"
         />
       </Section>
@@ -128,28 +130,11 @@ const Wedding = async () => {
           <div className="aspect-square w-full rounded bg-amber-900" />
         </div>
 
-        <UploadWeddingPhoto />
         <Link
           href="/moments"
-          className="inline-flex items-center justify-center gap-2 w-full px-6 py-4 bg-linear-to-r from-rose-400 to-rose-500 text-white font-pretendard text-sm font-medium rounded-xl shadow-lg shadow-rose-200/50 hover:from-rose-500 hover:to-rose-600 transition-all duration-300 hover:shadow-xl hover:shadow-rose-300/50"
+          className="inline-flex items-center justify-center gap-2 w-full px-6 py-4 bg-primary text-white font-pretendard font-medium rounded-full hover:bg-primary/80 transition-all duration-300"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            <circle cx="8.5" cy="8.5" r="1.5" />
-            <polyline points="21,15 16,10 5,21" />
-          </svg>
-          <span>Lovely Moments</span>
-          <span className="text-rose-200 text-xs">(231장의 사진)</span>
+          더 많은 사진 보러가기
         </Link>
       </Section>
 
@@ -180,7 +165,7 @@ const Wedding = async () => {
           <Section.Title
             category="Location"
             title="오시는 길"
-            description={`더베르G 웨딩\n서울 영등포구 국회대로 612\n지상2층(예식장), 지하1층(연회장)`}
+            description={`더베르G 웨딩\n서울 영등포구 국회대로 612 코레일유통사옥\n지상2층(예식장), 지하1층(연회장)`}
           />
           <KakaoMap />
           <LocationButtons
@@ -188,14 +173,61 @@ const Wedding = async () => {
             lat={37.5257757}
             lng={126.902050869}
           />
-          {/* 대중교통 */}
-          {/* 주차 */}
+
+          <Accordion name="location" title="약도">
+            <Image
+              src="/images/location.webp"
+              alt="약도"
+              width={1000}
+              height={1000}
+              className="w-full h-auto"
+            />
+          </Accordion>
+
+          {/* 대중교통 및 주차 안내 */}
+          <ul className="flex flex-col gap-6 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:mb-2">
+            <li>
+              <h3>자차로 오시는 길</h3>
+              <ul className="list-disc list-inside text-xs flex flex-col gap-1 text-gray-600">
+                <li>네비게이션 [더베르G] 검색</li>
+                <li>국회대로 612 코레일유통사옥 2층 / 당산동34가 2-7</li>
+              </ul>
+            </li>
+            <li>
+              <h3>지하철로 오시는 길</h3>
+              <ul className="list-disc list-inside text-xs flex flex-col gap-1 text-gray-600">
+                <li>2, 5호선 영등포구청역 4번 출구에서 566m(도보 약 7분)</li>
+              </ul>
+            </li>
+            <li>
+              <h3>버스로 오시는 길</h3>
+              <ul className="list-disc list-inside text-xs flex flex-col gap-1 text-gray-600">
+                <li>서울시립청소년 문화센터[19-439]: 간선 660</li>
+                <li>하이서울유스호스텔[19-127]: 일반 5</li>
+                <li>
+                  신화병원[19-121]: 좌석 700, 간선 605, 간선 661, 간선 760,{" "}
+                  <br />
+                  <span className="pl-28">지선 5616, 지선 5714</span>
+                </li>
+                <li>삼환아파트[19-125]: 직행 9030, 직행 8000</li>
+              </ul>
+            </li>
+            <li>
+              <h3>셔틀버스 안내</h3>
+              <ul className="list-disc list-inside text-xs flex flex-col gap-1 text-gray-600">
+                <li>
+                  2, 5호선 영등포구청역 5번 출구 뒤 ↔ 더베르G 주차장 입구 좌측
+                </li>
+                <li>2대 운행</li>
+              </ul>
+            </li>
+          </ul>
         </Section>
 
         {/* Contact */}
         {/* Share */}
         {/* Accounts */}
-        <Section className="flex flex-col items-center justify-center gap-4">
+        <Section className="flex flex-col items-center justify-center gap-4 py-0!">
           <Contact />
           <Accounts />
           <Share />
@@ -224,6 +256,7 @@ const Wedding = async () => {
         {/* Guestbook */}
         <Section className="flex flex-col items-center justify-center gap-4">
           <Section.Title category="Guestbook" title="축하 인사 전하기" />
+          <UploadWeddingPhoto />
           <RollingPaper initialMessages={initialGuestMessages} />
         </Section>
       </div>
