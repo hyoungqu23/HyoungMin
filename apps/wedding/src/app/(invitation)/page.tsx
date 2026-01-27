@@ -9,6 +9,7 @@ import { Section } from "./_components/common/Section";
 import { Contact } from "./_components/contact/Contact";
 import { UploadWeddingPhoto } from "./_components/gallery/UploadWeddingPhoto";
 import { RollingPaper } from "./_components/guestbook/RollingPaper";
+import { WriteOurName } from "./_components/hero/WriteOurName";
 import { KakaoMap } from "./_components/location/KakaoMap";
 import { LocationButtons } from "./_components/location/LocationButtons";
 import { Share } from "./_components/share-invitation/Share";
@@ -101,7 +102,9 @@ const Wedding = async () => {
               <span className="font-semibold">이민주, 이지연</span>의 오빠
             </p>
           </div>
-          <h2 className="text-3xl font-bold font-cafe24">이형민</h2>
+          <h2 className="text-3xl font-bold font-cafe24">
+            <WriteOurName name="groom" />
+          </h2>
         </div>
         <div className="w-full flex items-center justify-between gap-x-4">
           <div className="flex flex-col items-start justify-center">
@@ -112,7 +115,9 @@ const Wedding = async () => {
               <span className="font-semibold">임성재</span>의 동생
             </p>
           </div>
-          <h2 className="text-3xl font-bold font-cafe24">임희재</h2>
+          <h2 className="text-3xl font-bold font-cafe24">
+            <WriteOurName name="bride" />
+          </h2>
         </div>
       </Section>
 
@@ -232,26 +237,6 @@ const Wedding = async () => {
           <Accounts />
           <Share />
         </Section>
-
-        {/* 
-        <Section className="flex flex-col items-center justify-center gap-4">
-          <Section.Title category="Gallery" title="Lovely Moments" />
-          <GalleryContainer items={storyGalleryItems} />
-
-          <HorizontalScroll>
-            {storyGalleryItems.map(item => (
-              <Image
-                key={item.id}
-                src={item.src}
-                alt={String(item.id)}
-                width={item.width}
-                height={item.height}
-                className="h-[20vh] w-auto object-cover"
-              />
-            ))}
-          </HorizontalScroll>
-        </Section>
-        */}
 
         {/* Guestbook */}
         <Section className="flex flex-col items-center justify-center gap-4">

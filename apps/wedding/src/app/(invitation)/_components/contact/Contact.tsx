@@ -12,6 +12,18 @@ type Contact = {
   phone: string;
 };
 
+const groomContacts: Contact[] = [
+  { role: "신랑", name: "이형민", phone: "010-2783-2123" },
+  { role: "아버지", name: "이병수", phone: "010-3752-9324" },
+  { role: "어머니", name: "이광이", phone: "010-9978-9324" },
+];
+
+const brideContacts: Contact[] = [
+  { role: "신부", name: "임희재", phone: "010-8624-8945" },
+  { role: "아버지", name: "임종윤", phone: "010-3747-8947" },
+  { role: "어머니", name: "서미경", phone: "010-7933-4309" },
+];
+
 const ContactRow = ({ contact }: { contact: Contact }) => {
   const cleanPhone = contact.phone.replace(/-/g, "");
 
@@ -19,20 +31,16 @@ const ContactRow = ({ contact }: { contact: Contact }) => {
     <div className="flex items-center justify-between py-3 border-b border-stone-100 last:border-0">
       <div className="flex flex-col gap-0.5">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-stone-700">
-            {contact.name}
-          </span>
-          <span className="text-xs text-stone-400">{contact.role}</span>
+          <span className="text-sm font-bold">{contact.name}</span>
+          <span className="text-xs">{contact.role}</span>
         </div>
-        <div className="text-sm text-stone-500 tabular-nums">
-          {contact.phone}
-        </div>
+        <div className="text-sm tabular-nums">{contact.phone}</div>
       </div>
 
       <div className="flex gap-2">
         <a
           href={`tel:${cleanPhone}`}
-          className="flex items-center justify-center w-9 h-9 rounded-lg bg-rose-100 hover:bg-rose-200 transition-colors"
+          className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/20 transition-colors"
           aria-label={`${contact.name}에게 전화하기`}
         >
           <Image src={Phone} alt="Phone" width={16} height={16} />
@@ -40,7 +48,7 @@ const ContactRow = ({ contact }: { contact: Contact }) => {
 
         <a
           href={`sms:${cleanPhone}`}
-          className="flex items-center justify-center w-9 h-9 rounded-lg bg-rose-100 hover:bg-rose-200 transition-colors"
+          className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/20 transition-colors"
           aria-label={`${contact.name}에게 문자하기`}
         >
           <Image src={Message} alt="Message" width={16} height={16} />
@@ -51,18 +59,6 @@ const ContactRow = ({ contact }: { contact: Contact }) => {
 };
 
 export const Contact = () => {
-  const groomContacts: Contact[] = [
-    { role: "신랑", name: "이형민", phone: "010-2783-2123" },
-    { role: "아버지", name: "이병수", phone: "010-3752-9324" },
-    { role: "어머니", name: "이광이", phone: "010-9978-9324" },
-  ];
-
-  const brideContacts: Contact[] = [
-    { role: "신부", name: "임희재", phone: "010-8624-8945" },
-    { role: "아버지", name: "임종윤", phone: "010-3747-8947" },
-    { role: "어머니", name: "서미경", phone: "010-7933-4309" },
-  ];
-
   return (
     <div className="w-full max-w-md mx-auto px-4 py-12 flex flex-col gap-12">
       <Section.Title

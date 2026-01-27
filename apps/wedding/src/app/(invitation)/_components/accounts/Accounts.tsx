@@ -8,19 +8,13 @@ export const Accounts = () => {
       name: "이형민",
       relation: "신랑",
       bank: "국민은행",
-      accountNumber: "123-45-67890",
+      accountNumber: "734002-00-135247",
     },
     {
       name: "이병수",
       relation: "아버지",
-      bank: "신한은행",
-      accountNumber: "110-222-333333",
-    },
-    {
-      name: "이광이",
-      relation: "어머니",
-      bank: "농협",
-      accountNumber: "352-1234-5678-99",
+      bank: "하나은행",
+      accountNumber: "769-910074-19407",
     },
   ];
 
@@ -28,20 +22,20 @@ export const Accounts = () => {
     {
       name: "임희재",
       relation: "신부",
-      bank: "우리은행",
-      accountNumber: "1002-987-654321",
+      bank: "하나은행",
+      accountNumber: "230-910426-72207",
     },
     {
       name: "임종윤",
       relation: "아버지",
-      bank: "하나은행",
-      accountNumber: "123-456-789012",
+      bank: "농협은행",
+      accountNumber: "100180-56-147485",
     },
     {
       name: "서미경",
       relation: "어머니",
-      bank: "카카오뱅크",
-      accountNumber: "3333-01-2345678",
+      bank: "신한은행",
+      accountNumber: "110-276-782108",
     },
   ];
 

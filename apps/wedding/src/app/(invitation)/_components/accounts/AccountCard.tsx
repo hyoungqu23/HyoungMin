@@ -31,12 +31,10 @@ export const AccountCard = ({ account }: { account: Account }) => {
     <div className="flex items-center justify-between py-3 border-b border-stone-100 last:border-0">
       <div className="flex flex-col gap-0.5">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-stone-700">
-            {account.name}
-          </span>
-          <span className="text-xs text-stone-400">{account.relation}</span>
+          <span className="text-sm font-bold">{account.name}</span>
+          <span className="text-xs">{account.relation}</span>
         </div>
-        <div className="text-sm text-stone-600">
+        <div className="text-sm">
           <span className="mr-2">{account.bank}</span>
           <span className="tabular-nums font-medium">
             {account.accountNumber}
@@ -46,7 +44,7 @@ export const AccountCard = ({ account }: { account: Account }) => {
 
       <button
         onClick={handleCopy}
-        className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-rose-100 hover:bg-rose-200"
+        className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-primary/20"
       >
         {isCopied ? (
           <Image src={Check} alt="Check" width={16} height={16} />
