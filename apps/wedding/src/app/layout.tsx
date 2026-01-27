@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     description: "형민이와 희재의 결혼식에 초대합니다.",
     images: [
       {
-        url: "/images/main.webp",
+        url: "/images/opengraph.webp",
         width: 1200,
         height: 630,
         alt: "이형민 ♥ 임희재 결혼식",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     description: "형민이와 희재의 결혼식에 초대합니다.",
     images: [
       {
-        url: "/images/main.webp",
+        url: "/images/opengraph.webp",
         width: 1200,
         height: 630,
         alt: "이형민 ♥ 임희재 결혼식",

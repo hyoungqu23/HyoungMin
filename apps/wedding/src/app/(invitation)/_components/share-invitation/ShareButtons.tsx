@@ -13,7 +13,7 @@ const WEDDING_DESCRIPTION =
 
 const getWeddingUrl = () => ENV_WEDDING_URL ?? window.location.origin;
 const getWeddingImageUrl = () =>
-  new URL("/images/main.webp", getWeddingUrl()).toString();
+  new URL("/images/kakao-share.webp", getWeddingUrl()).toString();
 
 export const ShareButtons = () => {
   const [copied, setCopied] = useState(false);
