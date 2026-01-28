@@ -1,7 +1,19 @@
 "use client";
 
-import { motion, useInView } from "motion/react";
-import { Activity, useEffect, useEffectEvent, useRef, useState } from "react";
+import ChevronLeft from "@icons/arrow_left.svg";
+import ChevronRight from "@icons/arrow_right.svg";
+import Close from "@icons/close.svg";
+import { AnimatePresence, motion, useInView, type PanInfo } from "motion/react";
+import Image from "next/image";
+import {
+  Activity,
+  memo,
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from "react";
 import {
   addGuestMessage,
   getGuestMessages,
@@ -26,6 +38,203 @@ const getMessageStyle = (id: string) => {
   return { color, rotation };
 };
 
+// 메시지 카드 컴포넌트 (truncation 적용)
+type MessageCardProps = {
+  message: GuestMessage;
+  index: number;
+  onClick: (index: number) => void;
+};
+
+const MessageCard = memo(function MessageCard({
+  message,
+  index,
+  onClick,
+}: MessageCardProps) {
+  const { color, rotation } = getMessageStyle(message.id);
+
+  const handleClick = useCallback(() => {
+    onClick(index);
+  }, [onClick, index]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      whileInView={{ opacity: 1, scale: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4 }}
+      onClick={handleClick}
+      className={`relative p-3 rounded-sm shadow-md ${color} min-h-15 flex flex-col justify-between break-inside-avoid mb-4 cursor-pointer hover:shadow-lg transition-shadow`}
+      style={{ rotate: `${rotation}deg` }}
+    >
+      <p className="text-sm text-stone-700 whitespace-pre-wrap leading-relaxed font-yeongwol line-clamp-3">
+        {message.message}
+      </p>
+      <div className="text-right mt-2">
+        <span className="text-xs text-stone-500 font-bold tracking-tight">
+          - {message.name}
+        </span>
+      </div>
+    </motion.div>
+  );
+});
+
+// 메시지 모달 컴포넌트 (갤러리 형태)
+type MessageModalProps = {
+  messages: GuestMessage[];
+  selectedIndex: number | null;
+  onClose: () => void;
+  onIndexChange: (newIndex: number) => void;
+};
+
+const modalVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 300 : -300,
+    opacity: 0,
+  }),
+  center: {
+    zIndex: 1,
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    zIndex: 0,
+    x: direction < 0 ? 300 : -300,
+    opacity: 0,
+  }),
+};
+
+const MessageModal = ({
+  messages,
+  selectedIndex,
+  onClose,
+  onIndexChange,
+}: MessageModalProps) => {
+  const [direction, setDirection] = useState(0);
+
+  const paginate = useCallback(
+    (newDirection: number) => {
+      if (selectedIndex === null) return;
+      setDirection(newDirection);
+
+      let nextIndex = selectedIndex + newDirection;
+      if (nextIndex < 0) nextIndex = messages.length - 1;
+      if (nextIndex >= messages.length) nextIndex = 0;
+
+      onIndexChange(nextIndex);
+    },
+    [selectedIndex, messages.length, onIndexChange],
+  );
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") paginate(1);
+      if (e.key === "ArrowLeft") paginate(-1);
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [selectedIndex, onClose, paginate]);
+
+  const handleDragEnd = (
+    e: MouseEvent | TouchEvent | PointerEvent,
+    { offset, velocity }: PanInfo,
+  ) => {
+    const swipeConfidenceThreshold = 5000;
+    const swipePower = Math.abs(offset.x) * velocity.x;
+
+    if (swipePower < -swipeConfidenceThreshold) {
+      paginate(1);
+    } else if (swipePower > swipeConfidenceThreshold) {
+      paginate(-1);
+    }
+  };
+
+  if (selectedIndex === null) return null;
+
+  const currentMessage = messages[selectedIndex];
+  const { color } = getMessageStyle(currentMessage.id);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-100 flex items-center justify-center bg-black/40 backdrop-blur-md px-6 py-20"
+      onClick={onClose}
+    >
+      <button
+        className="absolute top-6 right-6 text-white/70 hover:text-white z-50 p-2"
+        onClick={onClose}
+      >
+        <Image src={Close} alt="Close" width={16} height={16} />
+      </button>
+
+      <button
+        className="absolute left-2 z-50 text-white/50 hover:text-white p-3 rounded-full hover:bg-white/10 transition"
+        onClick={(e) => {
+          e.stopPropagation();
+          paginate(-1);
+        }}
+      >
+        <Image src={ChevronLeft} alt="Previous" width={20} height={20} />
+      </button>
+      <button
+        className="absolute right-2 z-50 text-white/50 hover:text-white p-3 rounded-full hover:bg-white/10 transition"
+        onClick={(e) => {
+          e.stopPropagation();
+          paginate(1);
+        }}
+      >
+        <Image src={ChevronRight} alt="Next" width={20} height={20} />
+      </button>
+
+      <div
+        className="relative w-full max-w-sm flex items-center justify-center overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <AnimatePresence initial={false} custom={direction} mode="wait">
+          <motion.div
+            key={selectedIndex}
+            custom={direction}
+            variants={modalVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{
+              x: { type: "spring", stiffness: 300, damping: 30 },
+              opacity: { duration: 0.2 },
+            }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.8}
+            onDragEnd={handleDragEnd}
+            className={`w-full p-6 rounded-lg shadow-2xl ${color}`}
+          >
+            <p className="text-base text-stone-700 whitespace-pre-wrap leading-relaxed font-yeongwol">
+              {currentMessage.message}
+            </p>
+            <div className="text-right mt-4">
+              <span className="text-sm text-stone-500 font-bold tracking-tight">
+                - {currentMessage.name}
+              </span>
+            </div>
+
+            <div className="text-center mt-4 text-stone-400 text-xs">
+              {selectedIndex + 1} / {messages.length}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+};
+
 export const RollingPaper = ({
   initialMessages,
 }: {
@@ -40,6 +249,9 @@ export const RollingPaper = ({
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 갤러리 모달 상태
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(loadMoreRef, { margin: "100px" });
@@ -87,6 +299,19 @@ export const RollingPaper = ({
     }
   };
 
+  // 모달 핸들러
+  const handleSelect = useCallback((index: number) => {
+    setSelectedIndex(index);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setSelectedIndex(null);
+  }, []);
+
+  const handleIndexChange = useCallback((newIndex: number) => {
+    setSelectedIndex(newIndex);
+  }, []);
+
   return (
     <div className="w-full max-w-md mx-auto flex flex-col gap-4">
       <form
@@ -127,30 +352,14 @@ export const RollingPaper = ({
 
           <div className="relative">
             <ScrollMasonry className="pb-4">
-              {messages?.map((msg) => {
-                const { color, rotation } = getMessageStyle(msg.id);
-
-                return (
-                  <motion.div
-                    key={msg.id}
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4 }}
-                    className={`relative p-3 rounded-sm shadow-md ${color} min-h-15 flex flex-col justify-between break-inside-avoid mb-4`}
-                    style={{ rotate: `${rotation}deg` }}
-                  >
-                    <p className="text-sm text-stone-700 whitespace-pre-wrap leading-relaxed font-yeongwol">
-                      {msg.message}
-                    </p>
-                    <div className="text-right mt-2">
-                      <span className="text-xs text-stone-500 font-bold tracking-tight">
-                        - {msg.name}
-                      </span>
-                    </div>
-                  </motion.div>
-                );
-              })}
+              {messages?.map((msg, index) => (
+                <MessageCard
+                  key={msg.id}
+                  message={msg}
+                  index={index}
+                  onClick={handleSelect}
+                />
+              ))}
             </ScrollMasonry>
 
             <div ref={loadMoreRef} className="py-4 text-center w-full">
@@ -164,6 +373,18 @@ export const RollingPaper = ({
           </div>
         </div>
       </Activity>
+
+      {/* 갤러리 모달 */}
+      <AnimatePresence>
+        {selectedIndex !== null && messages && (
+          <MessageModal
+            messages={messages}
+            selectedIndex={selectedIndex}
+            onClose={handleClose}
+            onIndexChange={handleIndexChange}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
