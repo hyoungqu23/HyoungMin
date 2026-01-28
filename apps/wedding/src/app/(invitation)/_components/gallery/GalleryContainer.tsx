@@ -2,7 +2,7 @@
 
 import { AnimatePresence } from "motion/react";
 import Image from "next/image";
-import { useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { ScrollMasonry } from "../common/ScrollMasonry";
 import { GalleryModal } from "./GalleryModal";
 
@@ -20,6 +20,41 @@ type GalleryContainerProps = {
 
 const LOAD_MORE_COUNT = 10;
 
+// 개별 갤러리 아이템을 memo로 분리하여 불필요한 리렌더링 방지
+type GalleryItemCardProps = {
+  item: GalleryItem;
+  index: number;
+  onClick: (index: number) => void;
+};
+
+const GalleryItemCard = memo(function GalleryItemCard({
+  item,
+  index,
+  onClick,
+}: GalleryItemCardProps) {
+  const handleClick = useCallback(() => {
+    onClick(index);
+  }, [onClick, index]);
+
+  return (
+    <div
+      className="relative w-full overflow-hidden rounded-sm shadow-sm group cursor-pointer"
+      onClick={handleClick}
+    >
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+      <Image
+        src={item.src}
+        alt={`Gallery Item ${item.id + 1}`}
+        width={item.width ?? 1200}
+        height={item.height ?? 1600}
+        className="w-full h-auto"
+        loading={index < 4 ? "eager" : "lazy"}
+        priority={index < 4}
+      />
+    </div>
+  );
+});
+
 export const GalleryContainer = ({
   items,
   initialVisibleCount = 10,
@@ -30,34 +65,43 @@ export const GalleryContainer = ({
     showAll ? items.length : initialVisibleCount,
   );
 
-  if (!items.length) return null;
+  // useMemo로 visibleItems 메모이제이션
+  const visibleItems = useMemo(
+    () => (showAll ? items : items.slice(0, visibleCount)),
+    [showAll, items, visibleCount],
+  );
 
-  const visibleItems = showAll ? items : items.slice(0, visibleCount);
   const hasMore = !showAll && visibleCount < items.length;
 
-  const handleLoadMore = () => {
+  const handleLoadMore = useCallback(() => {
     setVisibleCount((prev) => Math.min(prev + LOAD_MORE_COUNT, items.length));
-  };
+  }, [items.length]);
+
+  // useCallback으로 핸들러 메모이제이션
+  const handleSelect = useCallback((index: number) => {
+    setSelectedIndex(index);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setSelectedIndex(null);
+  }, []);
+
+  const handleIndexChange = useCallback((newIndex: number) => {
+    setSelectedIndex(newIndex);
+  }, []);
+
+  if (!items.length) return null;
 
   return (
     <>
       <ScrollMasonry className="columns-4 md:columns-4">
         {visibleItems.map((item, index) => (
-          <div
+          <GalleryItemCard
             key={item.id}
-            className="relative w-full overflow-hidden rounded-sm shadow-sm group cursor-pointer"
-            onClick={() => setSelectedIndex(index)}
-          >
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-
-            <Image
-              src={item.src}
-              alt={`Gallery Item ${item.id + 1}`}
-              width={item.width ?? 1200}
-              height={item.height ?? 1600}
-              className="w-full h-auto"
-            />
-          </div>
+            item={item}
+            index={index}
+            onClick={handleSelect}
+          />
         ))}
       </ScrollMasonry>
 
@@ -78,8 +122,8 @@ export const GalleryContainer = ({
           <GalleryModal
             items={items}
             selectedIndex={selectedIndex}
-            onClose={() => setSelectedIndex(null)}
-            onIndexChange={(newIndex) => setSelectedIndex(newIndex)}
+            onClose={handleClose}
+            onIndexChange={handleIndexChange}
           />
         )}
       </AnimatePresence>
