@@ -55,3 +55,11 @@ export const getGuestMessages = async (
     return [];
   }
 };
+
+export const getGuestMessageCount = async () => {
+  try {
+    return await redis.llen(GUESTBOOK_KEY);
+  } catch {
+    return 0;
+  }
+};

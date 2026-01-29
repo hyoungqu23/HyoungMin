@@ -5,6 +5,8 @@ import Share from "@icons/share.svg";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { useState } from "react";
+import { getGuestMessageCount } from "../../_actions/guestbook";
+import { getHeartCount } from "../../_actions/hearts";
 
 const ENV_WEDDING_URL = process.env.NEXT_PUBLIC_URL;
 const WEDDING_TITLE = "이형민 ♥ 임희재 결혼합니다";
@@ -82,7 +84,7 @@ export const ShareButtons = () => {
 };
 
 export const OpenKakaoButton = () => {
-  const handleOpenKakao = () => {
+  const handleOpenKakao = async () => {
     const kakao = window.Kakao;
     const apiKey = process.env.NEXT_PUBLIC_KAKAO_SDK_API_KEY;
 
@@ -98,6 +100,9 @@ export const OpenKakaoButton = () => {
     const weddingUrl = getWeddingUrl();
     const weddingImageUrl = getWeddingImageUrl();
 
+    const heartCount = await getHeartCount();
+    const guestMessageCount = await getGuestMessageCount();
+
     kakao.Share.sendDefault({
       objectType: "location",
       address: "서울 영등포구 국회대로 612 지상2층",
@@ -112,10 +117,8 @@ export const OpenKakaoButton = () => {
         },
       },
       social: {
-        likeCount: 0,
-        commentCount: 0,
-        viewCount: 0,
-        subscriberCount: 0,
+        likeCount: heartCount,
+        commentCount: guestMessageCount,
       },
       buttons: [
         {
