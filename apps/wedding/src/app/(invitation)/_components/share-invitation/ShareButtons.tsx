@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { getGuestMessageCount } from "../../_actions/guestbook";
 import { getHeartCount } from "../../_actions/hearts";
+import { getAttendanceCount } from "../../_actions/submit-attendance";
 
 const ENV_WEDDING_URL = process.env.NEXT_PUBLIC_URL;
 const WEDDING_TITLE = "형민 ♥ 희재의 결혼식에 초대합니다.";
@@ -20,6 +21,7 @@ const getWeddingImageUrl = () =>
 interface SocialCounts {
   heartCount: number;
   guestMessageCount: number;
+  attendanceCount: number;
 }
 
 export const ShareButtons = () => {
@@ -27,15 +29,18 @@ export const ShareButtons = () => {
   const [socialCounts, setSocialCounts] = useState<SocialCounts>({
     heartCount: 0,
     guestMessageCount: 0,
+    attendanceCount: 0,
   });
 
   useEffect(() => {
     const fetchCounts = async () => {
-      const [heartCount, guestMessageCount] = await Promise.all([
-        getHeartCount(),
-        getGuestMessageCount(),
-      ]);
-      setSocialCounts({ heartCount, guestMessageCount });
+      const [heartCount, guestMessageCount, attendanceCount] =
+        await Promise.all([
+          getHeartCount(),
+          getGuestMessageCount(),
+          getAttendanceCount(),
+        ]);
+      setSocialCounts({ heartCount, guestMessageCount, attendanceCount });
     };
     fetchCounts();
   }, []);
@@ -140,6 +145,7 @@ export const OpenKakaoButton = ({ socialCounts }: OpenKakaoButtonProps) => {
       social: {
         likeCount: socialCounts.heartCount,
         commentCount: socialCounts.guestMessageCount,
+        shareCount: socialCounts.attendanceCount,
       },
       buttons: [
         {
