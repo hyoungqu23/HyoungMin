@@ -4,7 +4,7 @@ import Copy from "@icons/copy.svg";
 import Share from "@icons/share.svg";
 import { motion } from "motion/react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getGuestMessageCount } from "../../_actions/guestbook";
 import { getHeartCount } from "../../_actions/hearts";
 
@@ -17,8 +17,28 @@ const getWeddingUrl = () => ENV_WEDDING_URL ?? window.location.origin;
 const getWeddingImageUrl = () =>
   new URL("/images/kakao-share.webp", getWeddingUrl()).toString();
 
+interface SocialCounts {
+  heartCount: number;
+  guestMessageCount: number;
+}
+
 export const ShareButtons = () => {
   const [copied, setCopied] = useState(false);
+  const [socialCounts, setSocialCounts] = useState<SocialCounts>({
+    heartCount: 0,
+    guestMessageCount: 0,
+  });
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      const [heartCount, guestMessageCount] = await Promise.all([
+        getHeartCount(),
+        getGuestMessageCount(),
+      ]);
+      setSocialCounts({ heartCount, guestMessageCount });
+    };
+    fetchCounts();
+  }, []);
 
   const handleCopyAddress = async () => {
     const weddingUrl = getWeddingUrl();
@@ -69,7 +89,7 @@ export const ShareButtons = () => {
       </button>
 
       {/* 카카오톡 공유하기 */}
-      <OpenKakaoButton />
+      <OpenKakaoButton socialCounts={socialCounts} />
 
       {/* Web Share API */}
       <button
@@ -83,8 +103,12 @@ export const ShareButtons = () => {
   );
 };
 
-export const OpenKakaoButton = () => {
-  const handleOpenKakao = async () => {
+interface OpenKakaoButtonProps {
+  socialCounts: SocialCounts;
+}
+
+export const OpenKakaoButton = ({ socialCounts }: OpenKakaoButtonProps) => {
+  const handleOpenKakao = () => {
     const kakao = window.Kakao;
     const apiKey = process.env.NEXT_PUBLIC_KAKAO_SDK_API_KEY;
 
@@ -100,9 +124,6 @@ export const OpenKakaoButton = () => {
     const weddingUrl = getWeddingUrl();
     const weddingImageUrl = getWeddingImageUrl();
 
-    const heartCount = await getHeartCount();
-    const guestMessageCount = await getGuestMessageCount();
-
     kakao.Share.sendDefault({
       objectType: "location",
       address: "서울 영등포구 국회대로 612 지상2층",
@@ -117,8 +138,8 @@ export const OpenKakaoButton = () => {
         },
       },
       social: {
-        likeCount: heartCount,
-        commentCount: guestMessageCount,
+        likeCount: socialCounts.heartCount,
+        commentCount: socialCounts.guestMessageCount,
       },
       buttons: [
         {
