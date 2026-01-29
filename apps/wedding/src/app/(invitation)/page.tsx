@@ -7,6 +7,7 @@ import { Calendar } from "./_components/calendar/Calendar";
 import { Accordion } from "./_components/common/Accordion";
 import { Section } from "./_components/common/Section";
 import { Contact } from "./_components/contact/Contact";
+import { GridGallery } from "./_components/gallery/GridGallery";
 import { UploadWeddingPhoto } from "./_components/gallery/UploadWeddingPhoto";
 import { RollingPaper } from "./_components/guestbook/RollingPaper";
 import { WriteOurName } from "./_components/hero/WriteOurName";
@@ -122,18 +123,26 @@ const Wedding = async () => {
       </Section>
 
       <Section className="flex flex-col gap-4">
-        <div className="grid grid-cols-3 grid-rows-3 gap-3">
-          <div className="col-span-3 row-span-2 w-full rounded bg-amber-50" />
-          <div className="aspect-square w-full rounded bg-amber-100" />
-          <div className="aspect-square w-full rounded bg-amber-200" />
-          <div className="aspect-square w-full rounded bg-amber-300" />
-          <div className="aspect-square w-full rounded bg-amber-400" />
-          <div className="aspect-square w-full rounded bg-amber-500" />
-          <div className="aspect-square w-full rounded bg-amber-600" />
-          <div className="aspect-square w-full rounded bg-amber-700" />
-          <div className="aspect-square w-full rounded bg-amber-800" />
-          <div className="aspect-square w-full rounded bg-amber-900" />
-        </div>
+        <GridGallery
+          items={[
+            { id: 0, src: "/images/gallery/0428.webp" },
+            { id: 1, src: "/images/gallery/0107.webp" },
+            { id: 2, src: "/images/gallery/0333.webp" },
+            { id: 3, src: "/images/gallery/0516.webp" },
+            { id: 4, src: "/images/gallery/0554.webp" },
+            { id: 5, src: "/images/gallery/0578.webp" },
+            { id: 6, src: "/images/gallery/0664.webp" },
+            { id: 7, src: "/images/gallery/0713.webp" },
+            { id: 8, src: "/images/gallery/0984.webp" },
+            { id: 9, src: "/images/gallery/1034.webp" },
+            { id: 10, src: "/images/gallery/1210.webp" },
+            { id: 11, src: "/images/gallery/1230.webp" },
+            { id: 12, src: "/images/gallery/1399.webp" },
+            { id: 13, src: "/images/gallery/1435.webp" },
+            { id: 14, src: "/images/gallery/1523.webp" },
+            { id: 15, src: "/images/gallery/1787.webp" },
+          ]}
+        />
 
         <Link
           href="/moments"
