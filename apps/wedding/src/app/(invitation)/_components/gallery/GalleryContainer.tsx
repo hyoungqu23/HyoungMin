@@ -3,7 +3,7 @@
 import { AnimatePresence } from "motion/react";
 import Image from "next/image";
 import { memo, useCallback, useMemo, useState } from "react";
-import { ScrollMasonry } from "../common/ScrollMasonry";
+import { SimpleMasonry } from "../common/SimpleMasonry";
 import { GalleryModal } from "./GalleryModal";
 
 export type GalleryItem = {
@@ -94,7 +94,7 @@ export const GalleryContainer = ({
 
   return (
     <>
-      <ScrollMasonry className="columns-4 md:columns-4">
+      <SimpleMasonry className="columns-4 md:columns-4">
         {visibleItems.map((item, index) => (
           <GalleryItemCard
             key={item.id}
@@ -103,7 +103,7 @@ export const GalleryContainer = ({
             onClick={handleSelect}
           />
         ))}
-      </ScrollMasonry>
+      </SimpleMasonry>
 
       {hasMore && (
         <div className="flex justify-center mt-6">

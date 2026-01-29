@@ -1,8 +1,8 @@
+import storyGalleryData from "@/generated/story-gallery-items.json";
 import Link from "next/link";
 import { Section } from "../_components/common/Section";
-import { GalleryContainer } from "../_components/gallery/GalleryContainer";
 import type { GalleryItem } from "../_components/gallery/GalleryContainer";
-import storyGalleryData from "@/generated/story-gallery-items.json";
+import { GalleryContainer } from "../_components/gallery/GalleryContainer";
 
 const getStoryGalleryItems = (): GalleryItem[] => {
   return storyGalleryData as GalleryItem[];
@@ -37,7 +37,6 @@ const MomentsPage = () => {
             >
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
-            <span className="font-pretendard text-sm">돌아가기</span>
           </Link>
           <h1 className="font-great-vibes text-xl text-primary">Moments</h1>
           <div className="w-16" /> {/* Spacer for centering */}
@@ -51,7 +50,7 @@ const MomentsPage = () => {
           title="Lovely Moments"
           description="11년간의 소중한 순간들"
         />
-        <GalleryContainer items={storyGalleryItems} initialVisibleCount={0} />
+        <GalleryContainer items={storyGalleryItems} initialVisibleCount={20} />
       </Section>
     </main>
   );
