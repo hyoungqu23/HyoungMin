@@ -13,22 +13,26 @@ import {
 type SimpleMasonryProps = {
   children: ReactNode;
   className?: string;
+  columns?: number;
+  aspectRatios?: number[]; // 각 아이템의 가로/세로 비율 (width / height)
 };
 
-const DEFAULT_COLUMNS_CLASSNAME = "columns-3 md:columns-4";
+type ColumnItem = {
+  item: ReactNode;
+  originalIndex: number;
+};
 
 type LazyItemProps = {
   children: ReactNode;
   index: number;
 };
 
-// Lazy loading이 적용된 개별 아이템
 const LazyItem = memo(function LazyItem({ children, index }: LazyItemProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(index < 8); // 처음 8개는 즉시 표시
+  const [isVisible, setIsVisible] = useState(index < 8);
 
   useEffect(() => {
-    if (isVisible) return; // 이미 visible이면 observe 필요 없음
+    if (isVisible) return;
 
     const element = ref.current;
     if (!element) return;
@@ -41,7 +45,7 @@ const LazyItem = memo(function LazyItem({ children, index }: LazyItemProps) {
         }
       },
       {
-        rootMargin: "200px", // 화면 200px 전에 미리 로드
+        rootMargin: "200px",
         threshold: 0,
       },
     );
@@ -52,42 +56,73 @@ const LazyItem = memo(function LazyItem({ children, index }: LazyItemProps) {
   }, [isVisible]);
 
   return (
-    <div ref={ref} className="break-inside-avoid mb-2">
+    <div ref={ref}>
       {isVisible ? (
         children
       ) : (
-        // Placeholder: 이미지 비율을 유지하는 스켈레톤
         <div className="w-full aspect-3/4 bg-gray-100 rounded-sm animate-pulse" />
       )}
     </div>
   );
 });
 
-/**
- * SimpleMasonry
- * - ScrollMasonry와 달리 motion 애니메이션 없이 순수 CSS로만 Masonry 레이아웃 구현
- * - 각 아이템에 개별 IntersectionObserver 대신 Lazy Loading 통합
- * - MaxListenersExceededWarning 해결
- */
 export const SimpleMasonry = memo(function SimpleMasonry({
   children,
   className = "",
+  columns = 3,
+  aspectRatios,
 }: SimpleMasonryProps) {
   const items = useMemo(() => Children.toArray(children), [children]);
 
-  const hasColumnsClass = className.includes("columns-");
-  const resolvedColumnsClassName = hasColumnsClass
-    ? ""
-    : DEFAULT_COLUMNS_CLASSNAME;
+  const columnItems = useMemo(() => {
+    const cols: ColumnItem[][] = Array.from({ length: columns }, () => []);
+
+    // 높이 균형(Greedy) 알고리즘 적용
+    if (aspectRatios && aspectRatios.length > 0) {
+      // 각 열의 현재 높이 저장
+      const colHeights = new Array(columns).fill(0);
+
+      items.forEach((item, index) => {
+        // 가장 짧은 열 찾기
+        let minColIndex = 0;
+        let minHeight = colHeights[0];
+
+        for (let i = 1; i < columns; i++) {
+          if (colHeights[i] < minHeight) {
+            minHeight = colHeights[i];
+            minColIndex = i;
+          }
+        }
+
+        // 아이템을 해당 열에 추가
+        cols[minColIndex].push({ item, originalIndex: index });
+
+        // 높이 업데이트 (비율의 역수 = 높이/너비, 너비는 모두 같다고 가정)
+        // aspect ratio가 없으면 기본값 1.0 (정사각형) 가정
+        const ratio = aspectRatios[index] || 1;
+        colHeights[minColIndex] += 1 / ratio;
+      });
+    } else {
+      // Fallback: 기존 Row-first 방식
+      items.forEach((item, index) => {
+        const columnIndex = index % columns;
+        cols[columnIndex].push({ item, originalIndex: index });
+      });
+    }
+
+    return cols;
+  }, [items, columns, aspectRatios]);
 
   return (
-    <div
-      className={`w-full max-w-md gap-2 ${resolvedColumnsClassName} ${className}`}
-    >
-      {items.map((child, i) => (
-        <LazyItem key={i} index={i}>
-          {child}
-        </LazyItem>
+    <div className={`w-full max-w-md flex gap-2 ${className}`}>
+      {columnItems.map((columnChildren, colIndex) => (
+        <div key={colIndex} className="flex-1 flex flex-col gap-2">
+          {columnChildren.map(({ item, originalIndex }) => (
+            <LazyItem key={originalIndex} index={originalIndex}>
+              {item}
+            </LazyItem>
+          ))}
+        </div>
       ))}
     </div>
   );

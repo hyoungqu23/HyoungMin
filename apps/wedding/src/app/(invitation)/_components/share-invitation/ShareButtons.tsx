@@ -9,9 +9,9 @@ import { getGuestMessageCount } from "../../_actions/guestbook";
 import { getHeartCount } from "../../_actions/hearts";
 
 const ENV_WEDDING_URL = process.env.NEXT_PUBLIC_URL;
-const WEDDING_TITLE = "이형민 ♥ 임희재 결혼합니다";
+const WEDDING_TITLE = "형민 ♥ 희재의 결혼식에 초대합니다.";
 const WEDDING_DESCRIPTION =
-  "2026년 4월 19일 오전 11시, 더베르G 웨딩에서 결혼식을 올립니다.";
+  "이제는 부부라는 이름으로 손 꼭 잡고 함께 걷고자 합니다.\n2026년 4월 19일 일요일 오전 11시, 더베르G 웨딩";
 
 const getWeddingUrl = () => ENV_WEDDING_URL ?? window.location.origin;
 const getWeddingImageUrl = () =>
@@ -64,7 +64,7 @@ export const ShareButtons = () => {
         const weddingUrl = getWeddingUrl();
         await navigator.share({
           title: WEDDING_TITLE,
-          text: WEDDING_DESCRIPTION,
+          text: "2026년 4월 19일 일요일 오전 11시, 더베르G 웨딩",
           url: weddingUrl,
         });
       } catch (error) {

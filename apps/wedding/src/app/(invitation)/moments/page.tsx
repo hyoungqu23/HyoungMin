@@ -38,18 +38,15 @@ const MomentsPage = () => {
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
           </Link>
-          <h1 className="font-great-vibes text-xl text-primary">Moments</h1>
-          <div className="w-16" /> {/* Spacer for centering */}
+          <h1 className="w-full text-center font-great-vibes text-xl text-primary">
+            Moments
+          </h1>
         </div>
       </header>
 
       {/* Gallery Section */}
       <Section className="flex flex-col items-center justify-center gap-6 py-8">
-        <Section.Title
-          category="Gallery"
-          title="Lovely Moments"
-          description="11년간의 소중한 순간들"
-        />
+        <Section.Title category="2015. 12. 26 ~ 2026. 04. 19" title="" />
         <GalleryContainer items={storyGalleryItems} initialVisibleCount={20} />
       </Section>
     </main>

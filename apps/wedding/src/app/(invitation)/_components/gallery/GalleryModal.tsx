@@ -12,6 +12,7 @@ export type GalleryItem = {
   src: string;
   width?: number;
   height?: number;
+  date?: string;
 };
 
 type GalleryModalProps = {
@@ -92,12 +93,14 @@ export const GalleryModal = ({
 
   if (selectedIndex === null) return null;
 
+  const currentItem = items[selectedIndex];
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-100 flex items-center justify-center bg-black/30 backdrop-blur-md px-12 py-20"
+      className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 backdrop-blur-md px-4 py-20 md:px-12"
       onClick={onClose}
     >
       <button
@@ -148,12 +151,32 @@ export const GalleryModal = ({
             onDragEnd={handleDragEnd}
             className="absolute w-full h-full flex items-center justify-center p-4"
           >
-            <Image
-              src={items[selectedIndex].src}
-              alt={`Gallery Item ${items[selectedIndex].id + 1}`}
-              fill
-              className="object-contain"
-            />
+            <div className="relative inline-block shadow-2xl">
+              <Image
+                src={currentItem.src}
+                alt={`Gallery Item ${currentItem.id + 1}`}
+                width={currentItem.width ?? 1200}
+                height={currentItem.height ?? 1600}
+                className="max-w-[calc(100vw-32px)] max-h-[80vh] w-auto h-auto object-contain md:max-w-4xl"
+                priority
+              />
+
+              {/* 모달 내 날짜 오버레이 */}
+              {currentItem.date && (
+                <div className="absolute bottom-4 right-4 z-10 select-none pointer-events-none bg-black/50 rounded px-2 py-0.5">
+                  <span
+                    className="font-mono text-base md:text-xl text-[#ff9e42] tracking-widest font-bold opacity-90 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]"
+                    style={{ fontFamily: "'Courier New', Courier, monospace" }}
+                  >
+                    '
+                    {currentItem.date
+                      .replace(/^20/, "")
+                      .replace(/[.\s]+/g, " ")
+                      .trim()}
+                  </span>
+                </div>
+              )}
+            </div>
 
             <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-white/80 font-medium tracking-widest text-sm">
               {selectedIndex + 1} / {items.length}

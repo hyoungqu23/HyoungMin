@@ -19,7 +19,6 @@ import {
   getGuestMessages,
   type GuestMessage,
 } from "../../_actions/guestbook";
-import { ScrollMasonry } from "../common/ScrollMasonry";
 
 const NOTE_COLORS = [
   "bg-yellow-100",
@@ -214,7 +213,7 @@ const MessageModal = ({
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.8}
             onDragEnd={handleDragEnd}
-            className={`w-full p-6 rounded-lg shadow-2xl ${color}`}
+            className={`w-[80%] p-6 rounded-lg shadow-2xl ${color}`}
           >
             <p className="text-base text-stone-700 whitespace-pre-wrap leading-relaxed font-yeongwol">
               {currentMessage.message}
@@ -299,7 +298,6 @@ export const RollingPaper = ({
     }
   };
 
-  // 모달 핸들러
   const handleSelect = useCallback((index: number) => {
     setSelectedIndex(index);
   }, []);
@@ -351,7 +349,7 @@ export const RollingPaper = ({
           <div className="pointer-events-none absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_1px_1px,#e5e7eb_0,transparent_1px)] bg-size-[16px_16px]" />
 
           <div className="relative">
-            <ScrollMasonry className="pb-4">
+            <div className="grid grid-cols-3 gap-3">
               {messages?.map((msg, index) => (
                 <MessageCard
                   key={msg.id}
@@ -360,7 +358,7 @@ export const RollingPaper = ({
                   onClick={handleSelect}
                 />
               ))}
-            </ScrollMasonry>
+            </div>
 
             <div ref={loadMoreRef} className="py-4 text-center w-full">
               {isLoading && (
