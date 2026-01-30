@@ -60,27 +60,6 @@ export const submitAttendance = async (
   }
 };
 
-// 참석 데이터 조회 (관리자용)
-export const getAttendances = async (
-  page: number = 1,
-  limit: number = 50,
-): Promise<AttendanceData[]> => {
-  try {
-    const start = (page - 1) * limit;
-    const end = start + limit - 1;
-
-    const attendances = await redis.lrange<AttendanceData>(
-      ATTENDANCE_KEY,
-      start,
-      end,
-    );
-    return attendances ?? [];
-  } catch {
-    return [];
-  }
-};
-
-// 참석 데이터 개수 조회
 export const getAttendanceCount = async (): Promise<number> => {
   try {
     return await redis.llen(ATTENDANCE_KEY);

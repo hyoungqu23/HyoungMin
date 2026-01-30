@@ -15,7 +15,7 @@ export const Kakao = () => {
         crossOrigin="anonymous"
         strategy="afterInteractive"
         onLoad={() => {
-          window.Kakao.init(apiKey);
+          window.Kakao?.init(apiKey);
         }}
       />
       <Script

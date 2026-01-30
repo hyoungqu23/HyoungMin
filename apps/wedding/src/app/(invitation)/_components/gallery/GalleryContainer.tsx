@@ -59,7 +59,7 @@ const GalleryItemCard = memo(function GalleryItemCard({
             className="font-mono text-[10px] md:text-xs text-[#ff9e42] tracking-widest font-bold opacity-90 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]"
             style={{ fontFamily: "'Courier New', Courier, monospace" }}
           >
-            '
+            &apos;
             {item.date
               .replace(/^20/, "")
               .replace(/[.\s]+/g, " ")

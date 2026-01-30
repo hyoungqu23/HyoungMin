@@ -69,11 +69,12 @@ export const GalleryModal = ({
     };
     window.addEventListener("keydown", handleKeyDown);
 
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     };
   }, [selectedIndex, onClose, onIndexChange, paginate]);
 
@@ -168,7 +169,7 @@ export const GalleryModal = ({
                     className="font-mono text-base md:text-xl text-[#ff9e42] tracking-widest font-bold opacity-90 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]"
                     style={{ fontFamily: "'Courier New', Courier, monospace" }}
                   >
-                    '
+                    &apos;
                     {currentItem.date
                       .replace(/^20/, "")
                       .replace(/[.\s]+/g, " ")

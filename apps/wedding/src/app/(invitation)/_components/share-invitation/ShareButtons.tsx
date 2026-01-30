@@ -122,6 +122,11 @@ export const OpenKakaoButton = ({ socialCounts }: OpenKakaoButtonProps) => {
       return;
     }
 
+    if (!kakao || !kakao.Share) {
+      alert("카카오 공유 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
     if (!kakao.isInitialized()) {
       kakao.init(apiKey);
     }

@@ -6,11 +6,11 @@ import { motion } from "motion/react";
 import Image from "next/image";
 
 interface AddToCalendarProps {
-  title: string; // 예: 김철수 & 이영희 결혼식
-  description: string; // 예: 오시는 길: 강남구...
-  startDate: string; // 예: 2026-04-19 12:30
-  endDate: string; // 예: 2026-04-19 14:00
-  location: string; // 예: 아펠가모 선릉
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  location: string;
 }
 
 export default function AddToCalendar({
@@ -20,8 +20,26 @@ export default function AddToCalendar({
   endDate,
   location,
 }: AddToCalendarProps) {
+  const parseDateTime = (dateStr: string) => {
+    const [datePart, timePart = "00:00"] = dateStr.split(" ");
+    const [year, month, day] = datePart.split("-").map(Number);
+    const [hour, minute] = timePart.split(":").map(Number);
+
+    if (
+      Number.isNaN(year) ||
+      Number.isNaN(month) ||
+      Number.isNaN(day) ||
+      Number.isNaN(hour) ||
+      Number.isNaN(minute)
+    ) {
+      throw new Error(`Invalid date format: ${dateStr}`);
+    }
+
+    return new Date(year, month - 1, day, hour, minute);
+  };
+
   const getFormattedDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+    const date = parseDateTime(dateStr);
     const YYYY = date.getFullYear();
     const MM = String(date.getMonth() + 1).padStart(2, "0");
     const DD = String(date.getDate()).padStart(2, "0");
