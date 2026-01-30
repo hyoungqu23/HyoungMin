@@ -145,7 +145,7 @@ export const OpenKakaoButton = ({ socialCounts }: OpenKakaoButtonProps) => {
       social: {
         likeCount: socialCounts.heartCount,
         commentCount: socialCounts.guestMessageCount,
-        shareCount: socialCounts.attendanceCount,
+        sharedCount: socialCounts.attendanceCount,
       },
       buttons: [
         {

@@ -13,7 +13,7 @@ import { RollingPaper } from "./_components/guestbook/RollingPaper";
 import { WriteOurName } from "./_components/hero/WriteOurName";
 import { KakaoMap } from "./_components/location/KakaoMap";
 import { LocationButtons } from "./_components/location/LocationButtons";
-import { Share } from "./_components/share-invitation/Share";
+import { ShareButtons } from "./_components/share-invitation/ShareButtons";
 
 const Wedding = async () => {
   const initialGuestMessages = await getGuestMessages(1, 10);
@@ -250,7 +250,14 @@ const Wedding = async () => {
         <Section className="flex flex-col items-center justify-center gap-4 py-0!">
           <Contact />
           <Accounts />
-          <Share />
+          <div className="w-full max-w-md mx-auto">
+            <Section.Title
+              category="Share"
+              title="소식 전하기"
+              description="소중한 분들에게 저희의 결혼 소식을 전해주세요"
+            />
+            <ShareButtons />
+          </div>
         </Section>
 
         {/* Guestbook */}
