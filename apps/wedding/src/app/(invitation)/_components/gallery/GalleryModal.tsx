@@ -156,8 +156,8 @@ export const GalleryModal = ({
               <Image
                 src={currentItem.src}
                 alt={`Gallery Item ${currentItem.id + 1}`}
-                width={currentItem.width ?? 1200}
-                height={currentItem.height ?? 1600}
+                width={800}
+                height={800}
                 className="max-w-[calc(100vw-32px)] max-h-[80vh] w-auto h-auto object-contain md:max-w-4xl"
                 priority
               />

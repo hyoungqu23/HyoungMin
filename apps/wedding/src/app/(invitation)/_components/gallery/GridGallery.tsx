@@ -36,8 +36,8 @@ export const GridGallery = ({ items, className = "" }: GridGalleryProps) => {
             key={item.id}
             src={item.src}
             alt={`Photo ${item.id}`}
-            width={1000}
-            height={1000}
+            width={800}
+            height={800}
             className={`w-full rounded object-cover cursor-pointer hover:opacity-90 transition-opacity ${
               index === 0 ? "col-span-3 row-span-2" : "aspect-square"
             }`}
