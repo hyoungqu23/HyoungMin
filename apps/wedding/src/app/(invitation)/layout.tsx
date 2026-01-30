@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { getHeartCount } from "./_actions/hearts";
-import { getAttendanceCount } from "./_actions/submit-attendance";
 import { FloatingButton } from "./_components/floating/FloatingButton";
 import { HeartButton } from "./_components/floating/HeartButton";
 
@@ -13,7 +12,7 @@ const InvitationLayout = ({ children }: LayoutProps) => {
     <>
       {children}
       <Suspense fallback={null}>
-        <FloatingButton initialCountPromise={getAttendanceCount()} />
+        <FloatingButton />
       </Suspense>
       <Suspense fallback={null}>
         <HeartButton initialCountPromise={getHeartCount()} />

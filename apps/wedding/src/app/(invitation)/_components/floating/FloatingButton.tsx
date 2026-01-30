@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { use, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { disableBodyScroll, enableBodyScroll } from "../../_lib/scroll-lock";
 import { AttendanceForm } from "./AttendanceForm";
 
@@ -17,17 +17,8 @@ const ChevronUp = ({ className }: { className?: string }) => (
   </svg>
 );
 
-type FloatingButtonProps = {
-  initialCountPromise: Promise<number>;
-};
-
-export const FloatingButton = ({
-  initialCountPromise,
-}: FloatingButtonProps) => {
-  const initialCount = use(initialCountPromise);
-
+export const FloatingButton = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [attendanceCount, setAttendanceCount] = useState(initialCount);
   const [isVisible, setIsVisible] = useState(true);
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -65,11 +56,6 @@ export const FloatingButton = ({
 
   const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
 
-  const handleSuccess = useCallback(() => {
-    setAttendanceCount((prev) => prev + 1);
-    toggle();
-  }, [toggle]);
-
   return (
     <AnimatePresence>
       {!isOpen ? (
@@ -89,8 +75,7 @@ export const FloatingButton = ({
             onClick={toggle}
             className="pointer-events-auto flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-white shadow-lg shadow-primary/20 transition-all active:scale-95"
           >
-            <span className="text-lg">✉️</span>
-            <span className="text-xs font-bold">{attendanceCount}</span>
+            <span className="text-xs font-bold">참석 의사 전달하기</span>
           </motion.button>
         </div>
       ) : (
@@ -124,7 +109,7 @@ export const FloatingButton = ({
             </div>
 
             {/* 폼 바디 */}
-            <AttendanceForm onSuccess={handleSuccess} />
+            <AttendanceForm />
           </motion.div>
         </>
       )}

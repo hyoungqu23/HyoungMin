@@ -21,11 +21,7 @@ const mealOptions = [
   { value: "not_sure" as const, label: "미정" },
 ];
 
-type Props = {
-  onSuccess?: () => void;
-};
-
-export const AttendanceForm = ({ onSuccess }: Props) => {
+export const AttendanceForm = () => {
   const {
     register,
     handleSubmit,
@@ -49,7 +45,6 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
 
         if (result.success) {
           alert("소중한 의사가 전달되었습니다. 감사합니다! 🌸");
-          onSuccess?.();
         } else {
           alert("제출 중 오류가 발생했습니다. 다시 시도해주세요.");
         }
@@ -58,7 +53,7 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
         alert("제출 중 오류가 발생했습니다. 다시 시도해주세요.");
       }
     },
-    [onSuccess],
+    [],
   );
 
   return (

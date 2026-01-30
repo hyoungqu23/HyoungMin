@@ -12,17 +12,17 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   metadataBase: new URL(METADATA_BASE_URL),
-  title: "🎀 형민 ❤️ 희재 결혼식 초대장 🎀",
-  description: "형민이와 희재의 결혼식에 초대합니다.",
+  title: "형민 ❤️ 희재의 결혼식에 초대합니다.",
+  description: "2026년 4월 19일 일요일 오전 11시, 더베르G 웨딩",
   openGraph: {
-    title: "🎀 형민 ❤️ 희재 결혼식 초대장 🎀",
-    description: "형민이와 희재의 결혼식에 초대합니다.",
+    title: "형민 ❤️ 희재의 결혼식에 초대합니다.",
+    description: "2026년 4월 19일 일요일 오전 11시, 더베르G 웨딩",
     images: [
       {
         url: "/images/opengraph.webp",
         width: 1200,
         height: 630,
-        alt: "이형민 ♥ 임희재 결혼식",
+        alt: "형민 ❤️ 희재의 결혼식에 초대합니다.",
       },
     ],
     locale: "ko_KR",
@@ -30,14 +30,14 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "이형민 ♥ 임희재 결혼식",
-    description: "형민이와 희재의 결혼식에 초대합니다.",
+    title: "형민 ❤️ 희재의 결혼식에 초대합니다.",
+    description: "2026년 4월 19일 일요일 오전 11시, 더베르G 웨딩",
     images: [
       {
         url: "/images/opengraph.webp",
         width: 1200,
         height: 630,
-        alt: "이형민 ♥ 임희재 결혼식",
+        alt: "형민 ❤️ 희재의 결혼식에 초대합니다.",
       },
     ],
   },
