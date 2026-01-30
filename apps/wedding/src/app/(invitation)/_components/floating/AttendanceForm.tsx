@@ -74,8 +74,8 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
                   relative flex items-center justify-center py-2 rounded-xl border cursor-pointer transition-all duration-200
                   ${
                     selectedSide === item.value
-                      ? "bg-rose-50 border-rose-400 text-rose-600 font-bold shadow-sm"
-                      : "border-stone-200 text-stone-500 hover:bg-stone-50"
+                      ? "bg-primary/5 border-primary text-primary font-bold shadow-sm"
+                      : "border-black/10 text-stone-500 hover:bg-black/5"
                   }
                 `}
               >
@@ -91,31 +91,31 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
           </div>
 
           {errors.side && (
-            <p className="text-xs text-rose-500 mt-1">{errors.side.message}</p>
+            <p className="text-xs text-primary mt-1">{errors.side.message}</p>
           )}
         </div>
 
         {/* --- 2. 성함 --- */}
         <div className="space-y-2">
           <label className="text-sm font-bold text-stone-600">
-            성함 <span className="text-rose-500">*</span>
+            성함 <span className="text-primary">*</span>
           </label>
 
           <input
             type="text"
             placeholder="성함을 입력해주세요"
             {...register("name", { required: "성함을 입력해주세요." })}
-            className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none transition placeholder:text-stone-400 text-stone-800"
+            className="w-full px-3 py-2 rounded-xl border border-black/10 bg-stone-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition placeholder:text-stone-400 text-stone-800"
           />
           {errors.name && (
-            <p className="text-xs text-rose-500">{errors.name.message}</p>
+            <p className="text-xs text-primary">{errors.name.message}</p>
           )}
         </div>
 
         {/* --- 3. 참석 인원 --- */}
         <div className="space-y-2">
           <label className="text-sm font-bold text-stone-600">
-            참석 인원(본인 포함) <span className="text-rose-500">*</span>
+            참석 인원(본인 포함) <span className="text-primary">*</span>
           </label>
 
           <div className="flex gap-2">
@@ -126,8 +126,8 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
                   flex-1 flex items-center justify-center py-2 rounded-xl border cursor-pointer transition-all duration-200
                   ${
                     selectedCountType === val
-                      ? "bg-rose-50 border-rose-400 text-rose-600 font-bold shadow-sm"
-                      : "border-stone-200 text-stone-500 hover:bg-stone-50"
+                      ? "bg-primary/5 border-primary text-primary font-bold shadow-sm"
+                      : "border-black/10 text-stone-500 hover:bg-black/5"
                   }
                 `}
               >
@@ -164,10 +164,10 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
                       }
                     },
                   })}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none transition"
+                  className="w-full px-3 py-2 rounded-xl border border-black/10 bg-stone-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition"
                 />
                 {errors.customCount && (
-                  <p className="text-xs text-rose-500 mt-1">
+                  <p className="text-xs text-primary mt-1">
                     {errors.customCount.message}
                   </p>
                 )}
@@ -179,7 +179,7 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
         {/* --- 4. 식사 여부 --- */}
         <div className="space-y-2">
           <label className="text-sm font-bold text-stone-600">
-            식사 여부 <span className="text-rose-500">*</span>
+            식사 여부 <span className="text-primary">*</span>
           </label>
           <div className="grid grid-cols-3 gap-3">
             {mealOptions.map((item) => (
@@ -189,8 +189,8 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
                   flex items-center justify-center py-2 rounded-xl border cursor-pointer transition-all whitespace-nowrap
                   ${
                     selectedMeal === item.value
-                      ? "bg-rose-50 border-rose-400 text-rose-600 font-bold"
-                      : "border-stone-200 text-stone-500 hover:bg-stone-50"
+                      ? "bg-primary/5 border-primary text-primary font-bold"
+                      : "border-black/10 text-stone-500 hover:bg-black/5"
                   }
                 `}
               >
@@ -207,7 +207,7 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
             ))}
           </div>
           {errors.meal && (
-            <p className="text-xs text-rose-500 mt-1">{errors.meal.message}</p>
+            <p className="text-xs text-primary mt-1">{errors.meal.message}</p>
           )}
         </div>
 
@@ -221,7 +221,7 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
             type="text"
             placeholder="동행하시는 분들의 성함을 입력해주세요"
             {...register("guestNames")}
-            className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none transition placeholder:text-stone-400 text-stone-800"
+            className="w-full px-3 py-2 rounded-xl border border-black/10 bg-stone-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition placeholder:text-stone-400 text-stone-800"
           />
         </div>
 
@@ -229,7 +229,7 @@ export const AttendanceForm = ({ onSuccess }: Props) => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-2 rounded-xl bg-rose-500 text-white font-bold text-lg shadow-lg shadow-rose-200 hover:bg-rose-600 active:scale-95 disabled:bg-rose-300 disabled:scale-100 transition-all flex items-center justify-center gap-2"
+          className="w-full py-2 rounded-xl bg-primary text-white font-bold text-lg shadow-lg shadow-primary/30 hover:bg-primary/90 active:scale-95 disabled:bg-stone-300 disabled:scale-100 disabled:shadow-none transition-all flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
             <>

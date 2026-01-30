@@ -149,6 +149,16 @@ export const HeartButton = ({ initialCountPromise }: HeartButtonProps) => {
         </AnimatePresence>
       </div>
 
+      {/* 카운트 */}
+      <motion.div
+        key={globalCount}
+        initial={{ scale: 0.8 }}
+        animate={{ scale: 1 }}
+        className="px-1.5 bg-white/90 backdrop-blur-sm rounded-full border border-rose-100 shadow-sm text-[10px] font-bold text-primary tabular-nums"
+      >
+        {globalCount > 0 ? globalCount.toLocaleString() : "Like"}
+      </motion.div>
+
       {/* 버튼 */}
       <motion.button
         onClick={handleClick}
@@ -197,16 +207,6 @@ export const HeartButton = ({ initialCountPromise }: HeartButtonProps) => {
           />
         </svg>
       </motion.button>
-
-      {/* 카운트 */}
-      <motion.div
-        key={globalCount}
-        initial={{ scale: 0.8 }}
-        animate={{ scale: 1 }}
-        className="px-1.5 bg-white/90 backdrop-blur-sm rounded-full border border-rose-100 shadow-sm text-[10px] font-bold text-rose-500 tabular-nums"
-      >
-        {globalCount > 0 ? globalCount.toLocaleString() : "Like"}
-      </motion.div>
     </div>
   );
 };
