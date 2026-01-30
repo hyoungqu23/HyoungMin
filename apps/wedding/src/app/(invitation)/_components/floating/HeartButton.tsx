@@ -124,7 +124,7 @@ export const HeartButton = ({ initialCountPromise }: HeartButtonProps) => {
   const fillRatio = Math.min(localCount, MAX_FILL_COUNT) / MAX_FILL_COUNT;
 
   return (
-    <div className="fixed bottom-4 left-2 z-40 flex flex-col items-center font-yeongwol gap-0.5">
+    <div className="fixed bottom-4 left-2 z-40 flex flex-col items-center font-pretendard gap-0.5">
       {/* 파티클 */}
       <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 w-40 h-60 overflow-visible">
         <AnimatePresence>

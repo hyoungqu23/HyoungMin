@@ -73,9 +73,9 @@ export const FloatingButton = () => {
             exit={{ y: 100, opacity: 0 }}
             transition={{ duration: 0.3 }}
             onClick={toggle}
-            className="pointer-events-auto flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-white shadow-lg shadow-primary/20 transition-all active:scale-95"
+            className="pointer-events-auto flex items-center gap-2 rounded-full bg-[#FB7185] px-4 py-2 text-white shadow-lg shadow-primary/20 transition-all active:scale-95"
           >
-            <span className="text-xs font-bold">참석 의사 전달하기</span>
+            <span className="text-sm font-bold">참석 의사 전달하기</span>
           </motion.button>
         </div>
       ) : (

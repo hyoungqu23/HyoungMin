@@ -66,7 +66,7 @@ export default function AddToCalendar({
   };
 
   // 2. 기본 캘린더 (ICS 파일 다운로드 -> 앱 실행)
-  // 아이폰(Safari), 갤럭시(Chrome/Samsung Internet) 모두 호환
+  // 아이폰(Safari), 갤럭시(Chrome/Samsung Internet), 카카오 인앱 브라우저 모두 호환
   const handleNativeCalendar = () => {
     const start = getFormattedDate(startDate);
     const end = getFormattedDate(endDate);
@@ -87,19 +87,36 @@ export default function AddToCalendar({
       "END:VCALENDAR",
     ].join("\n");
 
-    // Blob 생성 및 다운로드 트리거
-    const blob = new Blob([icsContent], {
-      type: "text/calendar;charset=utf-8",
-    });
-    const url = URL.createObjectURL(blob);
+    // 인앱 브라우저 감지 (카카오, 네이버, 인스타그램 등)
+    const ua = navigator.userAgent.toLowerCase();
+    const isInAppBrowser =
+      ua.includes("kakaotalk") ||
+      ua.includes("naver") ||
+      ua.includes("instagram") ||
+      ua.includes("fbav") ||
+      ua.includes("line");
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "wedding_event.ics");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    if (isInAppBrowser) {
+      // 인앱 브라우저: Data URI 방식 사용 (Blob URL이 동작하지 않음)
+      // Base64 인코딩하여 새 창에서 열기
+      const base64 = btoa(unescape(encodeURIComponent(icsContent)));
+      const dataUri = `data:text/calendar;charset=utf-8;base64,${base64}`;
+      window.location.href = dataUri;
+    } else {
+      // 일반 브라우저: 기존 Blob 다운로드 방식 사용
+      const blob = new Blob([icsContent], {
+        type: "text/calendar;charset=utf-8",
+      });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "wedding_event.ics");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
   };
 
   return (

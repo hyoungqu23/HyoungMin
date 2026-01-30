@@ -90,14 +90,18 @@ export const GalleryContainer = ({
     [showAll, items, visibleCount],
   );
 
-  // visibleItems에 대한 aspectRatios 계산
-  const aspectRatios = useMemo(() => {
-    return visibleItems.map((item) => {
+  // 전체 items에 대한 aspectRatios를 한 번만 계산 (items는 불변)
+  // 이렇게 하면 visibleCount가 변경되어도 기존 아이템들의 aspectRatio가 유지됨
+  const allAspectRatios = useMemo(() => {
+    return items.map((item) => {
       const width = item.width ?? 1200;
       const height = item.height ?? 1600;
       return width / height;
     });
-  }, [visibleItems]);
+  }, [items]);
+
+  // visibleItems에 해당하는 aspectRatios만 slice
+  const aspectRatios = allAspectRatios.slice(0, visibleCount);
 
   const hasMore = !showAll && visibleCount < items.length;
 
