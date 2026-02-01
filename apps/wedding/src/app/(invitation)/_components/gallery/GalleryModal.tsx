@@ -39,6 +39,35 @@ const variants = {
   }),
 };
 
+const ImageFrame = ({ currentItem }: { currentItem: GalleryItem }) => {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+
+  return (
+    <div className="relative inline-block shadow-2xl">
+      <Image
+        src={currentItem.src}
+        alt={`Gallery Item ${currentItem.id + 1}`}
+        width={800}
+        height={800}
+        className="max-w-[calc(100vw-32px)] max-h-[80vh] w-auto h-auto object-contain md:max-w-4xl"
+        priority
+        onLoadingComplete={() => setIsImageLoaded(true)}
+      />
+
+      {/* 모달 내 날짜 오버레이 */}
+      {currentItem.date && isImageLoaded && (
+        <div className="absolute bottom-4 right-4 z-10 select-none pointer-events-none px-2 py-0.5">
+          <span className="font-dseg7 text-sm md:text-xl text-[#ff9e42] tracking-widest font-bold opacity-90 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+            {currentItem.date.length === 8
+              ? `${currentItem.date.slice(0, 4)}. ${currentItem.date.slice(4, 6)}. ${currentItem.date.slice(6, 8)}.`
+              : currentItem.date}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const GalleryModal = ({
   items,
   selectedIndex,
@@ -152,32 +181,7 @@ export const GalleryModal = ({
             onDragEnd={handleDragEnd}
             className="absolute w-full h-full flex items-center justify-center p-4"
           >
-            <div className="relative inline-block shadow-2xl">
-              <Image
-                src={currentItem.src}
-                alt={`Gallery Item ${currentItem.id + 1}`}
-                width={800}
-                height={800}
-                className="max-w-[calc(100vw-32px)] max-h-[80vh] w-auto h-auto object-contain md:max-w-4xl"
-                priority
-              />
-
-              {/* 모달 내 날짜 오버레이 */}
-              {currentItem.date && (
-                <div className="absolute bottom-4 right-4 z-10 select-none pointer-events-none bg-black/50 rounded px-2 py-0.5">
-                  <span
-                    className="font-mono text-base md:text-xl text-[#ff9e42] tracking-widest font-bold opacity-90 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]"
-                    style={{ fontFamily: "'Courier New', Courier, monospace" }}
-                  >
-                    &apos;
-                    {currentItem.date
-                      .replace(/^20/, "")
-                      .replace(/[.\s]+/g, " ")
-                      .trim()}
-                  </span>
-                </div>
-              )}
-            </div>
+            <ImageFrame key={selectedIndex} currentItem={currentItem} />
 
             <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-white/80 font-medium tracking-widest text-sm">
               {selectedIndex + 1} / {items.length}

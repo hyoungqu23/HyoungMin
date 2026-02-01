@@ -1,8 +1,8 @@
 import Image from "next/image";
-// import Link from "next/link";
+import Link from "next/link";
 import { getGuestMessages } from "./_actions/guestbook";
 import { Accounts } from "./_components/accounts/Accounts";
-// import AddToCalendar from "./_components/calendar/AddToCalendar";
+import AddToCalendar from "./_components/calendar/AddToCalendar";
 import { Calendar } from "./_components/calendar/Calendar";
 import { Accordion } from "./_components/common/Accordion";
 import { Section } from "./_components/common/Section";
@@ -150,12 +150,12 @@ const Wedding = async () => {
           ]}
         />
 
-        {/* <Link
+        <Link
           href="/moments"
           className="inline-flex items-center justify-center gap-2 w-full px-6 py-4 bg-primary text-white font-pretendard font-medium rounded-full hover:bg-primary/80 transition-all duration-300"
         >
           더 많은 사진 보러가기
-        </Link> */}
+        </Link>
       </Section>
 
       <div className="bg-white">
@@ -171,13 +171,13 @@ const Wedding = async () => {
             <span className="font-semibold">더베르G 웨딩</span>
           </p>
           <Calendar />
-          {/* <AddToCalendar
-            title="Our Wedding Day"
-            description="Our Wedding Day"
+          <AddToCalendar
+            title="이형민, 임희재 결혼식"
+            description="2026년 4월 19일 일요일 오전 11시, 더베르G 웨딩"
             startDate="2026-04-19 11:00"
-            endDate="2026-04-19 12:30"
+            endDate="2026-04-19 13:00"
             location="더베르G 웨딩"
-          /> */}
+          />
         </Section>
 
         {/* Location */}

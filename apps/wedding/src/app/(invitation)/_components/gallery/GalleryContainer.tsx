@@ -37,33 +37,33 @@ const GalleryItemCard = memo(function GalleryItemCard({
     onClick(index);
   }, [onClick, index]);
 
+  const width = item.width ?? 1200;
+  const height = item.height ?? 1600;
+  const aspectRatio = width / height;
+
   return (
     <div
       className="relative w-full overflow-hidden rounded-sm shadow-sm group cursor-pointer"
       onClick={handleClick}
+      style={{ aspectRatio }}
     >
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 z-10" />
       <Image
         src={item.src}
         alt={`Gallery Item ${item.id + 1}`}
-        width={item.width ?? 1200}
-        height={item.height ?? 1600}
-        className="w-full h-auto"
+        fill
+        sizes="(max-width: 768px) 50vw, 25vw"
+        className="object-cover"
         loading={index < 4 ? "eager" : "lazy"}
         priority={index < 4}
       />
       {/* 필름 카메라 스타일 날짜 오버레이 */}
       {item.date && (
         <div className="absolute bottom-1 right-1 z-10 select-none pointer-events-none">
-          <span
-            className="font-mono text-[10px] md:text-xs text-[#ff9e42] tracking-widest font-bold opacity-90 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]"
-            style={{ fontFamily: "'Courier New', Courier, monospace" }}
-          >
-            &apos;
-            {item.date
-              .replace(/^20/, "")
-              .replace(/[.\s]+/g, " ")
-              .trim()}
+          <span className="font-dseg7 text-[4px] md:text-xl text-[#ff9e42] tracking-widest font-bold opacity-90 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+            {item.date.length === 8
+              ? `${item.date.slice(0, 4)}. ${item.date.slice(4, 6)}. ${item.date.slice(6, 8)}.`
+              : item.date}
           </span>
         </div>
       )}
@@ -83,6 +83,8 @@ export const GalleryContainer = ({
 
   // 무한 스크롤을 위한 Sentinel ref
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const isLoadingMoreRef = useRef(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   // useMemo로 visibleItems 메모이제이션
   const visibleItems = useMemo(
@@ -109,13 +111,20 @@ export const GalleryContainer = ({
     setVisibleCount((prev) => Math.min(prev + LOAD_MORE_COUNT, items.length));
   }, [items.length]);
 
+  useEffect(() => {
+    isLoadingMoreRef.current = false;
+  }, [visibleCount]);
+
   // Infinite Scroll Intersection Observer
   useEffect(() => {
     if (!hasMore || !sentinelRef.current) return;
 
+    const target = sentinelRef.current;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0].isIntersecting && !isLoadingMoreRef.current) {
+          isLoadingMoreRef.current = true;
+          observer.unobserve(entries[0].target);
           handleLoadMore();
         }
       },
@@ -125,10 +134,14 @@ export const GalleryContainer = ({
       },
     );
 
-    observer.observe(sentinelRef.current);
+    observerRef.current = observer;
+    observer.observe(target);
 
-    return () => observer.disconnect();
-  }, [hasMore, handleLoadMore]);
+    return () => {
+      observer.disconnect();
+      observerRef.current = null;
+    };
+  }, [hasMore, handleLoadMore, visibleCount]);
 
   // useCallback으로 핸들러 메모이제이션
   const handleSelect = useCallback((index: number) => {
