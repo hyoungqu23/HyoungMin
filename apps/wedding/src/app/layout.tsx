@@ -54,7 +54,7 @@ const RootLayout = ({ children }: LayoutProps) => {
   return (
     <html lang="ko">
       <body
-        className={`relative ${pretendardFont.variable} ${greatVibesFont.variable} ${hahmletFont.variable} ${playfairDisplayFont.variable} antialiased bg-black overflow-x-hidden`}
+        className={`relative ${pretendardFont.variable} ${greatVibesFont.variable} ${hahmletFont.variable} ${playfairDisplayFont.variable} ${dseg7Font.variable} antialiased bg-black overflow-x-hidden`}
       >
         <Kakao />
         <Analytics />
@@ -139,4 +139,42 @@ const pretendardFont = localFont({
   display: "swap",
   preload: true,
   variable: "--pretendard",
+});
+
+const dseg7Font = localFont({
+  src: [
+    {
+      path: "../../public/fonts/DSEG7Modern-Bold.woff2",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/DSEG7Modern-BoldItalic.woff2",
+      weight: "700",
+      style: "italic",
+    },
+    {
+      path: "../../public/fonts/DSEG7Modern-Italic.woff2",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "../../public/fonts/DSEG7Modern-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/DSEG7Modern-Light.woff2",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/DSEG7Modern-LightItalic.woff2",
+      weight: "300",
+      style: "italic",
+    },
+  ],
+  display: "swap",
+  preload: true,
+  variable: "--dseg7",
 });
