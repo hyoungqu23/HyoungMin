@@ -32,52 +32,6 @@ export const formatToIcsDate = (dateStr: string): string => {
   return `${YYYY}${MM}${DD}T${HH}${mm}00`;
 };
 
-/** 날짜를 카카오 API용 UTC ISO 형식으로 변환 (KST → UTC) */
-export const formatToKakaoUtc = (dateStr: string): string => {
-  const { year, month, day, hour, minute } = getDateParts(dateStr);
-  const utcMillis = Date.UTC(year, month - 1, day, hour - 9, minute);
-  return new Date(utcMillis).toISOString().replace(".000Z", "Z");
-};
-
-/** ICS 텍스트 이스케이프 */
-export const escapeIcsText = (value: string): string => {
-  return value
-    .replace(/\\/g, "\\\\")
-    .replace(/\n/g, "\\n")
-    .replace(/;/g, "\\;")
-    .replace(/,/g, "\\,");
-};
-
-/** ICS 파일 내용 생성 */
-export const buildIcsContent = ({
-  title,
-  description,
-  location,
-  start,
-  end,
-}: {
-  title: string;
-  description: string;
-  location: string;
-  start: string;
-  end: string;
-}): string => {
-  return [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//Wedding Invitation//KR",
-    "CALSCALE:GREGORIAN",
-    "BEGIN:VEVENT",
-    `DTSTART;TZID=Asia/Seoul:${start}`,
-    `DTEND;TZID=Asia/Seoul:${end}`,
-    `SUMMARY:${escapeIcsText(title)}`,
-    `DESCRIPTION:${escapeIcsText(description)}`,
-    `LOCATION:${escapeIcsText(location)}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
-};
-
 /** 구글 캘린더 URL 생성 */
 export const buildGoogleCalendarUrl = ({
   title,
@@ -105,20 +59,47 @@ export const buildGoogleCalendarUrl = ({
   );
 };
 
-/** 인앱 브라우저 감지 */
-export const isInAppBrowser = (): boolean => {
-  if (typeof navigator === "undefined") return false;
-  const ua = navigator.userAgent.toLowerCase();
-  return (
-    ua.includes("naver") ||
-    ua.includes("instagram") ||
-    ua.includes("fbav") ||
-    ua.includes("line")
-  );
+/** 네이티브 캘린더 URL 생성 (webcal scheme 기반 - 애플 캘린더, 네이버 캘린더 등 지원) */
+export const buildNativeCalendarUrl = ({
+  title,
+  description,
+  location,
+  startDate,
+  endDate,
+}: {
+  title: string;
+  description: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+}): string => {
+  const start = formatToIcsDate(startDate);
+  const end = formatToIcsDate(endDate);
+
+  // data URI scheme을 사용하여 ICS 파일 직접 생성
+  const icsContent = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Wedding Invitation//KR",
+    "CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT",
+    `DTSTART;TZID=Asia/Seoul:${start}`,
+    `DTEND;TZID=Asia/Seoul:${end}`,
+    `SUMMARY:${escapeIcsText(title)}`,
+    `DESCRIPTION:${escapeIcsText(description)}`,
+    `LOCATION:${escapeIcsText(location)}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+
+  return `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
 };
 
-/** 카카오톡 인앱 브라우저 감지 */
-export const isKakaoInAppBrowser = (): boolean => {
-  if (typeof navigator === "undefined") return false;
-  return navigator.userAgent.toLowerCase().includes("kakaotalk");
+/** ICS 텍스트 이스케이프 */
+const escapeIcsText = (value: string): string => {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/\n/g, "\\n")
+    .replace(/;/g, "\\;")
+    .replace(/,/g, "\\,");
 };
