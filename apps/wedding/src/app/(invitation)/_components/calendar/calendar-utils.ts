@@ -59,8 +59,8 @@ export const buildGoogleCalendarUrl = ({
   );
 };
 
-/** 네이티브 캘린더 URL 생성 (webcal scheme 기반 - 애플 캘린더, 네이버 캘린더 등 지원) */
-export const buildNativeCalendarUrl = ({
+/** ICS 파일 내용 생성 */
+export const buildIcsContent = ({
   title,
   description,
   location,
@@ -76,8 +76,7 @@ export const buildNativeCalendarUrl = ({
   const start = formatToIcsDate(startDate);
   const end = formatToIcsDate(endDate);
 
-  // data URI scheme을 사용하여 ICS 파일 직접 생성
-  const icsContent = [
+  return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//Wedding Invitation//KR",
@@ -91,8 +90,6 @@ export const buildNativeCalendarUrl = ({
     "END:VEVENT",
     "END:VCALENDAR",
   ].join("\r\n");
-
-  return `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
 };
 
 /** ICS 텍스트 이스케이프 */

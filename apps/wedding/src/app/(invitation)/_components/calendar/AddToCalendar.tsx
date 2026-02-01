@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useCallback, useState } from "react";
 import {
   buildGoogleCalendarUrl,
-  buildNativeCalendarUrl,
+  buildIcsContent,
   isKakaoInAppBrowser,
   openInExternalBrowser,
 } from "./calendar-utils";
@@ -69,14 +69,27 @@ export default function AddToCalendar({
       return;
     }
 
-    const url = buildNativeCalendarUrl({
+    const icsContent = buildIcsContent({
       title,
       description,
       location,
       startDate,
       endDate,
     });
-    window.open(url, "_blank");
+
+    // Blob 생성 및 다운로드 트리거
+    const blob = new Blob([icsContent], {
+      type: "text/calendar;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "wedding_event.ics");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }, [title, description, location, startDate, endDate, isKakaoInApp]);
 
   // ---------------------------------------------------------------------------
