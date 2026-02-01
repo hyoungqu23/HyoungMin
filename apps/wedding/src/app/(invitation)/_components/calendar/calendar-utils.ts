@@ -103,3 +103,16 @@ const escapeIcsText = (value: string): string => {
     .replace(/;/g, "\\;")
     .replace(/,/g, "\\,");
 };
+
+/** 카카오톡 인앱 브라우저 감지 */
+export const isKakaoInAppBrowser = (): boolean => {
+  if (typeof navigator === "undefined") return false;
+  return navigator.userAgent.toLowerCase().includes("kakaotalk");
+};
+
+/** 외부 브라우저로 현재 URL 열기 (카카오 인앱 브라우저용) */
+export const openInExternalBrowser = (): void => {
+  const currentUrl = window.location.href;
+  // 카카오톡 인앱에서 외부 브라우저로 열기 위한 intent scheme
+  window.location.href = `kakaotalk://web/openExternal?url=${encodeURIComponent(currentUrl)}`;
+};
