@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700;800&display=swap');
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: oklch(0.985 0.01 92);
+  --foreground: oklch(0.24 0.015 92);
+  --card: oklch(1 0 0 / 0.9);
+  --card-foreground: oklch(0.24 0.015 92);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.24 0.015 92);
+  --primary: oklch(0.48 0.11 168);
+  --primary-foreground: oklch(0.98 0.01 100);
+  --secondary: oklch(0.95 0.01 95);
+  --secondary-foreground: oklch(0.3 0.02 95);
+  --muted: oklch(0.97 0.01 95);
+  --muted-foreground: oklch(0.55 0.015 95);
+  --accent: oklch(0.95 0.03 160);
+  --accent-foreground: oklch(0.32 0.04 160);
+  --destructive: oklch(0.63 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.91 0.012 92);
+  --input: oklch(0.91 0.012 92);
+  --ring: oklch(0.67 0.06 164);
+  --chart-1: oklch(0.5 0.12 168);
+  --chart-2: oklch(0.67 0.16 145);
+  --chart-3: oklch(0.72 0.15 123);
+  --chart-4: oklch(0.75 0.13 83);
+  --chart-5: oklch(0.83 0.12 51);
+  --radius: 1rem;
+}
+
+@theme inline {
+  --font-sans: 'Noto Sans KR', ui-sans-serif, system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 3px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  background:
+    radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.12), transparent 28%),
+    radial-gradient(circle at 90% 12%, rgba(13, 148, 136, 0.08), transparent 26%),
+    radial-gradient(circle at 50% 100%, rgba(234, 179, 8, 0.08), transparent 30%),
+    linear-gradient(180deg, #fcfbf7 0%, #f7faf8 54%, #f4f2ed 100%);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.42;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(circle at center, black, transparent 84%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.font-display {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+::selection {
+  background: rgba(16, 185, 129, 0.18);
+}
