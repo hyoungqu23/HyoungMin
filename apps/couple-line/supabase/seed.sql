@@ -1,0 +1,3 @@
+-- CoupleLine local seed placeholder
+-- Keep this file even if empty so `supabase db reset` runs without seed warnings.
+-- Add optional local-only seed data here later when needed.
