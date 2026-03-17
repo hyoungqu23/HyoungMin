@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { getSupabaseServerClient } from '#/shared/api/supabase/server'
+import { logger } from '#/shared/lib/logger'
 
 export const fetchMembersPageDataFn = createServerFn({ method: 'GET' })
   .inputValidator((input) =>
@@ -63,8 +64,10 @@ export const updateMemberRoleFn = createServerFn({ method: 'POST' })
     })
 
     if (error) {
+      logger.error('member.role.update', error, { spaceId: data.spaceId })
       throw error
     }
 
+    logger.info('member.role.update', { spaceId: data.spaceId, userId: data.userId, detail: data.role })
     return { success: true }
   })
