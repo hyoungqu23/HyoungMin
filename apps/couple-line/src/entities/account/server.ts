@@ -3,6 +3,8 @@ import { createServerFn } from '@tanstack/react-start'
 import { fetchSpaceLedgerData } from '#/entities/space/server'
 import { buildDashboardSnapshot } from '#/shared/lib/ledger'
 import { getSupabaseServerClient } from '#/shared/api/supabase/server'
+import { requireSpaceMember } from '#/shared/api/supabase/auth-guard'
+import { logger } from '#/shared/lib/logger'
 
 const accountSchema = z.object({
   id: z.string().uuid().optional(),
@@ -33,6 +35,8 @@ export const upsertAccountFn = createServerFn({ method: 'POST' })
   .inputValidator((input) => accountSchema.parse(input))
   .handler(async ({ data }) => {
     const supabase = await getSupabaseServerClient()
+    await requireSpaceMember(supabase, data.spaceId)
+
     const payload = {
       space_id: data.spaceId,
       name: data.name,
@@ -55,9 +59,11 @@ export const upsertAccountFn = createServerFn({ method: 'POST' })
     const { error } = await query
 
     if (error) {
+      logger.error('account.upsert', error, { spaceId: data.spaceId })
       throw error
     }
 
+    logger.info('account.upsert', { spaceId: data.spaceId, detail: `${data.id ? 'update' : 'create'} ${data.name}` })
     return { success: true }
   })
 
@@ -72,6 +78,8 @@ export const deleteAccountFn = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data }) => {
     const supabase = await getSupabaseServerClient()
+    await requireSpaceMember(supabase, data.spaceId)
+
     const { error } = await supabase
       .from('accounts')
       .delete()
@@ -79,8 +87,10 @@ export const deleteAccountFn = createServerFn({ method: 'POST' })
       .eq('space_id', data.spaceId)
 
     if (error) {
+      logger.error('account.delete', error, { spaceId: data.spaceId })
       throw error
     }
 
+    logger.info('account.delete', { spaceId: data.spaceId, detail: data.accountId })
     return { success: true }
   })

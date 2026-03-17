@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { getSupabaseServerClient } from '#/shared/api/supabase/server'
+import { requireSpaceMember } from '#/shared/api/supabase/auth-guard'
+import { logger } from '#/shared/lib/logger'
 
 const categorySchema = z.object({
   id: z.string().uuid().optional(),
@@ -33,6 +35,8 @@ export const upsertCategoryFn = createServerFn({ method: 'POST' })
   .inputValidator((input) => categorySchema.parse(input))
   .handler(async ({ data }) => {
     const supabase = await getSupabaseServerClient()
+    await requireSpaceMember(supabase, data.spaceId)
+
     const payload = {
       space_id: data.spaceId,
       name: data.name,
@@ -50,9 +54,11 @@ export const upsertCategoryFn = createServerFn({ method: 'POST' })
     const { error } = await query
 
     if (error) {
+      logger.error('category.upsert', error, { spaceId: data.spaceId })
       throw error
     }
 
+    logger.info('category.upsert', { spaceId: data.spaceId, detail: `${data.id ? 'update' : 'create'} ${data.name}` })
     return { success: true }
   })
 
@@ -67,6 +73,8 @@ export const deleteCategoryFn = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data }) => {
     const supabase = await getSupabaseServerClient()
+    await requireSpaceMember(supabase, data.spaceId)
+
     const { error } = await supabase
       .from('categories')
       .delete()
@@ -74,8 +82,10 @@ export const deleteCategoryFn = createServerFn({ method: 'POST' })
       .eq('space_id', data.spaceId)
 
     if (error) {
+      logger.error('category.delete', error, { spaceId: data.spaceId })
       throw error
     }
 
+    logger.info('category.delete', { spaceId: data.spaceId, detail: data.categoryId })
     return { success: true }
   })

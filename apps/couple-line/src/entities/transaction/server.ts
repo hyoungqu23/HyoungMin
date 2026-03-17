@@ -3,6 +3,8 @@ import { createServerFn } from '@tanstack/react-start'
 import { fetchSpaceLedgerData } from '#/entities/space/server'
 import { buildDashboardSnapshot } from '#/shared/lib/ledger'
 import { getSupabaseServerClient } from '#/shared/api/supabase/server'
+import { requireSpaceMember } from '#/shared/api/supabase/auth-guard'
+import { logger } from '#/shared/lib/logger'
 
 const nullableUuid = z.string().uuid().optional().or(z.literal(''))
 
@@ -97,22 +99,11 @@ export const createTransactionFn = createServerFn({ method: 'POST' })
   .inputValidator((input) => transactionSchema.parse(input))
   .handler(async ({ data }) => {
     const supabase = await getSupabaseServerClient()
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError) {
-      throw authError
-    }
-
-    if (!user) {
-      throw new Error('로그인이 필요합니다.')
-    }
+    const userId = await requireSpaceMember(supabase, data.spaceId)
 
     const { error } = await supabase.from('transactions').insert({
       space_id: data.spaceId,
-      user_id: user.id,
+      user_id: userId,
       date: data.date,
       type: data.type,
       amount: data.amount,
@@ -124,9 +115,11 @@ export const createTransactionFn = createServerFn({ method: 'POST' })
     })
 
     if (error) {
+      logger.error('transaction.create', error, { spaceId: data.spaceId, userId })
       throw error
     }
 
+    logger.info('transaction.create', { spaceId: data.spaceId, userId, detail: `${data.type} ${data.amount}` })
     return { success: true }
   })
 
@@ -141,6 +134,8 @@ export const deleteTransactionFn = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data }) => {
     const supabase = await getSupabaseServerClient()
+    await requireSpaceMember(supabase, data.spaceId)
+
     const { error } = await supabase
       .from('transactions')
       .delete()
@@ -148,8 +143,10 @@ export const deleteTransactionFn = createServerFn({ method: 'POST' })
       .eq('space_id', data.spaceId)
 
     if (error) {
+      logger.error('transaction.delete', error, { spaceId: data.spaceId })
       throw error
     }
 
+    logger.info('transaction.delete', { spaceId: data.spaceId, detail: data.transactionId })
     return { success: true }
   })
