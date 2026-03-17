@@ -28,7 +28,7 @@ begin
 
   update public.spaces
   set invite_password = hashed_password,
-      invite_expires_at = now() + (expire_hours || ' hours')::interval
+      invite_expires_at = now() + ('1 hour'::interval * expire_hours)
   where id = target_space_id;
 
   return hashed_password;

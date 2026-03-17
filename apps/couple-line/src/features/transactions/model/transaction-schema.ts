@@ -4,9 +4,9 @@ const nullableUuid = z.string().uuid().optional().or(z.literal(''))
 
 export const transactionSchema = z
   .object({
-    date: z.string().min(1, '일자를 입력해 주세요.'),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '유효한 날짜를 입력해 주세요.'),
     type: z.enum(['수입', '지출', '이체']),
-    amount: z.coerce.number(),
+    amount: z.coerce.number().positive('금액은 0보다 커야 합니다.').finite(),
     memo: z.string().optional().default(''),
     fromAccountId: nullableUuid,
     fromCategoryId: nullableUuid,

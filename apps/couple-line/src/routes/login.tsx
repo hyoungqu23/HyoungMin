@@ -12,8 +12,8 @@ export const Route = createFileRoute('/login')({
         throw redirect({ href: search.redirect })
       }
 
-      const firstSpace = context.viewer.spaces[0]
       if (context.viewer.spaces.length > 0) {
+        const firstSpace = context.viewer.spaces[0]
         throw redirect({ to: '/$spaceId', params: { spaceId: firstSpace.id } })
       }
 

@@ -11,9 +11,9 @@ const nullableUuid = z.string().uuid().optional().or(z.literal(''))
 const transactionSchema = z
   .object({
     spaceId: z.string().uuid(),
-    date: z.string().min(1),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '유효한 날짜 형식이 아닙니다.'),
     type: z.enum(['수입', '지출', '이체']),
-    amount: z.coerce.number(),
+    amount: z.coerce.number().positive('금액은 0보다 커야 합니다.').finite(),
     memo: z.string().trim().max(120).optional(),
     fromAccountId: nullableUuid,
     fromCategoryId: nullableUuid,

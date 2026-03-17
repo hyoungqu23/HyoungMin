@@ -19,5 +19,10 @@ export const Route = createFileRoute('/')({
 
 function HomeRoute() {
   const { viewer } = Route.useRouteContext()
-  return <HomePage viewer={viewer!} />
+
+  if (!viewer) {
+    return null
+  }
+
+  return <HomePage viewer={viewer} />
 }

@@ -15,8 +15,10 @@ export function getRouterContext() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 30_000,
-        refetchOnWindowFocus: false,
+        staleTime: 10_000,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
+        retry: 1,
       },
     },
   })
