@@ -8,12 +8,14 @@ export function SpaceInvitePage({
   redirectTo,
   spaceName,
   hasDirectLink,
+  isExpired,
   spaceId,
 }: {
   viewer: Viewer | null
   redirectTo: string
   spaceName: string
   hasDirectLink: boolean
+  isExpired: boolean
   spaceId: string
 }) {
   return (
@@ -58,7 +60,12 @@ export function SpaceInvitePage({
               <h2 className="mt-2 font-display text-[2rem] leading-none text-stone-900 sm:text-3xl">
                 {viewer.name}님, 공간에 합류할까요?
               </h2>
-              {hasDirectLink ? (
+              {isExpired ? (
+                <div className="mt-6 rounded-[1.35rem] border border-rose-200 bg-rose-50 p-5 text-sm leading-7 text-rose-800 sm:rounded-[1.6rem]">
+                  이 초대 링크는 만료되었어요. 공간 관리자에게 새 링크를
+                  요청해 주세요.
+                </div>
+              ) : hasDirectLink ? (
                 <div className="mt-6 rounded-[1.35rem] border border-emerald-200 bg-emerald-50 p-5 text-sm leading-7 text-emerald-800 sm:rounded-[1.6rem]">
                   링크 검증에 성공했어요. 잠시 후 자동으로 공간에 추가됩니다.
                 </div>

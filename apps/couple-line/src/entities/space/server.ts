@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { getSupabaseServerClient } from '#/shared/api/supabase/server'
 import { buildDashboardSnapshot } from '#/shared/lib/ledger'
+import { logger } from '#/shared/lib/logger'
 
 const spaceIdSchema = z.object({
   spaceId: z.string().uuid(),
@@ -64,9 +65,11 @@ export const createSpaceFn = createServerFn({ method: 'POST' })
     )
 
     if (error) {
+      logger.error('space.create', error)
       throw error
     }
 
+    logger.info('space.create', { spaceId: spaceId ?? undefined, detail: data.name })
     return { spaceId }
   })
 
@@ -96,11 +99,13 @@ export const fetchInviteInfoFn = createServerFn({ method: 'GET' })
     const resolved = (inviteData ?? {}) as {
       space_name?: string | null
       is_direct_link_valid?: boolean
+      is_expired?: boolean
     }
 
     return {
       spaceName: resolved.space_name ?? '우리 공간',
       isDirectLinkValid: Boolean(resolved.is_direct_link_valid),
+      isExpired: Boolean(resolved.is_expired),
     }
   })
 
@@ -133,15 +138,25 @@ export const joinSpaceWithInviteFn = createServerFn({ method: 'POST' })
       joined?: boolean
       already_member?: boolean
       valid?: boolean
+      expired?: boolean
       space_name?: string | null
     }
 
-    return {
+    const result = {
       joined: Boolean(resolved.joined),
       alreadyMember: Boolean(resolved.already_member),
       valid: Boolean(resolved.valid),
+      expired: Boolean(resolved.expired),
       spaceName: resolved.space_name ?? null,
     }
+
+    if (result.joined) {
+      logger.info('space.join', { spaceId: data.spaceId })
+    } else if (result.expired) {
+      logger.warn('space.join.expired', { spaceId: data.spaceId })
+    }
+
+    return result
   })
 
 export const createInviteLinkFn = createServerFn({ method: 'POST' })
@@ -150,6 +165,7 @@ export const createInviteLinkFn = createServerFn({ method: 'POST' })
       .object({
         spaceId: z.string().uuid(),
         password: z.string().trim().min(4).max(32),
+        expireHours: z.coerce.number().int().min(1).max(720).default(72),
       })
       .parse(input),
   )
@@ -160,13 +176,16 @@ export const createInviteLinkFn = createServerFn({ method: 'POST' })
       {
         target_space_id: data.spaceId,
         plain_password: data.password,
+        expire_hours: data.expireHours,
       },
     )
 
     if (error) {
+      logger.error('space.invite.create', error, { spaceId: data.spaceId })
       throw error
     }
 
+    logger.info('space.invite.create', { spaceId: data.spaceId, detail: `expires in ${data.expireHours}h` })
     return { inviteHash }
   })
 

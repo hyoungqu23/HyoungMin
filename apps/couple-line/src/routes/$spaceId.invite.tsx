@@ -49,6 +49,7 @@ function InviteRoute() {
       redirectTo={redirectTo}
       spaceName={data.spaceName}
       hasDirectLink={data.isDirectLinkValid}
+      isExpired={data.isExpired}
       spaceId={params.spaceId}
     />
   )

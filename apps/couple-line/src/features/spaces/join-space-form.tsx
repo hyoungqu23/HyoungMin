@@ -39,6 +39,10 @@ export function JoinSpaceForm({ spaceId }: { spaceId: string }) {
         )
         await router.invalidate()
         await navigate({ to: '/$spaceId', params: { spaceId } })
+      } else if (result.expired) {
+        toast.error('초대 링크가 만료되었어요.', {
+          description: '공간 관리자에게 새 초대 링크를 요청해 주세요.',
+        })
       } else {
         toast.error('비밀번호가 일치하지 않아요.', {
           description:

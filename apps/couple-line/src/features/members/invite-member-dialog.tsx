@@ -19,12 +19,20 @@ import {
 import { Input } from '#/shared/ui/input'
 import { Label } from '#/shared/ui/label'
 
+const EXPIRE_OPTIONS = [
+  { label: '24시간', value: 24 },
+  { label: '3일', value: 72 },
+  { label: '7일', value: 168 },
+  { label: '30일', value: 720 },
+] as const
+
 const schema = z.object({
   password: z
     .string()
     .trim()
     .min(4, '4자 이상 비밀번호를 입력해 주세요.')
     .max(32),
+  expireHours: z.number(),
 })
 
 export function InviteMemberDialog({ spaceId }: { spaceId: string }) {
@@ -33,7 +41,7 @@ export function InviteMemberDialog({ spaceId }: { spaceId: string }) {
   const createInviteLink = useServerFn(createInviteLinkFn)
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
-    defaultValues: { password: '' },
+    defaultValues: { password: '', expireHours: 72 },
   })
 
   const mutation = useMutation({
@@ -81,7 +89,11 @@ export function InviteMemberDialog({ spaceId }: { spaceId: string }) {
           className="space-y-4"
           onSubmit={form.handleSubmit(async (values) => {
             await mutation.mutateAsync({
-              data: { spaceId, password: values.password },
+              data: {
+                spaceId,
+                password: values.password,
+                expireHours: values.expireHours,
+              },
             })
           })}
         >
@@ -98,6 +110,19 @@ export function InviteMemberDialog({ spaceId }: { spaceId: string }) {
                 {form.formState.errors.password.message}
               </p>
             ) : null}
+          </div>
+          <div className="space-y-2">
+            <Label>링크 유효 기간</Label>
+            <select
+              className="h-11 w-full rounded-xl border border-input bg-white px-3 text-sm"
+              {...form.register('expireHours', { valueAsNumber: true })}
+            >
+              {EXPIRE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
           <Button
             type="submit"
