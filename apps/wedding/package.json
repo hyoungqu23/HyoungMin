@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prebuild": "npx tsx scripts/generate-image-metadata.ts",
-    "dev": "npx tsx scripts/generate-image-metadata.ts && next dev",
+    "prebuild": "tsx scripts/generate-image-metadata.ts",
+    "dev": "tsx scripts/generate-image-metadata.ts && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -30,6 +30,7 @@
     "eslint-config-next": "16.0.6",
     "react-hook-form": "^7.67.0",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5",
     "zod": "^4.1.12"
   }
