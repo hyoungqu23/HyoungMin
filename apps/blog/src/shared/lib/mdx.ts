@@ -72,6 +72,7 @@ export const compilePostMDX = async (
           [rehypePrettyCode, prettyCodeOptions],
         ],
       },
+      blockJS: false,
     },
     components,
   });

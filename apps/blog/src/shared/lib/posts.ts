@@ -30,6 +30,7 @@ const parseMeta = async (source: string) => {
         remarkPlugins: [],
         rehypePlugins: [],
       },
+      blockJS: false,
     },
   });
 
