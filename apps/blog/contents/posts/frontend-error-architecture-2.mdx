@@ -1,0 +1,267 @@
+---
+title: "Frontend Error Architecture #2 - 에러 모델과 도구 설계"
+description: ERROR_REGISTRY로 에러 코드·정책·expected 여부를 통합 관리하고, Zod 스키마 검증 기반의 DomainError 모델과 makeError 팩토리 함수를 설계하기
+createdAt: 2026-01-31
+category: Next.js
+series: frontend-error-architecture
+seriesOrder: 2
+tags:
+  - Next.js
+  - Error Handling
+  - DomainError
+  - SerializedError
+  - Zod
+  - Error Registry
+  - Error Code
+  - makeError
+  - SSOT
+  - RSC Serialization
+  - 에러 모델
+  - 직렬화
+  - 런타임 검증
+  - 팩토리 함수
+  - 프론트엔드 아키텍처
+---
+
+# 📄 [2편] 에러 모델과 도구 설계
+
+> **TL;DR**
+>
+> - 에러 코드, 정책, expected 여부를 하나의 `ERROR_REGISTRY`로 통합 관리해요.
+> - 인증 관련 에러는 `INVALID_CREDENTIALS`(로그인 실패)와 `AUTH_REQUIRED`(세션 만료)를 명확히 분리해요.
+> - `DomainError` 클래스는 앱 내부 로직용이고, 직렬화 경계를 넘을 때는 `SerializedError` plain object로 변환해요.
+> - `makeError` 팩토리 함수가 Zod 스키마로 런타임 검증을 강제해요.
+
+---
+
+## 1. ERROR_REGISTRY: 에러의 단일 진실 소스
+
+### 1.1 설계 원칙
+
+에러 코드 하나가 너무 많은 의미를 흡수하면, Sentry 대시보드에서 그루핑이 무의미해지고 알림 정책을 세울 수 없어요. **"이 코드를 Sentry에서 봤을 때, 팀원이 어디를 봐야 하는지 즉시 알 수 있는가?"**를 기준으로 삼아요.
+
+특히 주의할 점은 **같은 코드에 서로 다른 UX가 필요한 상황이 섞이지 않도록** 하는 것이에요. 예를 들어 "비밀번호가 틀렸습니다"는 폼 인라인 메시지가 적절하고, "세션이 만료되었습니다"는 로그인 페이지로 redirect가 적절합니다. 이 둘을 같은 코드로 묶으면 정책의 `ux` 필드가 모순에 빠져요.
+
+```typescript
+// error/registry.ts
+export type UxAction = "toast" | "alert" | "redirect" | "none";
+export type LogLevel = "info" | "warning" | "error" | "none";
+
+export type ErrorMeta = {
+  expected: boolean;
+  ux: UxAction;
+  log: LogLevel;
+};
+
+export const ERROR_REGISTRY = {
+  // ── 의도한 에러 (Track 1: Result로 반환) ──
+  VALIDATION: { expected: true, ux: "none", log: "none" },
+  INVALID_CREDENTIALS: { expected: true, ux: "none", log: "info" },
+  AUTH_REQUIRED: { expected: true, ux: "redirect", log: "info" },
+  NOT_FOUND: { expected: true, ux: "none", log: "none" },
+
+  // ── 네트워크 에러 (세분화) ──
+  OFFLINE: { expected: false, ux: "toast", log: "warning" },
+  TIMEOUT: { expected: false, ux: "toast", log: "warning" },
+  REQUEST_ABORTED: { expected: false, ux: "none", log: "info" },
+  NETWORK_ERROR: { expected: false, ux: "toast", log: "warning" },
+
+  // ── HTTP 에러 ──
+  HTTP_CLIENT_ERROR: { expected: false, ux: "toast", log: "warning" },
+  HTTP_SERVER_ERROR: { expected: false, ux: "toast", log: "error" },
+
+  // ── 데이터 무결성 ──
+  SCHEMA_MISMATCH: { expected: false, ux: "toast", log: "error" },
+
+  // ── 미분류 에러 (발생 위치로 구분) ──
+  UNKNOWN_SERVER_ERROR: { expected: false, ux: "toast", log: "error" },
+  UNKNOWN_CLIENT_ERROR: { expected: false, ux: "toast", log: "error" },
+} as const satisfies Record<string, ErrorMeta>;
+
+export type ErrorCode = keyof typeof ERROR_REGISTRY;
+
+export const isExpectedCode = (code: ErrorCode): boolean =>
+  ERROR_REGISTRY[code].expected;
+```
+
+`INVALID_CREDENTIALS`와 `AUTH_REQUIRED`의 차이를 명확히 해 둡니다.
+
+- `**INVALID_CREDENTIALS`:\*\* 사용자가 잘못된 자격증명을 입력한 상황 (비밀번호 불일치 등). `ux: "none"`이므로 Toast가 뜨지 않고, UI 컴포넌트가 `handleError` 반환값으로 폼 인라인 메시지를 직접 렌더링합니다.
+- `**AUTH_REQUIRED`:\*\* 세션 만료, 토큰 없음 등 인증 자체가 필요한 상황. `ux: "redirect"`이므로 호출부에서 반환값을 활용해 로그인 페이지로 redirect합니다.
+
+> **💡 확장 가이드:** 프로젝트의 도메인 요구사항에 따라 에러 코드를 확장하세요. 예를 들어, 서비스가 커지면 `FORBIDDEN`(권한 부족, 403)을 분리하는 것이 일반적이에요. 레지스트리에 한 줄 추가하는 것만으로 수용됩니다.
+
+---
+
+## 2. 런타임 감지 유틸리티
+
+여러 곳에서 현재 실행 환경(서버/클라이언트)을 판별해야 해요. 이 판별을 모듈 상단에서 `const isServer = typeof window === "undefined"`로 고정하면, 번들링 환경에 따라 모듈 평가 시점에 값이 고정되어 의도와 다르게 동작할 수 있습니다. 반드시 **함수 호출 시점에 매번 평가**해야 해요.
+
+```typescript
+// error/runtime.ts
+export type Runtime = "server" | "client";
+
+/**
+ * 현재 실행 환경을 매 호출 시점에 판별합니다.
+ *
+ * 모듈 상단에서 const로 고정하지 않는 이유:
+ * Next.js의 번들링(특히 Edge Runtime)에서 모듈 평가 시점의
+ * typeof window 결과가 실제 런타임과 다를 수 있기 때문입니다.
+ */
+export const getRuntime = (): Runtime =>
+  typeof window === "undefined" ? "server" : "client";
+```
+
+---
+
+## 3. Zod 스키마: details의 구조 정의
+
+```typescript
+// error/schema.ts
+import { z } from "zod";
+import type { ErrorCode } from "./registry";
+
+export const ErrorDetailsSchema = {
+  VALIDATION: z.object({
+    fieldErrors: z.record(z.array(z.string())),
+  }),
+  INVALID_CREDENTIALS: z.null(),
+  AUTH_REQUIRED: z.null(),
+  NOT_FOUND: z.object({ resource: z.string().optional() }).nullable(),
+  OFFLINE: z.null(),
+  TIMEOUT: z.null(),
+  REQUEST_ABORTED: z.null(),
+  NETWORK_ERROR: z.null(),
+  HTTP_CLIENT_ERROR: z.object({ status: z.number() }).nullable(),
+  HTTP_SERVER_ERROR: z.object({ status: z.number() }).nullable(),
+  SCHEMA_MISMATCH: z.object({ endpoint: z.string().optional() }).nullable(),
+  UNKNOWN_SERVER_ERROR: z.null(),
+  UNKNOWN_CLIENT_ERROR: z.null(),
+} as const satisfies Record<ErrorCode, z.ZodTypeAny>;
+
+export type ErrorDetailsMap = {
+  [K in ErrorCode]: z.infer<(typeof ErrorDetailsSchema)[K]>;
+};
+```
+
+---
+
+## 4. DomainError 클래스와 SerializedError DTO
+
+앱 내부에서 사용하는 `DomainError` 클래스와, 직렬화 경계를 넘을 때 사용하는 `SerializedError` plain object를 분리합니다.
+
+```typescript
+// error/domain-error.ts
+import type { ErrorCode } from "./registry";
+import type { ErrorDetailsMap } from "./schema";
+import { ERROR_REGISTRY } from "./registry";
+
+export type ErrorArgs<C extends ErrorCode> = {
+  code: C;
+  details: ErrorDetailsMap[C];
+  message?: string;
+  cause?: unknown;
+};
+
+export class DomainError<C extends ErrorCode = ErrorCode> extends Error {
+  public readonly code: C;
+  public readonly details: ErrorDetailsMap[C];
+
+  constructor(args: ErrorArgs<C>) {
+    super(args.message ?? args.code, { cause: args.cause });
+    this.name = "DomainError";
+    this.code = args.code;
+    this.details = args.details;
+  }
+
+  toSerialized(): SerializedError {
+    return {
+      code: this.code,
+      message: this.message,
+      details: this.details,
+    };
+  }
+}
+
+export type SerializedError = {
+  code: ErrorCode;
+  message: string;
+  details: unknown;
+};
+
+export const isDomainError = <C extends ErrorCode>(
+  e: unknown,
+  code?: C,
+): e is DomainError<C> =>
+  e instanceof DomainError && (!code || e.code === code);
+
+export const isSerializedError = (e: unknown): e is SerializedError =>
+  typeof e === "object" &&
+  e !== null &&
+  "code" in e &&
+  "message" in e &&
+  typeof (e as SerializedError).code === "string" &&
+  (e as SerializedError).code in ERROR_REGISTRY;
+```
+
+---
+
+## 5. makeError: 런타임 검증을 강제하는 팩토리 함수
+
+```typescript
+// error/make-error.ts
+import { DomainError, type ErrorArgs } from "./domain-error";
+import { ErrorDetailsSchema } from "./schema";
+import type { ErrorCode, ErrorDetailsMap } from "./registry";
+import { getRuntime } from "./runtime";
+
+export const makeError = <C extends ErrorCode>(
+  args: ErrorArgs<C>,
+): DomainError<C> => {
+  const schema = ErrorDetailsSchema[args.code];
+  const parsed = schema.safeParse(args.details);
+
+  if (!parsed.success) {
+    console.error(
+      `[makeError] details 검증 실패 (code: ${args.code})`,
+      parsed.error.flatten(),
+    );
+
+    // 💡 런타임에 따라 적절한 미분류 코드로 폴백합니다.
+    // details 검증 실패는 개발 단계에서 잡혀야 할 프로그래밍 실수이지,
+    // 운영에서 별도로 분류해야 할 에러 유형이 아닙니다.
+    // 프로덕션에서 이 경로가 실행되는 것 자체가 비정상이므로
+    // ERROR_SCHEMA_INVALID 같은 별도 코드를 두지 않고
+    // UNKNOWN_SERVER_ERROR / UNKNOWN_CLIENT_ERROR로 떨어뜨립니다.
+    const fallbackCode =
+      getRuntime() === "server"
+        ? "UNKNOWN_SERVER_ERROR"
+        : "UNKNOWN_CLIENT_ERROR";
+
+    return new DomainError({
+      code: fallbackCode as C,
+      details: null as ErrorDetailsMap[C],
+      message: args.message ?? "알 수 없는 오류가 발생했습니다.",
+      cause: args.cause,
+    });
+  }
+
+  return new DomainError({ ...args, details: parsed.data });
+};
+```
+
+---
+
+## 6. 결론
+
+우리는 다섯 가지 도구를 얻었어요.
+
+- **ERROR_REGISTRY:** 에러 코드 + 정책 + expected 여부. 인증 에러는 `INVALID_CREDENTIALS`와 `AUTH_REQUIRED`로 분리하여 UX 충돌 방지.
+- **getRuntime():** 번들링 환경에 안전한 런타임 감지 유틸리티.
+- **ErrorDetailsSchema:** Zod 기반 details 구조의 SSOT.
+- **DomainError / SerializedError:** 내부 로직용 클래스와 직렬화 경계용 DTO.
+- **makeError:** 런타임 검증을 강제하는 유일한 생성 경로.
+
+다음 편에서는 이 도구들 위에 투 트랙 전략과 중앙 에러 처리기를 세웁니다.
+
+---

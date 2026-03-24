@@ -1,0 +1,297 @@
+---
+title: "Frontend Error Architecture #5 - 클라이언트 경계 구현"
+description: safeHandler로 이벤트 핸들러 에러를 포착하고, error.tsx·global-error.tsx·브라우저 경계로 완전한 클라이언트 방어선을 구축하기
+createdAt: 2026-02-12
+category: Next.js
+series: frontend-error-architecture
+seriesOrder: 5
+tags:
+  - Next.js
+  - Error Boundary
+  - error.tsx
+  - global-error.tsx
+  - useActionState
+  - safeHandler
+  - Interaction Boundary
+  - Rendering Boundary
+  - Browser Boundary
+  - window.onerror
+  - React 19
+  - 클라이언트 경계
+  - 이벤트 핸들러 에러
+  - 렌더링 경계
+  - 프론트엔드 아키텍처
+---
+
+# 📄 [5편] 클라이언트 경계 구현
+
+> **TL;DR**
+>
+> - `safeHandler` 래퍼로 이벤트 핸들러의 에러를 포착하여 `handleError`에 위임해요.
+> - `error.tsx`에서는 `log: "none"`으로 중복 리포트를 방지하며 범용 UX만 제공해요.
+> - `global-error.tsx`에도 최소 관측 코드를 넣어 임팩트 큰 루트 에러를 놓치지 않아요.
+> - 브라우저 경계(`window.onerror`)를 최후의 안전망으로 설정해요.
+
+---
+
+## 1. 인터랙션 경계: safeHandler
+
+```typescript
+// error/safe-handler.ts
+import { handleError } from "./handler";
+
+export const safeHandler = <Args extends unknown[]>(
+  fn: (...args: Args) => void | Promise<void>,
+) => {
+  return async (...args: Args) => {
+    try {
+      await fn(...args);
+    } catch (error) {
+      handleError(error);
+    }
+  };
+};
+```
+
+**사용 예시 — 일반 버튼 핸들러:**
+
+```tsx
+// features/post/ui/DeleteButton.tsx
+"use client";
+import { safeHandler } from "@/error/safe-handler";
+import { handleError } from "@/error/handler";
+import { deletePost } from "../api/actions";
+
+export const DeleteButton = ({ postId }: { postId: string }) => {
+  const handleDelete = safeHandler(async () => {
+    const result = await deletePost(postId);
+
+    if (!result.ok) {
+      const error = handleError(result.error);
+      if (error.code === "NOT_FOUND") {
+        toast.info("이미 삭제된 게시글입니다.");
+      }
+      return;
+    }
+
+    toast.success("삭제되었습니다.");
+    router.push("/posts");
+  });
+
+  return <button onClick={handleDelete}>삭제</button>;
+};
+```
+
+---
+
+## 2. useActionState와의 결합
+
+```tsx
+// features/auth/ui/LoginForm.tsx
+"use client";
+import { useActionState } from "react";
+import { loginAction } from "../api/actions";
+import { handleError } from "@/error/handler";
+
+export const LoginForm = () => {
+  const [state, formAction, isPending] = useActionState(loginAction, null);
+
+  // 💡 아키텍처 규칙: 렌더링 중 handleError는 ux:"none" + log:"none"에 한정.
+  // INVALID_CREDENTIALS (ux:"none", log:"info")는 log가 있으므로
+  // 엄밀히는 useEffect에서 처리해야 합니다.
+  // 하지만 console.info는 렌더링 안전하므로 실용적으로 허용합니다.
+  const error = state && !state.ok ? handleError(state.error) : null;
+
+  return (
+    <form action={formAction}>
+      <input name="email" type="email" />
+      <input name="password" type="password" />
+
+      {/* INVALID_CREDENTIALS (ux: "none") → Toast 없이 인라인 메시지 */}
+      {error?.code === "INVALID_CREDENTIALS" && (
+        <p className="text-red-500">{error.message}</p>
+      )}
+
+      {/* VALIDATION (ux: "none") → 필드별 에러 */}
+      {error?.code === "VALIDATION" && (
+        <ul className="text-red-500">
+          {Object.entries(error.details.fieldErrors).map(([field, msgs]) => (
+            <li key={field}>
+              {field}: {msgs?.join(", ")}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <button disabled={isPending}>로그인</button>
+    </form>
+  );
+};
+```
+
+> **💡 Toast/Sentry가 필요한 에러가 state로 내려오는 경우:**
+
+```tsx
+useEffect(() => {
+  if (state && !state.ok) handleError(state.error);
+}, [state]);
+```
+
+---
+
+## 3. 렌더링 경계: error.tsx
+
+```tsx
+// app/error.tsx
+"use client";
+import { useEffect } from "react";
+import { handleError } from "@/error/handler";
+
+export default function ErrorPage({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // 💡 중복 방지: Track 2 에러는 서버 경계(safeServerAction)에서
+    // handleServerError를 통해 이미 Sentry에 리포트되었습니다.
+    // 클라이언트에서는 재리포트하지 않고 UX만 수행합니다.
+    handleError(error, { log: "none" });
+  }, [error]);
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[50vh]">
+      <h2 className="text-xl font-semibold">문제가 발생했습니다</h2>
+      <p className="text-gray-500 mt-2">잠시 후 다시 시도해주세요.</p>
+      <button
+        onClick={reset}
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+      >
+        다시 시도
+      </button>
+    </div>
+  );
+}
+```
+
+---
+
+## 4. global-error.tsx: 루트 레이아웃의 최후 방어선
+
+루트 레이아웃 에러는 빈도는 낮지만 임팩트가 큽니다. `global-error.tsx`에도 최소 관측 코드를 넣어 놓치지 않도록 합니다.
+
+```tsx
+// app/global-error.tsx
+"use client";
+import { useEffect } from "react";
+import { handleError } from "@/error/handler";
+
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // 💡 global-error.tsx는 <html>부터 새로 렌더링하므로
+    // sonner Provider가 없어 toast는 동작하지 않을 수 있습니다.
+    // 하지만 reporter(Sentry + console)는 정상 동작합니다.
+    // 서버에서 이미 리포트되었을 수 있으므로 log: "none"으로 호출합니다.
+    handleError(error, { log: "none" });
+  }, [error]);
+
+  return (
+    <html>
+      <body>
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <h2 className="text-xl font-semibold">
+            치명적인 오류가 발생했습니다
+          </h2>
+          <button
+            onClick={reset}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+          >
+            다시 시도
+          </button>
+        </div>
+      </body>
+    </html>
+  );
+}
+```
+
+---
+
+## 5. 브라우저 경계: 최후의 안전망
+
+```typescript
+// error/browser-boundary.ts
+import { handleError } from "./handler";
+
+export const initBrowserBoundary = () => {
+  if (typeof window === "undefined") return;
+
+  window.onerror = (_message, _source, _lineno, _colno, error) => {
+    handleError(error ?? new Error("Unhandled error (window.onerror)"), {
+      ux: "toast",
+      log: "error",
+    });
+  };
+
+  window.onunhandledrejection = (event: PromiseRejectionEvent) => {
+    handleError(event.reason ?? new Error("Unhandled rejection"), {
+      ux: "toast",
+      log: "error",
+    });
+  };
+};
+```
+
+```tsx
+// components/BrowserBoundaryInit.tsx
+"use client";
+import { useEffect } from "react";
+import { initBrowserBoundary } from "@/error/browser-boundary";
+
+export const BrowserBoundaryInit = () => {
+  useEffect(() => {
+    initBrowserBoundary();
+  }, []);
+  return null;
+};
+```
+
+---
+
+## 6. 경계별 역할 정리
+
+```
+에러 발생
+  │
+  ├─ Server Action 내부 → 서버 경계 (safeServerAction)
+  │   ├─ Track 1 → Result 반환 → UI에서 handleError(result.error) → 반환값 활용
+  │   └─ Track 2 → handleServerError(error, { ux: "none" }) → throw
+  │                → error.tsx → handleError(error, { log: "none" })
+  │
+  ├─ fetch 통신 → 네트워크 경계 (networkBoundary)
+  │   └─ OFFLINE / TIMEOUT / REQUEST_ABORTED / HTTP_xxx / SCHEMA_MISMATCH / NETWORK_ERROR
+  │
+  ├─ 이벤트 핸들러 → 인터랙션 경계 (safeHandler)
+  │   └─ catch → handleError(error)
+  │
+  ├─ 렌더링 중 throw → 렌더링 경계 (error.tsx)
+  │   └─ handleError(error, { log: "none" }) + Fallback UI
+  │
+  ├─ 루트 레이아웃 에러 → global-error.tsx
+  │   └─ handleError(error, { log: "none" }) + 최소 Fallback
+  │
+  └─ 어디서도 안 잡힘 → 브라우저 경계 (window.onerror)
+      └─ handleError(error)
+```
+
+다음 편에서는 DAL과 TanStack Query에 실전 적용합니다.
+
+---

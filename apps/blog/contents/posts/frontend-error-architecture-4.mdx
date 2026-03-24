@@ -1,0 +1,312 @@
+---
+title: "Frontend Error Architecture #4 - 서버 경계와 네트워크 경계 구현"
+description: safeServerAction으로 직렬화 안전한 Result 패턴을 구현하고, networkBoundary로 오프라인·타임아웃·HTTP 에러를 세분화하는 서버/네트워크 경계 래퍼
+createdAt: 2026-02-11
+category: Next.js
+series: frontend-error-architecture
+seriesOrder: 4
+tags:
+  - Next.js
+  - Server Actions
+  - Server Boundary
+  - Network Boundary
+  - safeServerAction
+  - networkBoundary
+  - Result Pattern
+  - AbortSignal
+  - Fetch Wrapper
+  - HTTP Error
+  - Timeout
+  - Offline Detection
+  - Schema Validation
+  - 서버 경계
+  - 네트워크 경계
+  - 프론트엔드 아키텍처
+---
+
+# 📄 [4편] 서버 경계와 네트워크 경계 구현
+
+> **TL;DR**
+>
+> - `safeServerAction`은 `handleServerError`를 사용하여 "모든 처리는 handleError로" 규칙을 서버에서도 지킵니다.
+> - `networkBoundary`는 `AbortSignal.any()`로 외부 signal과 내부 타이머를 합성하여 정확한 취소 감지를 수행해요.
+
+---
+
+## 1. Result 패턴
+
+```typescript
+// error/result.ts
+import type { DomainError, SerializedError } from "./domain-error";
+
+export type Success<T> = { ok: true; data: T };
+export type Failure = { ok: false; error: SerializedError };
+export type Result<T> = Success<T> | Failure;
+
+export const actionSuccess = <T>(data: T): Success<T> => ({
+  ok: true,
+  data,
+});
+
+export const actionFailure = (error: DomainError): Failure => ({
+  ok: false,
+  error: error.toSerialized(),
+});
+```
+
+---
+
+## 2. safeServerAction: 서버 경계 래퍼
+
+> **⚠️ 구현 안정성 참고:** `isRedirectError`와 `isNotFoundError`는 Next.js의 내부 모듈 경로에서 import합니다. 공식 API가 아니므로 메이저 버전 업그레이드 시 변경될 수 있어요. adapter 파일로 격리하여 확인 지점을 한 곳으로 모읍니다.
+
+```typescript
+// error/next-internals.ts
+// ⚠️ Next.js 내부 경로 import.
+// 공식 API가 아니므로 버전 업그레이드 시 이 파일만 확인하면 됩니다.
+export { isRedirectError } from "next/dist/client/components/redirect";
+export { isNotFoundError } from "next/dist/client/components/not-found";
+```
+
+```typescript
+// error/safe-action.ts
+"use server";
+import { z } from "zod";
+import { isRedirectError, isNotFoundError } from "./next-internals";
+import { makeError } from "./make-error";
+import { isDomainError } from "./domain-error";
+import { isExpectedCode } from "./registry";
+import { actionSuccess, actionFailure, type Result } from "./result";
+import { handleServerError } from "./handler.server";
+
+export const safeServerAction = <S extends z.ZodSchema, R>(
+  schema: S,
+  action: (parsedData: z.infer<S>) => Promise<R>,
+) => {
+  return async (data: z.infer<S>): Promise<Result<R>> => {
+    try {
+      const validation = schema.safeParse(data);
+      if (!validation.success) {
+        const error = makeError({
+          code: "VALIDATION",
+          details: {
+            fieldErrors: validation.error.flatten().fieldErrors,
+          },
+          message: "입력값을 확인해주세요.",
+        });
+        return actionFailure(error); // 🚦 Track 1
+      }
+
+      const result = await action(validation.data);
+      return actionSuccess(result);
+    } catch (error) {
+      if (isRedirectError(error) || isNotFoundError(error)) {
+        throw error;
+      }
+
+      // 🚦 Track 1: 의도한 비즈니스 에러는 Result로 반환
+      if (isDomainError(error) && isExpectedCode(error.code)) {
+        return actionFailure(error);
+      }
+
+      // 🚦 Track 2: handleServerError로 로깅 후 throw
+      // "모든 처리는 handleError로" 규칙에 예외 없음.
+      // ux: "none" → 서버에서 UX 부수효과 없음 (serverPresenter가 no-op)
+      handleServerError(error, { ux: "none" });
+
+      // 클라이언트에 노출할 일반화된 에러로 throw
+      throw new Error("일시적인 시스템 오류가 발생했습니다.", {
+        cause: error,
+      });
+    }
+  };
+};
+```
+
+**사용 예시:**
+
+```typescript
+// features/auth/api/actions.ts
+"use server";
+import { z } from "zod";
+import { safeServerAction } from "@/error/safe-action";
+import { makeError } from "@/error/make-error";
+
+const LoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+export const loginAction = safeServerAction(LoginSchema, async (data) => {
+  const user = await authService.login(data.email, data.password);
+
+  if (!user) {
+    // 💡 INVALID_CREDENTIALS: 폼 인라인 메시지용 (ux: "none")
+    // AUTH_REQUIRED(ux: "redirect")와 분리되어 정책이 충돌하지 않습니다.
+    throw makeError({
+      code: "INVALID_CREDENTIALS",
+      details: null,
+      message: "이메일 또는 비밀번호가 올바르지 않습니다.",
+    });
+  }
+
+  return { userId: user.id };
+});
+```
+
+---
+
+## 3. networkBoundary: 네트워크 경계 래퍼
+
+### 3.1 throw 모드 (기본)
+
+```typescript
+// error/network-boundary.ts
+import { z } from "zod";
+import { makeError } from "./make-error";
+import { isDomainError } from "./domain-error";
+import { isExpectedCode } from "./registry";
+import { actionSuccess, actionFailure, type Result } from "./result";
+
+type NetworkOptions<T> = RequestInit & {
+  responseSchema?: z.ZodType<T>;
+  timeout?: number;
+};
+
+export async function networkBoundary<T>(
+  input: RequestInfo | URL,
+  options?: NetworkOptions<T>,
+): Promise<T> {
+  const { responseSchema, timeout = 10000, ...init } = options ?? {};
+  const internalController = new AbortController();
+  const timer = setTimeout(() => internalController.abort(), timeout);
+
+  // 💡 외부 signal과 내부 타이머 signal을 합성합니다.
+  // 외부 signal이 있으면 AbortSignal.any()로 결합하여
+  // 어느 쪽이든 abort되면 fetch가 취소됩니다.
+  // AbortSignal.any()는 주요 브라우저에서 지원됩니다 (Chrome 116+, Firefox 124+, Safari 17.4+).
+  // Node.js 20+ 환경에서도 사용 가능합니다.
+  const signals = [internalController.signal];
+  if (init.signal) signals.push(init.signal);
+  const combinedSignal = AbortSignal.any(signals);
+
+  try {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      throw makeError({
+        code: "OFFLINE",
+        details: null,
+        message: "인터넷에 연결되어 있지 않습니다.",
+      });
+    }
+
+    const response = await fetch(input, {
+      ...init,
+      signal: combinedSignal,
+    });
+
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+
+      if (body.code && body.message) {
+        throw makeError({
+          code: body.code,
+          details: body.details ?? null,
+          message: body.message,
+        });
+      }
+
+      if (response.status >= 500) {
+        throw makeError({
+          code: "HTTP_SERVER_ERROR",
+          details: { status: response.status },
+          message: body.message ?? "서버에 문제가 발생했습니다.",
+        });
+      }
+
+      throw makeError({
+        code: "HTTP_CLIENT_ERROR",
+        details: { status: response.status },
+        message: body.message ?? `요청 실패 (${response.status})`,
+      });
+    }
+
+    const data = await response.json();
+
+    if (responseSchema) {
+      const parsed = responseSchema.safeParse(data);
+      if (!parsed.success) {
+        throw makeError({
+          code: "SCHEMA_MISMATCH",
+          details: { endpoint: input.toString() },
+          message: "서버 응답 형식이 예상과 다릅니다.",
+          cause: parsed.error,
+        });
+      }
+      return parsed.data;
+    }
+
+    return data as T;
+  } catch (error) {
+    if (isDomainError(error)) throw error;
+
+    if (error instanceof DOMException && error.name === "AbortError") {
+      // 외부 signal이 abort되었는지 확인하여 REQUEST_ABORTED / TIMEOUT 구분.
+      // 💡 실용적 수준의 구분입니다.
+      // 외부 signal과 내부 타이머가 거의 동시에 abort되는 엣지 케이스에서는
+      // 오분류될 수 있습니다. 100% 정확한 구분이 필요하다면
+      // AbortController를 커스텀 래핑하여 abort reason을 명시적으로
+      // 태깅하는 방식을 고려하세요.
+      if (init.signal?.aborted) {
+        throw makeError({
+          code: "REQUEST_ABORTED",
+          details: null,
+          message: "요청이 취소되었습니다.",
+          cause: error,
+        });
+      }
+      throw makeError({
+        code: "TIMEOUT",
+        details: null,
+        message: "서버 응답이 지연되고 있습니다. 다시 시도해주세요.",
+        cause: error,
+      });
+    }
+
+    throw makeError({
+      code: "NETWORK_ERROR",
+      details: null,
+      message: "네트워크 연결을 확인해주세요.",
+      cause: error,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+```
+
+### 3.2 Result 모드
+
+```typescript
+export async function networkBoundaryResult<T>(
+  input: RequestInfo | URL,
+  options?: NetworkOptions<T>,
+): Promise<Result<T>> {
+  try {
+    const data = await networkBoundary<T>(input, options);
+    return actionSuccess(data);
+  } catch (error) {
+    if (isDomainError(error) && isExpectedCode(error.code)) {
+      return actionFailure(error);
+    }
+    throw error;
+  }
+}
+```
+
+---
+
+## 4. 결론
+
+서버 경계와 네트워크 경계가 완성되었어요. `safeServerAction`은 `handleServerError`를 사용하여 "모든 처리는 handleError로" 규칙에 예외를 두지 않습니다. 다음 편에서는 클라이언트 측 경계를 구현합니다.
+
+---

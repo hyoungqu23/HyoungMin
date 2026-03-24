@@ -1,0 +1,335 @@
+---
+title: "Frontend Error Architecture #3 - 투 트랙 전략과 handleError"
+description: Return vs Throw 투 트랙으로 에러를 전달하되, DI 기반의 handleError 단일 처리기로 정책을 일관 적용하고 반환값으로 맥락별 UI를 처리하는 전략
+createdAt: 2026-02-10
+category: Next.js
+series: frontend-error-architecture
+seriesOrder: 3
+tags:
+  - Next.js
+  - Error Handling
+  - handleError
+  - Two-Track Error Handling
+  - Result Pattern
+  - Dependency Injection
+  - Error Reporter
+  - Error Presenter
+  - Sentry
+  - 투 트랙 전략
+  - 중앙 에러 처리기
+  - 에러 정책
+  - DI 패턴
+  - 프론트엔드 아키텍처
+---
+
+# 📄 [3편] 투 트랙 전략과 handleError
+
+> **TL;DR**
+>
+> - **"이 에러가 사용자에게 행동 교정을 요구하는가?"**라는 질문 하나로 전달 방식을 두 트랙으로 나눠요.
+> - 전달 방식만 다를 뿐, **처리는 항상 `handleError` 하나로 수렴**해요. 서버 경계를 포함한 모든 경계에서 예외 없이 `handleError`를 거칩니다.
+> - `handleError`는 DI로 주입된 reporter/presenter를 사용해요. 서버는 팩토리 함수로 인스턴스를 생성하고, 클라이언트는 init 패턴을 사용합니다.
+
+---
+
+## 1. 왜 투 트랙인가?
+
+### 1.1 기술적 이유: RSC 직렬화의 한계
+
+Server Action이나 Server Component에서 `throw`된 에러는 Next.js가 직렬화하면서 커스텀 속성(`code`, `details`)을 전부 제거해요. 비즈니스 에러의 풍부한 정보를 전달하려면 **Result 패턴(JSON 반환)**이 유일한 방법입니다.
+
+### 1.2 설계적 이유: 맥락별 UX의 필요
+
+Result로 반환해야 UI 컴포넌트가 에러 정보를 활용해 적절한 피드백을 구성할 수 있어요.
+
+**핵심 질문: "이 에러가 사용자에게 행동 교정을 요구하는가?"**
+
+- **Yes → Track 1:** `Result` 객체로 반환.
+- **No → Track 2:** `throw`하여 렌더링 경계가 격리.
+
+---
+
+## 2. 전달은 다르지만, 처리는 하나로
+
+투 트랙은 **전달 방식**의 분리이지, **처리 방식**의 분리가 아닙니다.
+
+**규칙은 단순해요: 에러를 만나면 무조건 `handleError`를 호출하고, 추가 처리가 필요하면 반환값을 활용한다.** 서버 경계도 예외가 아닙니다.
+
+```
+Track 1 → Result 반환 → handleError(result.error) → 정책 적용 → 반환값으로 추가 UI 처리
+Track 2 → handleError(error, { ux: "none" }) → 로깅 → throw → 렌더링 경계 포착
+```
+
+### 아키텍처 규칙
+
+투 트랙 전략은 네 가지 규칙을 따릅니다.
+
+1. **단일 처리기:** 어떤 에러든 `handleError`를 반드시 거친다. 서버 경계를 포함한 모든 경계에서 예외 없다.
+2. **중복 방지:** 하나의 에러 인스턴스에 대해 로깅(Sentry)은 최초 1회만 수행한다. 이미 리포트된 에러는 `log: "none"`으로 재리포트를 방지한다.
+3. **렌더링 안전:** 렌더링 중 `handleError` 호출은 `ux: "none"` + `log: "none"`인 에러에 한정한다. 그 외 에러는 반드시 `useEffect` 내에서 호출한다.
+4. **반환값 활용:** `handleError`는 정규화된 `DomainError`를 반환한다. 맥락별 추가 처리(필드 에러 렌더링, redirect 등)는 이 반환값으로 수행한다.
+
+---
+
+## 3. handleError: 모든 에러의 단일 처리기
+
+### 3.1 설계 원칙: 호출 API는 하나, 내부 동작은 DI
+
+`handleError`는 서버와 클라이언트 양쪽에서 호출돼요. 하지만 두 환경의 API가 다릅니다.
+
+- **서버:** `toast()`가 없음. Sentry는 서버 SDK를 동기적으로 사용해야 프로세스 종료 전 전송 보장.
+- **클라이언트:** `toast()`, `alert()` 사용 가능. Sentry는 브라우저 SDK.
+
+이 차이를 DI로 해결합니다. 서버에서는 **팩토리 함수**로 명시적 인스턴스를 생성하고, 클라이언트에서는 **init 패턴**으로 주입합니다.
+
+> **왜 서버는 팩토리 함수인가요?** Node.js 서버에서 모듈은 프로세스 수명 동안 캐시됩니다. `let reporter`같은 전역 mutable state는 이론적으로 요청 간 간섭 가능성이 있어요. 팩토리 함수로 인스턴스를 생성하면 모듈 스코프의 가변 상태를 피할 수 있습니다. 클라이언트는 탭당 하나의 런타임이므로 init 패턴으로 충분해요.
+
+> **⚠️ `handleError`는 순수 함수가 아닙니다.** 정규화(normalize) → 로깅(report) → UX 피드백(present) 세 단계를 수행하며, 로깅과 UX 피드백은 부수효과입니다. 정책이 `ux: "none"`, `log: "none"`이면 부수효과 없이 정규화만 수행합니다.
+
+### 3.2 Reporter / Presenter 인터페이스
+
+```typescript
+// error/types.ts
+import type { DomainError } from "./domain-error";
+import type { LogLevel, UxAction } from "./registry";
+
+export type ErrorReporter = {
+  report: (error: DomainError, level: LogLevel) => void;
+};
+
+export type ErrorPresenter = {
+  present: (error: DomainError, action: UxAction) => void;
+};
+```
+
+### 3.3 서버 / 클라이언트 구현체
+
+```typescript
+// error/reporter.server.ts
+import * as Sentry from "@sentry/nextjs";
+import type { ErrorReporter } from "./types";
+
+export const serverReporter: ErrorReporter = {
+  report: (error, level) => {
+    if (level === "error") {
+      console.error("[handleError:server]", error);
+      Sentry.captureException(error, {
+        extra: { code: error.code, details: error.details },
+      });
+    } else if (level === "warning") {
+      console.warn("[handleError:server]", error);
+    } else if (level === "info") {
+      console.info("[handleError:server]", error);
+    }
+  },
+};
+
+// error/presenter.server.ts
+import type { ErrorPresenter } from "./types";
+
+export const serverPresenter: ErrorPresenter = {
+  present: () => {}, // 서버에서는 UX 부수효과 없음
+};
+```
+
+```typescript
+// error/reporter.client.ts
+import * as Sentry from "@sentry/nextjs";
+import type { ErrorReporter } from "./types";
+
+export const clientReporter: ErrorReporter = {
+  report: (error, level) => {
+    if (level === "error") {
+      console.error("[handleError:client]", error);
+      Sentry.captureException(error, {
+        extra: { code: error.code, details: error.details },
+      });
+    } else if (level === "warning") {
+      console.warn("[handleError:client]", error);
+    } else if (level === "info") {
+      console.info("[handleError:client]", error);
+    }
+  },
+};
+
+// error/presenter.client.ts
+import { toast } from "sonner";
+import type { ErrorPresenter } from "./types";
+
+export const clientPresenter: ErrorPresenter = {
+  present: (error, action) => {
+    if (action === "toast") toast.error(error.message);
+    else if (action === "alert") alert(error.message);
+  },
+};
+```
+
+### 3.4 handleError 본체
+
+```typescript
+// error/handler.ts
+import { ERROR_REGISTRY, type UxAction, type LogLevel } from "./registry";
+import {
+  isDomainError,
+  isSerializedError,
+  type DomainError,
+} from "./domain-error";
+import { makeError } from "./make-error";
+import { getRuntime } from "./runtime";
+import type { ErrorReporter, ErrorPresenter } from "./types";
+
+type HandleErrorOptions = {
+  ux?: UxAction;
+  log?: LogLevel;
+  fallbackMessage?: string;
+};
+
+type HandleErrorDeps = {
+  reporter: ErrorReporter;
+  presenter: ErrorPresenter;
+};
+
+/**
+ * handleError 인스턴스를 생성하는 팩토리 함수.
+ * 서버에서는 이 팩토리로 명시적 인스턴스를 생성하여
+ * 모듈 스코프의 가변 상태를 피합니다.
+ */
+export const createHandleError = (deps: HandleErrorDeps) => {
+  /**
+   * 모든 에러의 단일 처리기.
+   *
+   * 1. Normalize — 입력을 DomainError로 정규화
+   * 2. Report — 주입된 reporter로 로깅
+   * 3. Present — 주입된 presenter로 UX 피드백
+   *
+   * @returns 정규화된 DomainError. 호출부에서 추가 UI 처리에 활용.
+   * @sideeffect 정책에 따라 로깅, Toast 등의 부수효과가 발생합니다.
+   */
+  return (error: unknown, options: HandleErrorOptions = {}): DomainError => {
+    // ── 1. Normalize ──
+    const domainError = isDomainError(error)
+      ? error
+      : isSerializedError(error)
+        ? makeError({
+            code: error.code,
+            details: error.details,
+            message: error.message,
+          })
+        : makeError({
+            code:
+              getRuntime() === "server"
+                ? "UNKNOWN_SERVER_ERROR"
+                : "UNKNOWN_CLIENT_ERROR",
+            details: null,
+            message:
+              options.fallbackMessage ?? "예상치 못한 오류가 발생했습니다.",
+            cause: error,
+          });
+
+    const meta = ERROR_REGISTRY[domainError.code];
+    const log = options.log ?? meta.log;
+    const ux = options.ux ?? meta.ux;
+
+    // ── 2. Report ──
+    if (log !== "none") {
+      deps.reporter.report(domainError, log);
+    }
+
+    // ── 3. Present ──
+    if (ux !== "none") {
+      deps.presenter.present(domainError, ux);
+    }
+
+    return domainError;
+  };
+};
+
+// ── 클라이언트 싱글턴 (init 패턴) ──
+// 서버에서는 createHandleError로 직접 생성하세요.
+let _handleError: ReturnType<typeof createHandleError> = createHandleError({
+  // 초기화 전 폴백: console만 사용
+  reporter: {
+    report: (error, level) => {
+      if (level === "error") console.error("[handleError:fallback]", error);
+      else if (level === "warning")
+        console.warn("[handleError:fallback]", error);
+    },
+  },
+  presenter: { present: () => {} },
+});
+
+/** 클라이언트 엔트리에서 reporter/presenter를 주입합니다. */
+export const initHandleError = (deps: HandleErrorDeps) => {
+  _handleError = createHandleError(deps);
+};
+
+/** 클라이언트에서 사용하는 handleError 싱글턴. */
+export const handleError: ReturnType<typeof createHandleError> = (
+  error,
+  options,
+) => _handleError(error, options);
+```
+
+### 3.5 초기화 시점
+
+```typescript
+// error/handler.server.ts
+// 서버 전용 handleError 인스턴스.
+// safeServerAction, DAL 등 서버 코드에서 이 인스턴스를 import합니다.
+import { createHandleError } from "./handler";
+import { serverReporter } from "./reporter.server";
+import { serverPresenter } from "./presenter.server";
+
+export const handleServerError = createHandleError({
+  reporter: serverReporter,
+  presenter: serverPresenter,
+});
+```
+
+```tsx
+// components/ErrorHandlerInit.tsx
+"use client";
+import { useEffect } from "react";
+import { initHandleError } from "@/error/handler";
+import { clientReporter } from "@/error/reporter.client";
+import { clientPresenter } from "@/error/presenter.client";
+
+export const ErrorHandlerInit = () => {
+  useEffect(() => {
+    initHandleError({
+      reporter: clientReporter,
+      presenter: clientPresenter,
+    });
+  }, []);
+  return null;
+};
+
+// app/layout.tsx에서 <ErrorHandlerInit /> 배치
+```
+
+### 3.6 반환값이 핵심이에요
+
+```tsx
+// VALIDATION (ux: "none", log: "none") → 부수효과 제로
+const error = handleError(result.error);
+if (error.code === "VALIDATION") {
+  setFieldErrors(error.details.fieldErrors);
+}
+
+// NETWORK_ERROR (ux: "toast", log: "warning") → Toast 자동
+handleError(result.error);
+
+// AUTH_REQUIRED (ux: "redirect", log: "info") → 반환값으로 redirect
+const error = handleError(result.error);
+if (error.code === "AUTH_REQUIRED") {
+  redirect("/login");
+}
+```
+
+---
+
+## 4. 결론
+
+다음 편에서는 이 전략을 서버 경계와 네트워크 경계에 적용합니다.
+
+---
