@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Great_Vibes, Hahmlet, Playfair_Display } from "next/font/google";
 import localFont from "next/font/local";
 import { Analytics } from "./(invitation)/_components/analytics/Analytics";
-import { HappyWeddingDay } from "./(invitation)/_components/root/HappyWeddingDay";
 import { Kakao } from "./(invitation)/_components/root/Kakao";
 import "./globals.css";
 
@@ -60,7 +59,6 @@ const RootLayout = ({ children }: LayoutProps) => {
         <Kakao />
         <Analytics />
         {children}
-        <HappyWeddingDay />
       </body>
     </html>
   );
