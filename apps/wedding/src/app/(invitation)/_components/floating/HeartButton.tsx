@@ -68,7 +68,7 @@ export const HeartButton = ({ initialCountPromise }: HeartButtonProps) => {
     const saved = localStorage.getItem(STORAGE_KEY);
 
     if (saved) {
-      save(saved);
+      queueMicrotask(() => save(saved));
     }
   }, []);
 

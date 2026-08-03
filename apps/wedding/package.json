@@ -10,11 +10,11 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@next/third-parties": "^16.0.3",
+    "@next/third-parties": "16.2.12",
     "@upstash/redis": "^1.35.7",
     "@vercel/analytics": "^1.5.0",
     "motion": "^12.23.24",
-    "next": "16.0.10",
+    "next": "16.2.12",
     "react": "19.2.1",
     "react-dom": "19.2.1"
   },
@@ -27,11 +27,11 @@
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
-    "eslint-config-next": "16.0.6",
+    "eslint-config-next": "16.2.12",
     "react-hook-form": "^7.67.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
-    "zod": "^4.1.12"
+    "zod": "^4.4.3"
   }
 }

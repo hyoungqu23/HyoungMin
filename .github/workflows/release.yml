@@ -21,7 +21,12 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.20.0
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -34,7 +39,7 @@ jobs:
 
       - name: Install Frontend Dependencies
         working-directory: ./apps/onbrix
-        run: npm install -g pnpm && pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build and Release
         uses: tauri-apps/tauri-action@v0

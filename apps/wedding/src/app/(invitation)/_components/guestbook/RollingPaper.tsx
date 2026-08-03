@@ -274,7 +274,11 @@ export const RollingPaper = ({
 
   useEffect(() => {
     if (isInView && hasMore) {
-      loadMore();
+      const frame = requestAnimationFrame(() => {
+        void loadMore();
+      });
+
+      return () => cancelAnimationFrame(frame);
     }
   }, [hasMore, isInView]);
 
