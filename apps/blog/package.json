@@ -12,7 +12,6 @@
     "test:ci": "vitest run --coverage"
   },
   "dependencies": {
-    "@hyoungmin/design-system": "workspace:*",
     "@hyoungmin/schema": "workspace:*",
     "@hyoungmin/ui": "workspace:*",
     "@next/third-parties": "16.2.12",
@@ -37,7 +36,6 @@
     "@types/react": "^19.2.4",
     "@types/react-dom": "^19.2.3",
     "@vitest/ui": "^4.0.8",
-    "autoprefixer": "^10.4.22",
     "jsdom": "^27.2.0",
     "postcss": "^8.5.25",
     "vitest": "^4.0.8"

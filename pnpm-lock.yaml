@@ -85,9 +85,6 @@ importers:
 
   apps/blog:
     dependencies:
-      '@hyoungmin/design-system':
-        specifier: workspace:*
-        version: link:../../packages/design-system
       '@hyoungmin/schema':
         specifier: workspace:*
         version: link:../../packages/schema
@@ -155,9 +152,6 @@ importers:
       '@vitest/ui':
         specifier: ^4.0.8
         version: 4.0.18(vitest@4.0.18)
-      autoprefixer:
-        specifier: ^10.4.22
-        version: 10.4.23(postcss@8.5.25)
       jsdom:
         specifier: ^27.2.0
         version: 27.4.0(supports-color@9.4.0)
