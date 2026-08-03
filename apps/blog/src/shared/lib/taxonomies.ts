@@ -116,44 +116,6 @@ export const getPostsBySeries = async (seriesId: string) => {
     });
 };
 
-export type SeriesLatestSummary = SeriesSummary & { latestAt: Date };
-
-export const getTopSeriesByLatestPost = async (
-  limit: number,
-): Promise<SeriesLatestSummary[]> => {
-  const posts = await getPublishedPosts();
-  const registry = await getSeriesRegistry();
-  const map = new Map<string, { count: number; latestAt: Date }>();
-
-  for (const post of posts) {
-    const id = post.meta.series;
-    if (!id) continue;
-    const existing = map.get(id);
-    if (!existing) {
-      map.set(id, { count: 1, latestAt: post.meta.createdAt });
-    } else {
-      existing.count += 1;
-      if (post.meta.createdAt > existing.latestAt) {
-        existing.latestAt = post.meta.createdAt;
-      }
-    }
-  }
-
-  return Array.from(map, ([id, { count, latestAt }]) => {
-    const info = registry[id];
-    return {
-      id,
-      title: info?.title ?? id,
-      description: info?.description,
-      cover: info?.cover,
-      count,
-      latestAt,
-    };
-  })
-    .sort((a, b) => b.latestAt.getTime() - a.latestAt.getTime())
-    .slice(0, limit);
-};
-
 export type SeriesWithPostsPreview = SeriesSummary & {
   latestAt: Date;
   previewPosts: PostSummary[];

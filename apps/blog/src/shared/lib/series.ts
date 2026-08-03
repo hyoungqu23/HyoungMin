@@ -46,8 +46,3 @@ export const getSeriesEntry = async (
   if (!entry) return null;
   return { id, ...entry };
 };
-
-export const listSeriesEntries = async (): Promise<SeriesEntry[]> => {
-  const registry = await getSeriesRegistry();
-  return Object.entries(registry).map(([id, entry]) => ({ id, ...entry }));
-};

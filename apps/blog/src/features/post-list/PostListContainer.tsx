@@ -8,7 +8,7 @@ import { PostCard } from "./PostCard";
 import { PostList } from "./PostList";
 import { useInfiniteScroll } from "./useInfiniteScroll";
 
-export type PostWithSlug = {
+type PostWithSlug = {
   slug: string;
   meta: PostMeta;
   firstImage?: string | null;

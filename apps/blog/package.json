@@ -5,19 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "generate:mdx-components": "node scripts/generate-mdx-components.mjs",
-    "predev": "pnpm generate:mdx-components",
     "build": "next build",
-    "prebuild": "pnpm generate:mdx-components",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "pretypecheck": "pnpm generate:mdx-components",
     "test": "vitest",
-    "pretest": "pnpm generate:mdx-components",
     "test:ci": "vitest run --coverage"
   },
   "dependencies": {
-    "@heroicons/react": "^2.2.0",
     "@hyoungmin/design-system": "workspace:*",
     "@hyoungmin/schema": "workspace:*",
     "@hyoungmin/ui": "workspace:*",
@@ -39,9 +33,6 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^14.6.1",
     "@types/hast": "^3.0.4",
     "@types/react": "^19.2.4",
     "@types/react-dom": "^19.2.3",
