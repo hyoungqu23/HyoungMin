@@ -7,8 +7,6 @@ import KeyboardShortcutsProvider from "@/features/keyboard-shortcuts/KeyboardSho
 import { Analytics } from "@/root/analytics/ui/Analytics";
 import "@/root/styles/globals.css";
 import { siteUrl } from "@/shared/config/site";
-import Footer from "@/widgets/footer/Footer";
-import Header from "@/widgets/header/Header";
 
 const siteName = "Blog";
 
@@ -70,17 +68,7 @@ const RootLayout = ({
       >
         <Analytics />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <KeyboardShortcutsProvider>
-            <Header />
-            <main
-              id="main"
-              role="main"
-              className="flex-1 flex flex-col items-center"
-            >
-              {children}
-            </main>
-            <Footer />
-          </KeyboardShortcutsProvider>
+          <KeyboardShortcutsProvider>{children}</KeyboardShortcutsProvider>
         </ThemeProvider>
       </body>
     </html>
