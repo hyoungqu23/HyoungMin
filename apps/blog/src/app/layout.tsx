@@ -126,6 +126,9 @@ const pretendardFont = localFont({
     },
   ],
   display: "swap",
-  preload: true,
+  // 9개 웨이트 전부(약 2.4MB)를 모든 페이지에서 preload하면 모바일 LCP를
+  // 파괴한다. preload를 끄면 @font-face 지연 로딩에 따라 실제 렌더에
+  // 사용되는 웨이트만 내려받는다.
+  preload: false,
   variable: "--pretendard",
 });
