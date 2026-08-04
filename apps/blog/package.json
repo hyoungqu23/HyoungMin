@@ -12,11 +12,13 @@
     "test:ci": "vitest run --coverage"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "@hyoungmin/schema": "workspace:*",
     "@hyoungmin/ui": "workspace:*",
     "@next/third-parties": "16.2.12",
     "@tailwindcss/typography": "^0.5.19",
     "@vercel/analytics": "^1.5.0",
+    "gsap": "^3.15.0",
     "next": "16.2.12",
     "next-mdx-remote": "^6.0.0",
     "next-themes": "^0.4.6",
