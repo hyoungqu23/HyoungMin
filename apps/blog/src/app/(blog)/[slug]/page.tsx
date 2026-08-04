@@ -1,11 +1,15 @@
-import { Prose } from "@hyoungmin/ui";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 
-import { TagList } from "@/features/post-list/TagList";
-import ShareButton from "@/features/share/ShareButton";
+import { EditorialArticle } from "../_components/EditorialArticle";
+
+import {
+  buildBlogPostingJsonLd,
+  buildNotFoundMetadata,
+  buildPostMetadata,
+} from "./_lib/post-seo";
+
 import { siteUrl } from "@/shared/config/site";
 import { listSlugs, readArticle } from "@/shared/lib/fs";
 import { compilePostMDX } from "@/shared/lib/mdx";
@@ -14,15 +18,6 @@ import { getPostSummary } from "@/shared/lib/posts";
 import { calculateReadingTime } from "@/shared/lib/reading-time";
 import { getRelatedPosts } from "@/shared/lib/related-posts";
 import { getSeriesEntry } from "@/shared/lib/series";
-import ReadingProgress from "@/widgets/reading-progress/ReadingProgress";
-import { RelatedPosts } from "@/widgets/related-posts/RelatedPosts";
-import TableOfContents from "@/widgets/toc/TableOfContents";
-
-import {
-  buildBlogPostingJsonLd,
-  buildNotFoundMetadata,
-  buildPostMetadata,
-} from "./_lib/post-seo";
 
 export const generateStaticParams = async () => {
   const slugs = await listSlugs();
@@ -81,65 +76,15 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <ReadingProgress />
-
-      <div className="container px-4 h-full flex flex-col md:flex-row md:items-start gap-8 md:gap-12">
-        {/* 사이드바 (데스크톱만 표시) */}
-        <aside className="hidden sticky top-24 md:flex w-72 shrink-0 h-full flex-col gap-6 md:gap-8">
-          <TableOfContents headings={headings} />
-          <RelatedPosts relatedPosts={relatedPosts} />
-        </aside>
-
-        {/* 본문 */}
-        <article className="relative flex-1 min-w-0 max-w-screen overflow-x-auto md:border-l-2 md:border-primary-200 px-4 md:px-12">
-          <Prose>
-            <h1>{meta.title}</h1>
-
-            <p className="text-lg text-primary-700">{meta.description}</p>
-            <div className="flex flex-wrap items-center gap-4 my-4 text-sm text-primary-600">
-              <time dateTime={meta.createdAt.toISOString()}>
-                {meta.createdAt.toLocaleDateString("ko-KR", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </time>
-              <span>|</span>
-              <span>{readingTime}분 읽기</span>
-              {meta.category && (
-                <>
-                  <span>|</span>
-                  <Link
-                    href={`/categories/${encodeURIComponent(meta.category)}`}
-                    className="hover:text-secondary-400 transition-colors"
-                  >
-                    {meta.category}
-                  </Link>
-                </>
-              )}
-              {meta.series && (
-                <>
-                  <span>|</span>
-                  <Link
-                    href={`/series/${encodeURIComponent(meta.series)}`}
-                    className="hover:text-secondary-400 transition-colors"
-                  >
-                    {seriesEntry?.title ?? meta.series}
-                  </Link>
-                </>
-              )}
-              <ShareButton url={`${siteUrl}/${slug}`} />
-              <TagList tags={meta.tags} linkable />
-            </div>
-            {content}
-          </Prose>
-        </article>
-
-        {/* 모바일 관련 포스트 */}
-        <div className="md:hidden">
-          <RelatedPosts relatedPosts={relatedPosts} />
-        </div>
-      </div>
+      <EditorialArticle
+        content={content}
+        headings={headings}
+        meta={meta}
+        readingTime={readingTime}
+        relatedPosts={relatedPosts}
+        seriesEntry={seriesEntry}
+        slug={slug}
+      />
     </>
   );
 };

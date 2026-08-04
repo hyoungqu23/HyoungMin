@@ -81,8 +81,13 @@
 }
 
 body {
-  background-color: var(--primary-50);
-  color: var(--primary-900);
+  background-color: #fafaf9;
+  color: #18181b;
+}
+
+.dark body {
+  background-color: #09090b;
+  color: #fafaf9;
 }
 
 /* Code block syntax highlighting (rehype-pretty-code) */
