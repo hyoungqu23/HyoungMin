@@ -7,14 +7,12 @@ export const HERO = {
   intro: {
     main: {
       before: "문제를 ",
-      strongA: "숫자로 확인하고",
+      strongA: "데이터로 확인하고",
       middle: ", 같은 문제가 반복되지 않도록 ",
-      strongB: "구조를 바꿉니다.",
+      strongB: "프로세스와 아키텍처를 바꿉니다.",
     },
-    sub: "사용자 경험부터 팀의 개발 방식까지. 제품에 남은 불편을 발견하고, 측정 가능한 변화로 연결해 온 프론트엔드 개발자 이형민입니다.",
   },
-  tags: ["Seoul, KR", "4th year", "2026 Portfolio"],
-  // 만 4년(2026.11) 전이므로 절대 기간 대신 연차 표기를 쓴다 (사실성 가드레일)
+  tags: ["Seoul, KR", "4th year"],
   sticker: ["4TH YEAR", "IN PRODUCT"],
 } as const;
 
@@ -26,7 +24,7 @@ export const MARQUEE_ITEMS = [
 ] as const;
 
 export const IMPACT = {
-  index: "01 / Flagship Impact",
+  index: "01 / Impact",
   before: "20.1",
   after: "0.7",
   unit: "s",
@@ -95,7 +93,7 @@ export const WORK = {
       kicker: "Carbon accounting platform",
       title: "탄소 데이터를 수집하는 복잡한 흐름을 제품으로 정리하다.",
       description:
-        "정기 요청 기능을 설계부터 레거시 삭제까지 담당하고, TypeScript strict 전환과 UI 라이브러리 정리로 다음 변경이 안전한 기반을 만들었습니다.",
+        "TypeScript strict 전환과 UI 라이브러리 정리로 다음 변경이 안전한 기반을 만들었습니다.",
       tags: ["Next.js 15", "React 19", "TypeScript", "MUI"],
       tone: "surface",
       href: undefined,

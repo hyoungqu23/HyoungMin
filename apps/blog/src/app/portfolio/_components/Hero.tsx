@@ -44,10 +44,8 @@ const Hero = () => {
           <div className="pf-hero-meta" role="group" aria-label="기본 정보">
             <span className="pf-tag">{HERO.tags[0]}</span>
             <span className="pf-tag pf-tag--cyan">{HERO.tags[1]}</span>
-            <span className="pf-tag pf-tag--acid">{HERO.tags[2]}</span>
           </div>
         </div>
-        <p className="pf-hero-intro">{intro.sub}</p>
       </div>
 
       <div className="pf-scroll-cue" aria-hidden="true">

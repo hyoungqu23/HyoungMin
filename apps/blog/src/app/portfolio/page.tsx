@@ -15,7 +15,7 @@ import { siteUrl } from "@/shared/config/site";
 
 const TITLE = "이형민 — Product Engineer";
 const DESCRIPTION =
-  "문제를 숫자로 확인하고 구조를 바꾸는 4년차 Product Engineer 이형민의 포트폴리오. 대시보드 p75 FCP 20.1초→0.7초, 다국어 수작업 99% 자동화, 758개 파일 strict 전환.";
+  "문제를 데이터로 확인하고 프로세스와 아키텍처를 바꿉니다. 대시보드 p75 FCP 20.1초→0.7초, 다국어 수작업 99% 자동화, 758개 파일 strict 전환.";
 const OG_IMAGE = `${siteUrl}/images/og/portfolio.png`;
 
 export const metadata: Metadata = {
