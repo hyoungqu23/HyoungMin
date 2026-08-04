@@ -18,7 +18,11 @@ import ReadingProgress from "@/widgets/reading-progress/ReadingProgress";
 import { RelatedPosts } from "@/widgets/related-posts/RelatedPosts";
 import TableOfContents from "@/widgets/toc/TableOfContents";
 
-const siteName = "Blog";
+import {
+  buildBlogPostingJsonLd,
+  buildNotFoundMetadata,
+  buildPostMetadata,
+} from "./_lib/post-seo";
 
 export const generateStaticParams = async () => {
   const slugs = await listSlugs();
@@ -35,54 +39,10 @@ export const generateMetadata = async ({
   const meta = summary?.meta;
 
   if (!meta || meta.draft) {
-    return {
-      title: "Not Found",
-      robots: {
-        index: false,
-        follow: false,
-      },
-    };
+    return buildNotFoundMetadata();
   }
 
-  const title = meta.title;
-  const description = meta.description;
-  const url = `${siteUrl}/${slug}`;
-  const image = `${siteUrl}/images/logos/logo-background.png`;
-
-  return {
-    title,
-    description,
-    keywords: meta.tags.length > 0 ? meta.tags : undefined,
-    alternates: {
-      canonical: url,
-    },
-    openGraph: {
-      type: "article",
-      locale: "ko_KR",
-      url,
-      siteName,
-      title,
-      description,
-      images: [
-        {
-          url: image,
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
-      publishedTime: meta.createdAt.toISOString(),
-      modifiedTime: meta.createdAt.toISOString(),
-      authors: [siteName],
-      tags: meta.tags.length > 0 ? meta.tags : undefined,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [image],
-    },
-  };
+  return buildPostMetadata({ meta, siteUrl, slug });
 };
 
 const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
@@ -110,33 +70,7 @@ const PostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const relatedPosts = await getRelatedPosts(slug, 5);
   const seriesEntry = meta.series ? await getSeriesEntry(meta.series) : null;
 
-  // JSON-LD 구조화 데이터 (SEO + GEO)
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: meta.title,
-    description: meta.description,
-    image: `${siteUrl}/images/logos/logo-text.png`,
-    datePublished: meta.createdAt.toISOString(),
-    dateModified: meta.createdAt.toISOString(),
-    author: {
-      "@type": "Person",
-      name: siteName,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: siteName,
-      logo: {
-        "@type": "ImageObject",
-        url: `${siteUrl}/images/logos/logo-text.png`,
-      },
-    },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `${siteUrl}/${slug}`,
-    },
-    keywords: meta.tags.length > 0 ? meta.tags.join(", ") : undefined,
-  };
+  const jsonLd = buildBlogPostingJsonLd({ meta, siteUrl, slug });
 
   return (
     <>
