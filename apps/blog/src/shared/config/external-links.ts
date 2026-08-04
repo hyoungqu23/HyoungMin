@@ -1,8 +1,6 @@
 export const EXTERNAL_LINKS = {
   GITHUB: { id: "github", href: "https://github.com/hyoungqu23" },
-  CV: { id: "cv", href: "https://hyoungmin.vercel.app/" },
-  PORTFOLIO: { id: "portfolio", href: "" },
-  RESUME: { id: "resume", href: "" },
+  PORTFOLIO: { id: "portfolio", href: "/portfolio" },
   INSTAGRAM: { id: "instagram", href: "https://www.instagram.com/hyoungqu23/" },
   LINKEDIN: {
     id: "linkedin",

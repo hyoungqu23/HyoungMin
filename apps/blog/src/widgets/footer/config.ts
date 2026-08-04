@@ -1,4 +1,4 @@
-export const INFORMATION = ["HyoungMin", "Frontend Engineer"];
+export const INFORMATION = ["HyoungMin", "Product Engineer"];
 
 export const SKILLS = [
   "TypeScript",
@@ -7,7 +7,6 @@ export const SKILLS = [
   "Next.js",
   "Node.js",
   "Git",
-  "GitHub",
 ];
 
 export const COPYRIGHT = `© Copyright ${new Date().getFullYear()} HyoungMin. All rights reserved.`;
