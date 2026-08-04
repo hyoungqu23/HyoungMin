@@ -1,6 +1,8 @@
 import { readdir, readFile } from "fs/promises";
 import { join } from "path";
 
+// 주의: "portfolio"는 src/app/portfolio 정적 라우트가 우선 매칭하므로
+// 포스트 슬러그(파일명)로 사용하면 해당 글이 조용히 가려진다.
 const POSTS_DIR = join(process.cwd(), "contents", "posts");
 
 export const listSlugs = async (): Promise<string[]> => {
