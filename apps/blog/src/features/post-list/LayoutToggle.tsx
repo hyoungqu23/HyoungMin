@@ -10,7 +10,7 @@ interface LayoutToggleProps {
 
 export const LayoutToggle = ({ layout, onLayoutChange }: LayoutToggleProps) => {
   return (
-    <div className="flex items-center gap-2 border border-primary-200 rounded-md p-1">
+    <div className="flex items-center gap-1 border border-zinc-950 p-1 dark:border-stone-50">
       <Button
         type="button"
         variant={layout === "list" ? "default" : "ghost"}
@@ -19,9 +19,9 @@ export const LayoutToggle = ({ layout, onLayoutChange }: LayoutToggleProps) => {
         aria-pressed={layout === "list"}
         onClick={() => onLayoutChange("list")}
         className={cn(
-          "h-8 w-8 text-primary-500 hover:text-primary-100 flex items-center justify-center",
+          "flex h-9 w-9 items-center justify-center text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-stone-50",
           layout === "list"
-            ? "bg-primary-900 text-primary-100"
+            ? "bg-zinc-950 text-stone-50 dark:bg-stone-50 dark:text-zinc-950"
             : "bg-transparent",
         )}
       >
@@ -35,9 +35,9 @@ export const LayoutToggle = ({ layout, onLayoutChange }: LayoutToggleProps) => {
         aria-pressed={layout === "card"}
         onClick={() => onLayoutChange("card")}
         className={cn(
-          "h-8 w-8 text-primary-500 hover:text-primary-100 flex items-center justify-center",
+          "flex h-9 w-9 items-center justify-center text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-stone-50",
           layout === "card"
-            ? "bg-primary-900 text-primary-100"
+            ? "bg-zinc-950 text-stone-50 dark:bg-stone-50 dark:text-zinc-950"
             : "bg-transparent",
         )}
       >

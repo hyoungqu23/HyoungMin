@@ -24,7 +24,7 @@ const PostsPage = async () => {
   }));
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="w-full max-w-[96rem] px-4 py-14 md:py-20">
       <PostListContainer
         title="Posts"
         initialPosts={postsWithSeriesColor}

@@ -9,14 +9,20 @@ interface GeneratedThumbnailProps {
   title: string;
   className?: string;
   bgColor?: string;
+  compact?: boolean;
 }
 
 export const GeneratedThumbnail = ({
   title,
   className,
   bgColor: bgColorOverride,
+  compact = false,
 }: GeneratedThumbnailProps) => {
-  const bgColor = bgColorOverride ?? generateThumbnailColor(title);
+  const bgColor = bgColorOverride?.match(/^#?([0-9a-f]{6})$/i)?.[1]
+    ? bgColorOverride.startsWith("#")
+      ? bgColorOverride
+      : `#${bgColorOverride}`
+    : generateThumbnailColor(title);
   const textColor = getTextColor(bgColor);
 
   return (
@@ -25,15 +31,16 @@ export const GeneratedThumbnail = ({
       style={{
         backgroundColor: bgColor,
         color: textColor,
-        padding: "2rem",
+        padding: compact ? "1rem" : "2rem",
       }}
     >
       <div
-        className="text-center line-clamp-3"
+        className="text-center line-clamp-3 uppercase"
         style={{
-          fontSize: "1.5rem",
-          fontWeight: "bold",
-          lineHeight: "1.4",
+          fontSize: compact ? "0.625rem" : "1.5rem",
+          fontWeight: 800,
+          letterSpacing: "0.08em",
+          lineHeight: 1.3,
           wordBreak: "break-word",
         }}
       >

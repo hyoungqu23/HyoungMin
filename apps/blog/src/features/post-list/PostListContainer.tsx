@@ -54,18 +54,28 @@ export const PostListContainer = ({
   });
 
   return (
-    <div className="space-y-6">
-      {/* 헤더 및 레이아웃 토글 */}
-      <div className="flex items-center justify-between">
-        {title && <h1 className="text-4xl font-bold">{title}</h1>}
+    <div className="w-full">
+      <header className="flex flex-col gap-8 border-t-2 border-zinc-950 py-10 dark:border-stone-50 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+        <div>
+          <p className="text-xs font-bold tracking-[0.24em] text-zinc-500 uppercase dark:text-zinc-400">
+            Editorial Index
+          </p>
+          {title && (
+            <h1 className="mt-3 text-5xl font-black tracking-[-0.06em] text-zinc-950 dark:text-stone-50 sm:text-6xl">
+              {title}
+            </h1>
+          )}
+          <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
+            {initialPosts.length}개의 기록
+          </p>
+        </div>
         {showLayoutToggle && (
           <LayoutToggle layout={layout} onLayoutChange={handleLayoutChange} />
         )}
-      </div>
+      </header>
 
-      {/* 포스트 목록 */}
       {layout === "card" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 border-t border-zinc-300 pt-6 md:grid-cols-2 xl:grid-cols-3 dark:border-zinc-700">
           {displayedPosts.map((post) => (
             <PostCard
               key={post.slug}
@@ -77,9 +87,15 @@ export const PostListContainer = ({
           ))}
         </div>
       ) : (
-        <ul className="space-y-4">
+        <ul>
           {displayedPosts.map((post) => (
-            <PostList key={post.slug} slug={post.slug} meta={post.meta} />
+            <PostList
+              key={post.slug}
+              slug={post.slug}
+              meta={post.meta}
+              firstImage={post.firstImage}
+              seriesColor={post.seriesColor}
+            />
           ))}
         </ul>
       )}
@@ -88,9 +104,9 @@ export const PostListContainer = ({
       {hasMore && (
         <div
           ref={observerTarget}
-          className="h-20 flex items-center justify-center"
+          className="flex h-20 items-center justify-center"
         >
-          <div className="text-sm text-primary-600">
+          <div className="text-xs font-bold tracking-[0.16em] text-zinc-500 uppercase dark:text-zinc-400">
             더 많은 포스트를 불러오는 중...
           </div>
         </div>
@@ -98,7 +114,7 @@ export const PostListContainer = ({
 
       {/* 모든 포스트 로드 완료 */}
       {!hasMore && initialPosts.length > 0 && (
-        <div className="text-center text-sm text-primary-600 py-8">
+        <div className="border-t border-zinc-300 py-8 text-center text-xs font-bold tracking-[0.16em] text-zinc-500 uppercase dark:border-zinc-700 dark:text-zinc-400">
           모든 포스트를 불러왔습니다.
         </div>
       )}

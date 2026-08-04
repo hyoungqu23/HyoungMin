@@ -21,12 +21,15 @@ export const TagList = ({
           <Link
             key={tag}
             href={`/tags/${encodeURIComponent(tag)}`}
-            className="px-2 py-1 text-xs border rounded hover:bg-primary-50 transition-colors"
+            className="border-b border-zinc-400 px-0.5 py-1 text-xs text-zinc-700 transition-colors hover:border-zinc-950 hover:text-zinc-950 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-stone-50 dark:hover:text-stone-50"
           >
             {tag}
           </Link>
         ) : (
-          <span key={tag} className="px-2 py-1 text-xs border rounded">
+          <span
+            key={tag}
+            className="border-b border-zinc-300 px-0.5 py-1 text-xs text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
+          >
             {tag}
           </span>
         ),

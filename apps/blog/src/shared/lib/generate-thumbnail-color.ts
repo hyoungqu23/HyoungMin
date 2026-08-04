@@ -1,5 +1,5 @@
 /**
- * 제목 문자열을 기반으로 일관된 색상을 생성합니다.
+ * 제목 문자열을 기반으로 일관된 Editorial 팔레트 색상을 생성합니다.
  * 같은 제목은 항상 같은 색상을 반환합니다.
  */
 export const generateThumbnailColor = (title: string): string => {
@@ -9,27 +9,21 @@ export const generateThumbnailColor = (title: string): string => {
     hash = title.charCodeAt(i) + ((hash << 5) - hash);
   }
 
-  // 색상 팔레트 (부드러운 그라데이션 색상들)
+  // 채도가 낮은 팔레트라 밝은 테마와 어두운 테마 모두에서 과하게 튀지 않는다.
   const colors = [
-    { bg: "#3B82F6", text: "#FFFFFF" }, // Blue
-    { bg: "#8B5CF6", text: "#FFFFFF" }, // Purple
-    { bg: "#EC4899", text: "#FFFFFF" }, // Pink
-    { bg: "#F59E0B", text: "#FFFFFF" }, // Amber
-    { bg: "#10B981", text: "#FFFFFF" }, // Emerald
-    { bg: "#06B6D4", text: "#FFFFFF" }, // Cyan
-    { bg: "#6366F1", text: "#FFFFFF" }, // Indigo
-    { bg: "#EF4444", text: "#FFFFFF" }, // Red
-    { bg: "#14B8A6", text: "#FFFFFF" }, // Teal
-    { bg: "#F97316", text: "#FFFFFF" }, // Orange
+    "#E7E5E4", // Stone
+    "#FDE68A", // Amber
+    "#BFDBFE", // Blue
+    "#C4B5FD", // Violet
+    "#BBF7D0", // Green
+    "#FECDD3", // Rose
+    "#BAE6FD", // Sky
+    "#FED7AA", // Orange
   ];
 
   // 해시 값을 사용하여 색상 선택
   const colorIndex = Math.abs(hash) % colors.length;
-  const selectedColor = colors[colorIndex];
-  if (!selectedColor) {
-    return colors[0]?.bg || "#3B82F6"; // 기본 색상
-  }
-  return selectedColor.bg;
+  return colors[colorIndex] ?? "#E7E5E4";
 };
 
 /**
@@ -37,7 +31,10 @@ export const generateThumbnailColor = (title: string): string => {
  */
 export const getTextColor = (bgColor: string): string => {
   // 밝은 색상이면 어두운 텍스트, 어두운 색상이면 밝은 텍스트
-  const hex = bgColor.replace("#", "");
+  const match = bgColor.match(/^#?([0-9a-f]{6})$/i);
+  if (!match) return "#18181B";
+
+  const hex = match[1]!;
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
