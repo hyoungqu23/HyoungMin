@@ -1,26 +1,28 @@
 import type { PostMeta } from "@hyoungmin/schema";
 
-import { getSeriesRegistry } from "./series";
+import { getSeriesRegistry, type SeriesRegistry } from "./series";
 import { getAllPostSummaries } from "./posts";
 
 export type PostSummary = Awaited<
   ReturnType<typeof getAllPostSummaries>
 >[number];
 
-const getPublishedPosts = async (): Promise<PostSummary[]> => {
-  const posts = await getAllPostSummaries();
-  return posts
+export const selectPublishedPosts = (posts: PostSummary[]): PostSummary[] =>
+  [...posts]
     .filter((post) => !post.meta.draft)
     .sort((a, b) => b.meta.createdAt.getTime() - a.meta.createdAt.getTime());
-};
+
+const getPublishedPosts = async (): Promise<PostSummary[]> =>
+  selectPublishedPosts(await getAllPostSummaries());
 
 export type CategorySummary = {
   name: string;
   count: number;
 };
 
-export const getAllCategories = async (): Promise<CategorySummary[]> => {
-  const posts = await getPublishedPosts();
+export const summarizeCategories = (
+  posts: PostSummary[],
+): CategorySummary[] => {
   const counts = new Map<string, number>();
 
   for (const post of posts) {
@@ -34,11 +36,19 @@ export const getAllCategories = async (): Promise<CategorySummary[]> => {
   );
 };
 
+export const getAllCategories = async (): Promise<CategorySummary[]> =>
+  summarizeCategories(await getPublishedPosts());
+
+export const filterPostsByCategory = (
+  posts: PostSummary[],
+  categoryName: string,
+): PostSummary[] => posts.filter((post) => post.meta.category === categoryName);
+
 export const getPostsByCategory = async (
   categoryName: string,
 ): Promise<PostSummary[]> => {
   const posts = await getPublishedPosts();
-  return posts.filter((post) => post.meta.category === categoryName);
+  return filterPostsByCategory(posts, categoryName);
 };
 
 export type TagSummary = {
@@ -46,8 +56,7 @@ export type TagSummary = {
   count: number;
 };
 
-export const getAllTags = async (): Promise<TagSummary[]> => {
-  const posts = await getPublishedPosts();
+export const summarizeTags = (posts: PostSummary[]): TagSummary[] => {
   const counts = new Map<string, number>();
 
   for (const post of posts) {
@@ -61,11 +70,19 @@ export const getAllTags = async (): Promise<TagSummary[]> => {
   );
 };
 
+export const getAllTags = async (): Promise<TagSummary[]> =>
+  summarizeTags(await getPublishedPosts());
+
+export const filterPostsByTag = (
+  posts: PostSummary[],
+  tagName: string,
+): PostSummary[] => posts.filter((post) => post.meta.tags.includes(tagName));
+
 export const getPostsByTag = async (
   tagName: string,
 ): Promise<PostSummary[]> => {
   const posts = await getPublishedPosts();
-  return posts.filter((post) => post.meta.tags.includes(tagName));
+  return filterPostsByTag(posts, tagName);
 };
 
 export type SeriesSummary = {
@@ -76,9 +93,7 @@ export type SeriesSummary = {
   count: number;
 };
 
-export const getAllSeries = async (): Promise<SeriesSummary[]> => {
-  const posts = await getPublishedPosts();
-  const registry = await getSeriesRegistry();
+const groupPostsBySeries = (posts: PostSummary[]) => {
   const map = new Map<string, PostSummary[]>();
 
   for (const post of posts) {
@@ -91,6 +106,15 @@ export const getAllSeries = async (): Promise<SeriesSummary[]> => {
       map.set(id, [post]);
     }
   }
+
+  return map;
+};
+
+export const summarizeSeries = (
+  posts: PostSummary[],
+  registry: SeriesRegistry,
+): SeriesSummary[] => {
+  const map = groupPostsBySeries(posts);
 
   return Array.from(map, ([id, seriesPosts]) => {
     const info = registry[id];
@@ -104,16 +128,27 @@ export const getAllSeries = async (): Promise<SeriesSummary[]> => {
   }).sort((a, b) => a.title.localeCompare(b.title, "ko"));
 };
 
+export const getAllSeries = async (): Promise<SeriesSummary[]> => {
+  const [posts, registry] = await Promise.all([
+    getPublishedPosts(),
+    getSeriesRegistry(),
+  ]);
+  return summarizeSeries(posts, registry);
+};
+
+export const sortPostsInSeries = (posts: PostSummary[]): PostSummary[] =>
+  [...posts].sort((a, b) => {
+    const aOrder = a.meta.seriesOrder ?? Number.MAX_SAFE_INTEGER;
+    const bOrder = b.meta.seriesOrder ?? Number.MAX_SAFE_INTEGER;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return a.meta.createdAt.getTime() - b.meta.createdAt.getTime();
+  });
+
 export const getPostsBySeries = async (seriesId: string) => {
   const posts = await getPublishedPosts();
-  return posts
-    .filter((post) => post.meta.series === seriesId)
-    .sort((a, b) => {
-      const aOrder = a.meta.seriesOrder ?? Number.MAX_SAFE_INTEGER;
-      const bOrder = b.meta.seriesOrder ?? Number.MAX_SAFE_INTEGER;
-      if (aOrder !== bOrder) return aOrder - bOrder;
-      return a.meta.createdAt.getTime() - b.meta.createdAt.getTime();
-    });
+  return sortPostsInSeries(
+    posts.filter((post) => post.meta.series === seriesId),
+  );
 };
 
 export type SeriesWithPostsPreview = SeriesSummary & {
@@ -121,23 +156,12 @@ export type SeriesWithPostsPreview = SeriesSummary & {
   previewPosts: PostSummary[];
 };
 
-export const getAllSeriesWithPostsPreview = async (
+export const summarizeSeriesWithPostsPreview = (
+  posts: PostSummary[],
+  registry: SeriesRegistry,
   previewCount: number = 3,
-): Promise<SeriesWithPostsPreview[]> => {
-  const posts = await getPublishedPosts();
-  const registry = await getSeriesRegistry();
-  const map = new Map<string, PostSummary[]>();
-
-  for (const post of posts) {
-    const id = post.meta.series;
-    if (!id) continue;
-    const existing = map.get(id);
-    if (existing) {
-      existing.push(post);
-    } else {
-      map.set(id, [post]);
-    }
-  }
+): SeriesWithPostsPreview[] => {
+  const map = groupPostsBySeries(posts);
 
   const seriesList = Array.from(map, ([id, seriesPosts]) => {
     const info = registry[id];
@@ -163,12 +187,22 @@ export const getAllSeriesWithPostsPreview = async (
   return seriesList.sort((a, b) => b.latestAt.getTime() - a.latestAt.getTime());
 };
 
+export const getAllSeriesWithPostsPreview = async (
+  previewCount: number = 3,
+): Promise<SeriesWithPostsPreview[]> => {
+  const [posts, registry] = await Promise.all([
+    getPublishedPosts(),
+    getSeriesRegistry(),
+  ]);
+  return summarizeSeriesWithPostsPreview(posts, registry, previewCount);
+};
+
 export type CategoryLatestSummary = CategorySummary & { latestAt: Date };
 
-export const getTopCategoriesByLatestPost = async (
+export const selectTopCategoriesByLatestPost = (
+  posts: PostSummary[],
   limit: number,
-): Promise<CategoryLatestSummary[]> => {
-  const posts = await getPublishedPosts();
+): CategoryLatestSummary[] => {
   const map = new Map<string, { count: number; latestAt: Date }>();
 
   for (const post of posts) {
@@ -193,3 +227,8 @@ export const getTopCategoriesByLatestPost = async (
     .sort((a, b) => b.latestAt.getTime() - a.latestAt.getTime())
     .slice(0, limit);
 };
+
+export const getTopCategoriesByLatestPost = async (
+  limit: number,
+): Promise<CategoryLatestSummary[]> =>
+  selectTopCategoriesByLatestPost(await getPublishedPosts(), limit);
