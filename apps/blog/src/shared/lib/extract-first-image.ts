@@ -15,19 +15,17 @@ export const extractFirstImage = (source: string): string | null => {
   const markdownImagePattern = /!\[.*?\]\((.*?)\)/;
   const htmlImagePattern = /<img[^>]+src=["']([^"']+)["'][^>]*>/i;
 
-  // 3. 마크다운 이미지 패턴 먼저 확인
   const markdownMatch = withoutCodeBlocks.match(markdownImagePattern);
-  if (markdownMatch && markdownMatch[1]) {
-    return markdownMatch[1];
-  }
-
-  // 4. HTML 이미지 태그 확인
   const htmlMatch = withoutCodeBlocks.match(htmlImagePattern);
-  if (htmlMatch && htmlMatch[1]) {
-    return htmlMatch[1];
-  }
 
-  return null;
+  const images = [markdownMatch, htmlMatch]
+    .filter(
+      (match): match is RegExpMatchArray =>
+        Boolean(match?.[1]) && match?.index !== undefined,
+    )
+    .sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+
+  return images[0]?.[1] ?? null;
 };
 
 /**

@@ -15,6 +15,13 @@ import {
 } from "@hyoungmin/ui";
 import { useMemo, useState } from "react";
 
+import {
+  buildAiContentUrl,
+  buildSocialShareUrl,
+  type AiContentProvider,
+  type SocialSharePlatform,
+} from "./share-links";
+
 type ShareButtonProps = {
   url?: string;
   // title?: string;
@@ -37,58 +44,19 @@ const ShareButton = ({
     return window.location.href;
   }, [url]);
 
-  const shareToSocial = (
-    platform: "linkedin" | "facebook" | "x" | "reddit" | "threads",
-  ) => {
+  const shareToSocial = (platform: SocialSharePlatform) => {
     if (!currentUrl || typeof window === "undefined") return;
 
     const shareTitle = typeof document !== "undefined" ? document.title : "";
-
-    let shareUrl = "";
-
-    switch (platform) {
-      case "facebook":
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
-        break;
-      case "linkedin":
-        shareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(currentUrl)}`;
-        break;
-      case "x":
-        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(shareTitle)}`;
-        break;
-      case "reddit":
-        shareUrl = `https://www.reddit.com/submit?url=${encodeURIComponent(currentUrl)}&title=${encodeURIComponent(shareTitle)}`;
-        break;
-      case "threads":
-        shareUrl = `https://www.threads.net/intent/post?text=${encodeURIComponent(currentUrl)}`;
-        break;
-      default:
-        return;
-    }
+    const shareUrl = buildSocialShareUrl(platform, currentUrl, shareTitle);
 
     window.open(shareUrl, "_blank", "width=600,height=400,noopener,noreferrer");
   };
 
-  const askAiAboutContent = (provider: "chatgpt" | "claude" | "grok") => {
+  const askAiAboutContent = (provider: AiContentProvider) => {
     if (!currentUrl || typeof window === "undefined") return;
 
-    const prompt = `Read ${currentUrl} summarize and answer questions about the content`;
-
-    let url = "";
-
-    switch (provider) {
-      case "chatgpt":
-        url = `https://chatgpt.com/?prompt=${encodeURIComponent(prompt)}`;
-        break;
-      case "claude":
-        url = `https://claude.ai/new?q=${encodeURIComponent(prompt)}`;
-        break;
-      case "grok":
-        url = `https://grok.com?q=${encodeURIComponent(prompt)}`;
-        break;
-      default:
-        return;
-    }
+    const url = buildAiContentUrl(provider, currentUrl);
 
     window.open(url, "_blank", "noopener,noreferrer");
   };
